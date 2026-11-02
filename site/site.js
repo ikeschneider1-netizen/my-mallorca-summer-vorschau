@@ -67,6 +67,15 @@
 
       seitenkopf();
       faecher();
+      // Tiefe wie im Hero: Die Gegenstände rücken mit der Maus ein wenig mit, einmal je Bild gesetzt.
+      if (!reduced.matches) for (const job of document.querySelectorAll('.job')) {
+        let geplant = 0, zx = 0, zy = 0;
+        (job.closest('.kapitel') || job).addEventListener('pointermove', (e) => {
+          if (e.pointerType !== 'mouse') return;
+          zx = e.clientX / innerWidth * 2 - 1; zy = e.clientY / innerHeight * 2 - 1;
+          if (!geplant) geplant = requestAnimationFrame(() => { geplant = 0; job.style.setProperty('--zx', zx.toFixed(3)); job.style.setProperty('--zy', zy.toFixed(3)); });
+        });
+      }
       // Fakten: Beim Überfahren oder Antippen spielt der Gegenstand seine kleine Szene einmal ganz durch.
       if (!reduced.matches) for (const f of document.querySelectorAll('.fakt')) {
         const ding = f.querySelector('.fakt-ding');
@@ -457,7 +466,7 @@ void main() {
       const bild = feld.querySelector('.szene-unten');
       const stufen = JSON.parse(feld.dataset.boden);
       new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { feld.classList.add('nah'); io.disconnect(); } }, { rootMargin: '900px 0px' }).observe(feld);
-      const B = { x: 0, y: 0, vx: 0, vy: 0, rot: 0, r: 40, lage: 'warten' };
+      const B = { x: 0, y: 0, vx: 0, vy: 0, rot: 0, w: 0, q: 0, qv: 0, qa: 0, r: 40, lage: 'warten' };
       let W = 1, H = 1, s = 1, links = 0, oben = 0, unten = { x: 0, y: 0, w: 1, h: 1 };
       // Maße einmal pro Bild: Feld und unteres Szenenbild, auf das Feld bezogen.
       const mass = () => {
@@ -468,13 +477,33 @@ void main() {
         if (moewe && !fliegt) { const m = moewe.getBoundingClientRect(); moeweBox = { x: m.left - f.left + m.width * 0.18, y: m.top - f.top + m.height * 0.25, w: m.width * 0.64, h: m.height * 0.75 }; } else moeweBox = null;
       };
       // Höhe des Bodens unter einer Stelle: Stufen aus dem Szenenbild, in Bruchteilen des unteren Bildes.
+      // Ein Eintrag mit vier Werten [von x, bis x, Höhe links, Höhe rechts] ist schräg.
       const boden = (x) => {
         const fx = (x - unten.x) / unten.w;
-        for (const [a, b, y] of stufen) if (fx >= a && fx < b) return unten.y + y * unten.h;
-        return unten.y + stufen[fx < stufen[0][0] ? 0 : stufen.length - 1][2] * unten.h;
+        for (const [a, b, y1, y2 = y1] of stufen) if (fx >= a && fx < b) return unten.y + (y1 + (y2 - y1) * (fx - a) / (b - a)) * unten.h;
+        const [, , y1, y2 = y1] = stufen[fx < stufen[0][0] ? 0 : stufen.length - 1];
+        return unten.y + (fx < stufen[0][0] ? y1 : y2) * unten.h;
+      };
+      // Der Boden als Linienzug: Stufenflächen, dazwischen senkrechte Kanten. Der Ball stößt an Flächen, Kanten und Ecken
+      // wie ein echter Ball. Auf einer Ecke balanciert er nicht, er kippt ab. Der Kübel ist oben leicht schräg:
+      // Die Blätter drücken den Ball herunter, er rollt ab, statt auf dem Rand liegen zu bleiben.
+      const kanten = () => {
+        const L = [];
+        stufen.forEach(([a, b, y1, y2 = y1], i) => {
+          const x1 = unten.x + a * unten.w, x2 = unten.x + b * unten.w, p1 = unten.y + y1 * unten.h, p2 = unten.y + y2 * unten.h;
+          // Über die Bildränder hinaus geht es waagrecht weiter (am Handy ist das Bild breiter als der Bildschirm).
+          if (i === 0) L.push([-W, p1, x1, p1]);
+          const vor = L[L.length - 1];
+          if (vor && Math.abs(vor[3] - p1) > 0.5) L.push([x1, vor[3], x1, p1]);
+          L.push([x1, p1, x2, p2]);
+          if (i === stufen.length - 1) L.push([x2, p2, 2 * W, p2]);
+        });
+        return L;
       };
       const zeigen = () => {
-        ball.style.transform = `translate(${(B.x - B.r).toFixed(1)}px, ${(B.y - B.r).toFixed(1)}px)`;
+        // Beim Aufprall staucht der Ball kurz entlang der Stoßrichtung und federt zurück.
+        const quetsch = Math.abs(B.q) > 0.004 ? ` rotate(${B.qa.toFixed(3)}rad) scale(${(1 - B.q).toFixed(3)}, ${(1 + B.q * 0.6).toFixed(3)}) rotate(${(-B.qa).toFixed(3)}rad)` : '';
+        ball.style.transform = `translate(${(B.x - B.r).toFixed(1)}px, ${(B.y - B.r).toFixed(1)}px)${quetsch}`;
         const schritt = Math.PI / 8, k = Math.round(B.rot / schritt), bild = ((k % 16) + 16) % 16;
         muster.style.backgroundPositionX = `${(bild / 15 * 100).toFixed(3)}%`;
         muster.style.rotate = `${(B.rot - k * schritt).toFixed(3)}rad`;
@@ -517,28 +546,43 @@ void main() {
         const a = { x: M.x, y: M.y }, b = sitzPunkt(ziel), k = moewe.offsetWidth / 150;
         const c = { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - (140 + Math.random() * 90) * k }, dauer = 1.1 + Math.abs(b.x - a.x) / Math.max(W, 1) * 1.3;
         fliegt = true; moeweBox = null; clearTimeout(moeweZeit); delete moewe.dataset.lage;
-        moewe.classList.add('fliegt'); moewe.classList.toggle('links', b.x < a.x);
-        let t = 0;
-        laufen((dt) => {
-          t = Math.min(1, t + dt / dauer);
-          // Weich los, weich landen: Bogen mit sanftem Anfang und Ende.
-          const u = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, v = 1 - u;
-          M.x = v * v * a.x + 2 * v * u * c.x + u * u * b.x; M.y = v * v * a.y + 2 * v * u * c.y + u * u * b.y;
-          stellen();
-          if (t < 1) return true;
-          fliegt = false; platz = ziel;
-          moewe.classList.remove('fliegt'); moewe.classList.toggle('links', sitze[ziel][0] > 0.55);
-          const stand = moewe.querySelector('.moewe-stand');
-          if (stand.animate) stand.animate([{ transform: 'scale(1.1, .86)' }, { transform: 'scale(1, 1)' }], { duration: 320, easing: 'cubic-bezier(.3, 1.6, .5, 1)' });
-          if (getroffenVomBall) {
-            // Nach dem Treffer: Sie schüttelt sich, dreht sich zum Ball und schaut ihn lange frech an.
-            moewe.classList.toggle('links', B.x < M.x);
-            if (stand.animate) stand.animate([{ rotate: '0deg' }, { rotate: '-10deg' }, { rotate: '8deg' }, { rotate: '-5deg' }, { rotate: '2deg' }, { rotate: '0deg' }], { duration: 700, delay: 300, easing: 'ease-in-out' });
-            haltung('frech', 3200);
-          } else haltung('frech', 1600);
-          naechsterFlug = performance.now() + 9000 + Math.random() * 7000;
-          return false;
-        });
+        const flug = moewe.querySelector('.moewe-flug'), schonInDerLuft = moewe.classList.contains('fliegt');
+        // So fliegt eine Möwe: Sie geht kurz in die Knie und springt ab, steigt mit schnellem Flügelschlag,
+        // neigt sich in die Flugrichtung, gleitet im Sinkflug mit ausgebreiteten Flügeln und richtet sich vor
+        // der Landung auf, um mit ein paar Schlägen abzubremsen.
+        const los = () => {
+          moewe.classList.add('fliegt'); moewe.classList.toggle('links', b.x < a.x);
+          let t = 0, px = M.x, py = M.y, neig = 0;
+          laufen((dt) => {
+            t = Math.min(1, t + dt / dauer);
+            // Weich los, weich landen: Bogen mit sanftem Anfang und Ende.
+            const u = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, v = 1 - u;
+            M.x = v * v * a.x + 2 * v * u * c.x + u * u * b.x; M.y = v * v * a.y + 2 * v * u * c.y + u * u * b.y;
+            const dx = M.x - px, dy = M.y - py; px = M.x; py = M.y;
+            const soll = t > 0.84 ? -14 : Math.max(-22, Math.min(26, Math.atan2(dy, Math.abs(dx) + 0.01) * 180 / Math.PI * 0.55));
+            neig += (soll - neig) * (1 - Math.exp(-9 * dt));
+            flug.style.rotate = `${neig.toFixed(1)}deg`;
+            moewe.classList.toggle('steigt', t < 0.32);
+            moewe.classList.toggle('gleitet', t > 0.46 && t < 0.84);
+            stellen();
+            if (t < 1) return true;
+            fliegt = false; platz = ziel; flug.style.rotate = '';
+            moewe.classList.remove('fliegt', 'steigt', 'gleitet'); moewe.classList.toggle('links', sitze[ziel][0] > 0.55);
+            const stand = moewe.querySelector('.moewe-stand');
+            if (stand.animate) stand.animate([{ transform: 'scale(1.1, .86)' }, { transform: 'scale(1, 1)' }], { duration: 320, easing: 'cubic-bezier(.3, 1.6, .5, 1)' });
+            if (getroffenVomBall) {
+              // Nach dem Treffer: Sie schüttelt sich, dreht sich zum Ball und schaut ihn lange frech an.
+              moewe.classList.toggle('links', B.x < M.x);
+              if (stand.animate) stand.animate([{ rotate: '0deg' }, { rotate: '-10deg' }, { rotate: '8deg' }, { rotate: '-5deg' }, { rotate: '2deg' }, { rotate: '0deg' }], { duration: 700, delay: 300, easing: 'ease-in-out' });
+              haltung('frech', 3200);
+            } else haltung('frech', 1600);
+            naechsterFlug = performance.now() + 9000 + Math.random() * 7000;
+            return false;
+          });
+        };
+        if (schonInDerLuft || !moewe.animate) { los(); return; }
+        moewe.querySelector('.moewe-stand').animate([{ transform: 'none' }, { transform: 'scale(1.07, .88)', offset: 0.55 }, { transform: 'translateY(-7%) scale(.95, 1.07)' }], { duration: 230, easing: 'ease-in' });
+        setTimeout(los, 200);
       };
       const wegfliegen = () => { const frei = sitze.map((_, i) => i).filter((i) => i !== platz && sichtbar(i)); if (frei.length) fliegen(frei[Math.floor(Math.random() * frei.length)]); };
       // Federn beim Treffer: Sie stieben in Schussrichtung auseinander und segeln pendelnd zu Boden.
@@ -641,25 +685,45 @@ void main() {
       const physik = (dt) => {
         if (reduced.matches) { ruhen(); return false; }
         mass();
-        const G = 2600 * s, n = Math.ceil(dt / (1 / 240)), h = dt / n;
+        const G = 2600 * s, n = Math.ceil(dt / (1 / 240)), h = dt / n, segs = kanten();
+        let kontakt = null;
         for (let i = 0; i < n; i++) {
           B.vy += G * h;
-          const altX = B.x;
           B.x += B.vx * h; B.y += B.vy * h;
           if (B.x < B.r) { B.x = B.r; B.vx = Math.abs(B.vx) * 0.6; }
           if (B.x > W - B.r) { B.x = W - B.r; B.vx = -Math.abs(B.vx) * 0.6; }
-          // Stufenkante: Rollt der Ball seitlich gegen eine höhere Stufe, prallt er ab.
-          if (B.y + B.r > boden(B.x) + B.r * 0.5 && boden(altX) > boden(B.x) + 2) { B.x = altX; B.vx = -B.vx * 0.5; }
-          const g = boden(B.x);
-          if (B.y + B.r > g) {
-            B.y = g - B.r;
-            if (B.vy > 0) {
-              if (B.vy > 260 * s) titel.stoss(B.x + links, g + oben, Math.min(0.5, B.vy / (3000 * s)));
-              if (B.vy > 260 * s && moeweBox && Math.abs(B.x - (moeweBox.x + moeweBox.w / 2)) < B.r * 6 && moewe.dataset.lage !== 'schreck') haltung('frech', 1800);
-              B.vy = B.vy > 90 * s ? -B.vy * 0.7 : 0;
+          kontakt = null;
+          for (const [x1, y1, x2, y2] of segs) {
+            const dx = x2 - x1, dy = y2 - y1, t = Math.max(0, Math.min(1, ((B.x - x1) * dx + (B.y - y1) * dy) / (dx * dx + dy * dy)));
+            const ex = B.x - (x1 + t * dx), ey = B.y - (y1 + t * dy), d = Math.hypot(ex, ey);
+            if (d >= B.r || d === 0) continue;
+            // Normale von der Fläche zum Ball; der Ball wird hinausgeschoben.
+            const nx = ex / d, ny = ey / d;
+            B.x += nx * (B.r - d); B.y += ny * (B.r - d);
+            const vn = B.vx * nx + B.vy * ny;
+            if (vn < 0) {
+              const tx = -ny, ty = nx, vt = B.vx * tx + B.vy * ty, prall = -vn;
+              // Harte Treffer springen zurück, ganz leichte nicht: So kommt er zur Ruhe, statt endlos zu zittern.
+              const e = prall > 140 * s ? 0.62 : 0;
+              if (prall > 260 * s) {
+                titel.stoss(B.x + links, B.y + B.r + oben, Math.min(0.5, prall / (3000 * s)));
+                if (moeweBox && Math.abs(B.x - (moeweBox.x + moeweBox.w / 2)) < B.r * 6 && moewe.dataset.lage !== 'schreck') haltung('frech', 1800);
+                B.q = Math.min(0.2, prall / (7000 * s)); B.qv = 0; B.qa = Math.atan2(ny, nx);
+              }
+              B.vx = tx * vt + nx * prall * e; B.vy = ty * vt + ny * prall * e;
             }
-            B.vx *= Math.pow(B.y + B.r > g - 1 && Math.abs(B.vy) < 1 ? 0.08 : 0.4, h);
+            kontakt = { nx, ny };
           }
+          if (kontakt) {
+            // Rollwiderstand bremst gleichmäßig. Der Drall passt sich der Bahn an: Er rollt, statt zu rutschen.
+            const tx = -kontakt.ny, ty = kontakt.nx, vn = B.vx * kontakt.nx + B.vy * kontakt.ny, brems = 70 * s * h;
+            let vt = B.vx * tx + B.vy * ty;
+            vt = Math.abs(vt) <= brems ? 0 : vt - Math.sign(vt) * brems;
+            B.vx = tx * vt + kontakt.nx * vn; B.vy = ty * vt + kontakt.ny * vn;
+            B.w += (vt / B.r - B.w) * (1 - Math.exp(-25 * h));
+          } else B.w *= Math.exp(-0.3 * h);
+          B.rot += B.w * h;
+          B.qv += (-340 * B.q - 16 * B.qv) * h; B.q += B.qv * h;
           // Titelbuchstaben: Der Ball schubst sie und prallt weich ab.
           if (B.vy < 0 || B.y < H * 0.6) for (const k of titel.tasten()) {
             const kx = k.L - links, ky = k.T - oben + k.H * 0.12, kh = k.H * 0.7;
@@ -687,11 +751,11 @@ void main() {
               else { haltung('schreck', 300); setTimeout(wegfliegen, 240); }
             }
           }
-          B.rot += (B.x - altX) / B.r;
         }
         zeigen();
-        if (Math.abs(B.vy) < 1 && Math.abs(B.vx) < 6 * s && B.y + B.r >= boden(B.x) - 0.5) {
-          B.vx = 0; B.lage = 'ruhe';
+        // Zur Ruhe kommt er nur auf flachem Boden. Auf einer Schräge oder einer Ecke rollt er weiter.
+        if (kontakt && kontakt.ny < -0.985 && Math.hypot(B.vx, B.vy) < 5 * s && Math.abs(B.q) < 0.01) {
+          B.vx = 0; B.vy = 0; B.w = 0; B.q = 0; B.lage = 'ruhe';
           // Liegt der Ball dort, wo die Möwe steht, macht sie Platz.
           if (moewe && platz >= 0 && !fliegt && Math.abs(M.x - B.x) < B.r * 3.2) setTimeout(wegfliegen, 350);
           return false;
@@ -719,14 +783,19 @@ void main() {
         // Ziel ist ein sichtbarer Titelbuchstabe. Ist keiner im Bild, springt der Ball im sichtbaren Ausschnitt hoch und kommt zurück.
         let tx = Math.min(W - B.r, Math.max(B.r, B.x + (Math.random() - 0.5) * W * 0.5)), ty = Math.max(scrollY - oben + innerHeight * 0.18, B.r);
         if (sicht.length) { const k = sicht[Math.floor(Math.random() * sicht.length)]; tx = k.x - links; ty = k.T - oben + k.H * 0.6; }
-        const T = 0.62, G = 2600 * s;
-        B.vx = (tx - B.x) / T; B.vy = (ty - B.y) / T - 0.5 * G * T; B.lage = 'frei';
+        // Weitere Ziele bekommen einen höheren, längeren Bogen. Der Ball fliegt mit Drall in Flugrichtung.
+        const G = 2600 * s, T = Math.min(1, Math.max(0.5, 0.42 + Math.hypot(tx - B.x, ty - B.y) / (2400 * s)));
+        B.vx = (tx - B.x) / T; B.vy = (ty - B.y) / T - 0.5 * G * T; B.w = Math.sign(B.vx || 1) * 9; B.lage = 'frei';
         haltung('schreck', 500);
         laufen(physik);
       };
       ball.addEventListener('click', schuss);
       // Für die Prüfskripte (nur mit ?debug): den Abschuss der Möwe direkt auslösen.
-      if (/[?&]debug\b/.test(location.search)) feld.__abschuss = abschuss;
+      if (/[?&]debug\b/.test(location.search)) {
+        feld.__abschuss = abschuss;
+        // Ball an eine Stelle des unteren Bildes setzen und fallen lassen (Bruchteile wie data-boden).
+        feld.__ball = (fx, fy, vx = 0) => { mass(); B.x = unten.x + fx * unten.w; B.y = unten.y + fy * unten.h; B.vx = vx * s; B.vy = 0; B.w = 0; B.lage = 'frei'; laufen(physik); };
+      }
       ball.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); schuss(); } });
       // Das untere Bild ist am Handy breiter als der Bildschirm, darum eine niedrige Schwelle.
       new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { io.disconnect(); herein(); } }, { threshold: 0.12 }).observe(bild);

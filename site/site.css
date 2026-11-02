@@ -74,8 +74,16 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
    dazwischen wächst die Wand mit dem Inhalt. */
 .szene { --ball-d: clamp(64px, 6.6cqw, 104px); container-type: inline-size; background: url('putz.webp') 0 0 / 256px repeat, var(--band) 0 0 / 100% 100% no-repeat, var(--welt); background-blend-mode: soft-light, normal; }
 /* Licht über dem Inhalt: Palmenschatten und Sonne fallen auch über die Schrift, sie steht in der Szene, nicht davor. */
-.kapitel > .szene-licht { position: absolute; z-index: 1; inset: 0; max-width: none; margin: 0; pointer-events: none; background: radial-gradient(120% 70% at 92% 0%, rgba(255, 236, 190, .35), transparent 60%); mix-blend-mode: soft-light; }
+/* Das Licht blendet oben weich ein: So gibt es an der Kante zum Kapitel davor keine helle Naht. */
+.kapitel > .szene-licht { position: absolute; z-index: 1; inset: 0; max-width: none; margin: 0; pointer-events: none; background: radial-gradient(120% 70% at 92% 0%, rgba(255, 236, 190, .35), transparent 60%); mix-blend-mode: soft-light; -webkit-mask: linear-gradient(transparent, #000 min(260px, 22%)); mask: linear-gradient(transparent, #000 min(260px, 22%)); }
 .kapitel > .szene-licht::after { content: ''; position: absolute; right: -6%; top: 22%; width: min(1100px, 95%); aspect-ratio: 5 / 4; background: url('palme-schatten.svg') no-repeat right top / contain; opacity: .1; mix-blend-mode: multiply; transform-origin: 100% 0; animation: wiegen 11s ease-in-out infinite alternate; }
+/* Sonnenstrahlen von oben rechts, wie im Hero: ein Fächer aus weichen Lichtbahnen, der sich kaum merklich dreht.
+   Oben blenden sie weich ein, damit an der Kante zur Landung keine Naht entsteht. */
+.szene-vanille > .szene-licht::before { content: ''; position: absolute; right: -10%; top: -12%; width: min(1500px, 140%); aspect-ratio: 1; background: repeating-conic-gradient(from 198deg at 100% 0%, rgba(255, 244, 214, 0) 0deg 4deg, rgba(255, 246, 220, .9) 6deg 7.5deg, rgba(255, 244, 214, 0) 10deg 15deg); --strahl: radial-gradient(circle at 100% 0%, #000 0, rgba(0, 0, 0, .6) 35%, transparent 70%), linear-gradient(transparent 0, #000 22%); -webkit-mask: var(--strahl); -webkit-mask-composite: source-in; mask: var(--strahl); mask-composite: intersect; opacity: .8; transform-origin: 100% 0; animation: strahlen 14s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes strahlen { from { rotate: -2.5deg; } to { rotate: 2deg; } }
+/* Gesprenkeltes Licht: ein zweiter Palmenschatten wandert hinter den Fakten über die Wand, gegenläufig zum ersten. */
+.szene-vanille .job { position: relative; }
+.szene-vanille .job::before { content: ''; position: absolute; z-index: -1; left: -14%; top: -6%; width: min(1200px, 80%); aspect-ratio: 5 / 4; background: url('palme-schatten.svg') no-repeat center / contain; opacity: .13; mix-blend-mode: multiply; scale: -1 1; transform-origin: 0 0; animation: wiegen 13s ease-in-out infinite alternate-reverse; pointer-events: none; }
 .szene::before { display: none; }
 .kapitel > .spielball, .kapitel > .spielball-schatten { max-width: none; margin: 0; }
 .szene-vanille { --moewe-b: clamp(104px, 11.5cqw, 176px); --mx: .2; --my: .747; }
@@ -118,6 +126,10 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 .szene-oben .moewe-mauer img { max-width: none; height: 100%; }
 .szene-oben .moewe-mauer .moewe-stand::before { display: none; }
 @media (max-width: 760px), (orientation: landscape) and (max-height: 540px) { .szene-oben .moewe-mauer { display: none; } }
+/* Im Steigen schlagen die Flügel schneller, im Sinkflug gleitet sie mit ausgebreiteten Flügeln (viertes Bild). */
+.moewe.steigt .moewe-flug img { animation-duration: 210ms !important; }
+.moewe.gleitet .moewe-flug img { animation: none !important; opacity: 0; }
+.moewe.gleitet .moewe-flug img:nth-child(4) { opacity: 1; }
 /* Abgeschossen: Die Flügel schlagen hektisch, während sie sich überschlägt. Federn stieben dabei auseinander. */
 .moewe.trudelt .moewe-flug img { animation-duration: 130ms !important; }
 .kapitel > .feder { position: absolute; z-index: 3; left: 0; top: 0; max-width: none; margin: 0; width: calc(20px * var(--k, 1)); aspect-ratio: 5 / 2; background: url('feder.svg') center / contain no-repeat; filter: drop-shadow(0 2px 2px rgba(80, 30, 0, .22)); pointer-events: none; }
@@ -219,9 +231,21 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 /* Fakten-Tafel: Begriff und Antwort, getrennt durch Wellenlinien statt Kästen. */
 .fakten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(28px, 4vw, 64px); margin: 0; }
 .fakt { position: relative; padding: 18px 0 22px; }
-.fakt dt { display: flex; flex-direction: column; align-items: flex-start; gap: .3em; margin-bottom: .45em; font: 400 clamp(1.32rem, .95rem + .75vw, 1.75rem)/1.12 Shrikhand, Georgia, serif; color: var(--terra); text-shadow: -.015em .015em 0 #a8411f, -.03em .03em 0 #963819, -.045em .045em 0 #842f14, -.09em .13em .12em rgba(110, 50, 0, .28); }
-.fakt-ding { flex: none; width: clamp(64px, 7.4cqw, 128px); height: auto; margin-bottom: -.12em; filter: drop-shadow(-6px 9px 7px rgba(110, 50, 0, .3)); transform-origin: 50% 80%; transition: rotate 700ms var(--boing), scale 700ms var(--boing); }
+.fakt dt { display: flex; flex-direction: column; align-items: flex-start; gap: .3em; margin-bottom: .45em; font: 400 clamp(1.32rem, .95rem + .75vw, 1.75rem)/1.12 Shrikhand, Georgia, serif; color: var(--terra); text-shadow: 0 -.012em 0 #e8835a, -.015em .015em 0 #a8411f, -.03em .03em 0 #963819, -.045em .045em 0 #842f14, -.06em .06em 0 #74290f, -.09em .13em .12em rgba(110, 50, 0, .28); }
+.fakt-ding { flex: none; width: clamp(64px, 7.4cqw, 128px); height: auto; margin-bottom: -.12em; filter: drop-shadow(-6px 9px 7px rgba(110, 50, 0, .3)); transform-origin: 50% 80%; transition: rotate 700ms var(--boing), scale 700ms var(--boing), translate 700ms var(--out); }
 .fakt dd { margin: 0; }
+/* Leuchtmarker: ein Kernbegriff je Fakt in Sonnengelb, wie von Hand gezogen. Er zieht sich, wenn der Fakt ins Bild kommt. */
+.marker { margin: 0 -.14em; padding: 0 .14em; color: inherit; border-radius: .3em .12em .35em .15em; background: linear-gradient(97deg, rgba(255, 210, 31, .15) 0, rgba(255, 210, 31, .72) .3em, rgba(255, 216, 50, .62) calc(100% - .3em), rgba(255, 210, 31, .12)) no-repeat 0 92% / 100% .66em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.site-js .fakt[data-zeigen] .marker { background-size: 0% .66em; transition: background-size 1000ms var(--out) 500ms; }
+.site-js .fakt[data-zeigen].da .marker { background-size: 100% .66em; }
+/* Licht auf den Gegenständen: Hinter jedem liegt ein warmer Sonnenfleck auf der Wand, sie schweben ganz leicht
+   und rücken mit der Maus ein wenig mit (site.js setzt --zx, --zy). So stehen sie vor der Wand wie die Schrift im Hero. */
+@property --schweben { syntax: '<length>'; inherits: false; initial-value: 0px; }
+.fakt dt { position: relative; }
+.fakt dt::before { content: ''; position: absolute; z-index: -1; left: -12%; top: -14%; width: calc(clamp(64px, 7.4cqw, 128px) * 1.5); aspect-ratio: 1; background: radial-gradient(closest-side, rgba(255, 246, 214, 1), rgba(255, 232, 178, .5) 50%, transparent); pointer-events: none; }
+.fakt-ding { translate: calc(var(--zx, 0) * 7px) calc(var(--zy, 0) * 5px + var(--schweben)); animation: schweben 5.5s ease-in-out infinite alternate; }
+.fakt:nth-child(odd) .fakt-ding { animation-duration: 6.6s; animation-delay: -2.2s; }
+@keyframes schweben { from { --schweben: -3px; } to { --schweben: 4px; } }
 /* Jeder Gegenstand hat seine eigene kleine Szene, beim Überfahren oder Antippen (site.js setzt .spielt, bis sie zu Ende ist). */
 .fakt { cursor: default; }
 .fakt.spielt .fakt-ding[src*="ticket"] { animation: d-ticket 900ms var(--boing); }
@@ -244,7 +268,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 @keyframes d-schluessel { 0% { transform: none; } 15% { transform: rotate(-20deg); } 35% { transform: rotate(15deg); } 55% { transform: rotate(-9deg); } 75% { transform: rotate(5deg); } 100% { transform: none; } }
 @keyframes d-blase { 0% { transform: none; } 35% { transform: translateY(-10px) scale(1.16); } 60% { transform: translateY(-2px) scale(.95); } 100% { transform: none; } }
 /* Beim Hereinscrollen hüpfen die Gegenstände an ihren Platz, nacheinander. */
-.site-js .fakt[data-zeigen] .fakt-ding { scale: .5; rotate: -14deg; opacity: 0; transition: scale 800ms var(--boing) 120ms, rotate 800ms var(--boing) 120ms, opacity 300ms ease 120ms; }
+.site-js .fakt[data-zeigen] .fakt-ding { scale: .5; rotate: -14deg; opacity: 0; transition: scale 800ms var(--boing) 120ms, rotate 800ms var(--boing) 120ms, opacity 300ms ease 120ms, translate 700ms var(--out); }
 .site-js .fakt[data-zeigen].da .fakt-ding { scale: 1; rotate: 0deg; opacity: 1; }
 
 /* Fotos: ohne Rahmen, leicht schräg wie hingelegt, mit warmem Schatten. Beim Überfahren richten sie sich auf. */
@@ -309,6 +333,9 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   .fakt-ding { transition: none; }
   .site-js .fakt[data-zeigen] .fakt-ding { scale: 1; rotate: 0deg; opacity: 1; transition: none; }
   .fakt.spielt .fakt-ding { animation: none !important; }
+  .fakt-ding { animation: none; }
+  .site-js .fakt[data-zeigen] .marker { background-size: 100% .66em; transition: none; }
+  .szene-vanille > .szene-licht::before, .szene-vanille .job::before { animation: none; }
   .site-js [data-zeigen], .site-js .titel[data-zeigen] .w, .site-js .foto[data-zeigen] { opacity: 1; translate: none; transition: none; }
   .site-js .foto[data-zeigen] { rotate: var(--kipp); }
   .f, .f + .f, .wave, .weiter img, .aufkleber, .aufkleber-in, .foto, .frage summary img { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }

@@ -45,6 +45,7 @@
 .bk-unter { margin-top: clamp(48px, 6vw, 88px); margin-bottom: clamp(20px, 2.6vw, 32px); }
 .bk-regeln { display: grid; gap: 20px; max-width: 70ch; margin: clamp(24px, 3vw, 40px) 0 0; padding-left: 1.2em; }
 .bk-regeln strong { font-weight: 800; }
+.bk-regeln code { padding: .05em .3em; font: 700 .85em/1.4 ui-monospace, Menlo, Consolas, monospace; background: rgba(255, 255, 255, .45); border-radius: 4px; overflow-wrap: anywhere; }
 
 .fuss { padding-block: clamp(48px, 6vw, 80px); }
 .fuss-in { display: flex; flex-wrap: wrap; align-items: center; gap: 24px 48px; }
