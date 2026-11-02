@@ -30,7 +30,7 @@ const ORDER_A = ['work', 'comma', 'wo', 'and', 'fun', 'mach', 'end'], ORDER_B = 
 const edgeToVP = (x, y, to) => y + (VP[1] - y) / (VP[0] - x) * (to - x);
 const CLAIM_QUAD = [[116, 644], [1012, edgeToVP(116, 644, 1012)], [1014, edgeToVP(112, 682, 1014)], [112, 682]];
 const HIT_LINES = ['Treffer! Jetzt bewerben?', 'Schon wieder. Das ist ein Zeichen.', 'Drei Treffer! Jetzt aber bewerben.', 'Okay, du kannst zielen. Bewerben?'];
-const GULL_D = 650, GULL_S = 72, CLAIM_G = 5000;
+const GULL_D = 650, GULL_S = 72, CLAIM_G = 5000, CLAIM_LINE = 86;
 
 const params = new URLSearchParams(location.search);
 const debug = params.has('debug');
@@ -39,6 +39,7 @@ const hero = document.querySelector('.hero');
 const track = document.querySelector('.track');
 const canvas = document.querySelector('.gl');
 const bottom = document.querySelector('.bottom');
+const formLink = document.querySelector('.form-link');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -204,7 +205,7 @@ const PLATE_FRAG = /* glsl */`
   uniform vec4 uPlaneT;
   uniform vec4 uView, uBall, uRipple, uPulse, uGullShadow;
   uniform vec2 uMouse, uRevealC, uShadowOff, uPtr, uC, uTarget;
-  uniform float uTime, uDawn, uReveal, uFlare, uGust, uStretch, uSheen, uZoom, uBlur, uHole, uFx, uBallShadow, uFlock;
+  uniform float uMirror, uTime, uDawn, uReveal, uFlare, uGust, uStretch, uSheen, uZoom, uBlur, uHole, uFx, uBallShadow, uFlock;
   varying vec2 vUv;
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
   // Das Muster für Wolken und Wasser kommt aus einer festen Vorlage. Eine reine Rechenformel rundet auf jeder Grafikkarte anders,
@@ -300,6 +301,8 @@ const PLATE_FRAG = /* glsl */`
       float qd = d < L ? d - (1. - uStretch) * d * d / (2. * L) : L * (1. + uStretch) / 2. + (d - L) * uStretch;
       q.y = 640. + qd; ext = max(0., q.y - 756.) / uStretch;
     }
+    // Im Hochformat läuft die Terrasse unten gespiegelt weiter, statt zu verschwimmen.
+    if (uMirror > .5 && q.y > 755.) q.y = 1510. - q.y;
     q = clamp(q, vec2(1.), vec2(1439., 755.));
     vec3 m = texture2D(tMaps, vec2(q.x / 1440., 1. - q.y / 756.)).rgb;
     float depth = m.r, water = m.g, ring = smoothstep(.72, .92, m.b), boat = smoothstep(.2, .42, m.b) * (1. - ring);
@@ -522,7 +525,7 @@ const S = { reveal: 0, dawn: 1, flare: 0, gust: 0, sheen: 0, glint: -1 };
 const ballQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.55, -0.5, 0.25));
 const fly = { on: false, p: 0, s: 0, v: 0, k: 1, tx: RING_C.x, ty: RING_C.y };
 let mode = 'intro', intro = null, paused = false, visible = true, time = 0, last = 0, tempo = 1, lastBx = B.x, acc = 0, skipping = false, dprCap = 2, paceSum = 0, paceN = 0, confettiLive = 0;
-const pointer = { x: -999, y: -999, over: false, mx: 0, my: 0, sx: 0, sy: 0, px: W / 2, py: H / 2, vx: 0, lx: -999 };
+const pointer = { touch: false, x: -999, y: -999, over: false, mx: 0, my: 0, sx: 0, sy: 0, px: W / 2, py: H / 2, vx: 0, lx: -999 };
 const phys = { vx: 0, vy: 0, scored: false, wasIn: false, hist: [], down: null, hopCool: 0, sq: 0, sv: 0, idle: 7, grab: { x: 0, y: 0 }, homeV: 0 };
 let ripple = { x: 0, y: 0, t: 9 };
 const pulses = [], bits = [], tmpO = new THREE.Object3D();
@@ -706,8 +709,9 @@ function updateConfetti(dt) {
 
 // --- Der Satz: kleine 3D-Buchstaben, die auf der Terrasse stehen, in derselben Flucht wie der Schriftzug ---
 const claimV = new THREE.Vector3();
-function claimToStage(x, y) { claimV.set(x, y, claim.depth).applyMatrix4(claim.basis); return project(claimV); }
-function stageToClaim(x, y) { const h = claim.inv, w = h[2][0] * x + h[2][1] * y + h[2][2]; return { x: (h[0][0] * x + h[0][1] * y + h[0][2]) / w, y: (h[1][0] * x + h[1][1] * y + h[1][2]) / w }; }
+// Beide Umrechnungen laufen über den Bildausschnitt des Hochformats. Am Desktop ist er neutral.
+function claimToStage(x, y) { claimV.set(x, y, claim.depth).applyMatrix4(claim.basis); const s = project(claimV); return { x: comp.a * (s.x - comp.px) + comp.qx, y: comp.a * (s.y - comp.py) + comp.qy }; }
+function stageToClaim(sx, sy) { const x = (sx - comp.qx) / comp.a + comp.px, y = (sy - comp.qy) / comp.a + comp.py, h = claim.inv, w = h[2][0] * x + h[2][1] * y + h[2][2]; return { x: (h[0][0] * x + h[0][1] * y + h[0][2]) / w, y: (h[1][0] * x + h[1][1] * y + h[1][2]) / w }; }
 function buildClaim(font) {
   const size = 100, k = size / font.data.resolution, depth = claim.depth, geos = {};
   const geoOf = (ch) => {
@@ -728,7 +732,7 @@ function buildClaim(font) {
     for (const ch of text) {
       const mesh = new THREE.Mesh(geoOf(ch), [front, side]);
       const pivot = new THREE.Group(); pivot.add(mesh); pivot.visible = false; group.add(pivot);
-      const it = { key, ch, pivot, mesh, alt: null, x: 0, y: 0, jump: 0, jv: 0, s: 1, rz: 0, rzT: 0, rv: 0, spin: 0, press: 0, v: 0, goal: 0, wob: 0, wv: 0, sq: 0, sv: 0, sx: 0, sy: 0, on: false, xA: 0, xB: 0, air: false, up: false, at: 0, aT: 0, x0: 0, v0: 0, v1: 0, tx: 0, vy: 0, ox: 0, ov: 0 };
+      const it = { key, ch, pivot, mesh, alt: null, x: 0, y: 0, ly: 0, xP: 0, lyP: 0, jump: 0, jv: 0, s: 1, rz: 0, rzT: 0, rv: 0, spin: 0, press: 0, v: 0, goal: 0, wob: 0, wv: 0, sq: 0, sv: 0, sx: 0, sy: 0, on: false, xA: 0, xB: 0, air: false, up: false, at: 0, aT: 0, x0: 0, v0: 0, v1: 0, tx: 0, vy: 0, ox: 0, ov: 0 };
       t.items.push(it); claim.items.push(it);
     }
     claim.tok[key] = t;
@@ -751,12 +755,17 @@ function buildClaim(font) {
   };
   claim.w = flow(ORDER_A, false, 'xA');
   flow(ORDER_B, true, 'xB');
+  // Im Hochformat steht der Satz auf zwei Zeilen: „Arbeiten, wo andere“ und „Urlaub machen.“
+  const w1 = flow(['work', 'comma', 'wo', 'and'], false, 'xP'), w2 = flow(['fun', 'mach', 'end'], false, 'xP');
+  for (const key of ['work', 'comma', 'wo', 'and']) for (const it of claim.tok[key].items) it.lyP = CLAIM_LINE;
+  claim.wP = Math.max(w1, w2); claim.hP = CLAIM_LINE + 66.6;
   const rect = [[0, 66.6], [claim.w, 66.6], [claim.w, 0], [0, 0]];
   claim.inv = solveH(CLAIM_QUAD, rect);
   const base = basisFromQuad(CLAIM_QUAD, claim.w, 66.6, depth);
   // Gleich groß im Bild, aber näher an der Kamera: So steht der Satz wirklich vor dem Schriftzug.
   const far = -new THREE.Vector3(claim.w / 2, 33, depth).applyMatrix4(base).z;
   claim.basis = new THREE.Matrix4().makeScale(700 / far, 700 / far, 700 / far).multiply(base);
+  claim.basisA = claim.basis; claim.invA = claim.inv;
   group.userData = { basis: claim.basis, own: [], depth, w: 700 };
   group.matrix.copy(claim.basis);
   for (const it of claim.items) { it.x = it.xA; const s = claimToStage(it.xA, 26); it.sx = s.x; it.sy = s.y; }
@@ -1045,7 +1054,7 @@ function leaveGull() {
   gag.tl?.kill();
   gag.canHit = false; gag.onClaim = false;
   if (gag.rope) lastLetter();
-  rearrange('xA');
+  rearrange(homeSlot());
   spinSwap(false);
   Object.assign(gull.pose, { fold: 0, flapAmp: 1, flapRate: 12, tuck: 1, yaw: -0.5, pitch: 0.25, roll: 0.3, mouth: 0, wide: 0, lid: 0.2, brow: 0, cock: 0.55, smile: 0.7, shades: 1, puff: 0, crest: 0, gesture: 0, stare: 0, lookX: 0, headYaw: 0, headPitch: 0, blink: 1 });
   gag.tl = g.timeline({ onComplete: endGag }).to(P, { x: view.x0 + view.vw + 240, y: -120, duration: 1.8, ease: 'power1.in' }, 0);
@@ -1056,7 +1065,7 @@ function gullHit(nx = 0.4, ny = -0.9) {
   gag.tl?.kill();
   gag.canHit = false; gag.onClaim = false; gag.rope = false; gag.print = false; gag.nodes = [];
   // Die Buchstaben springen zurück, der Satz stimmt wieder.
-  rearrange('xA');
+  rearrange(homeSlot());
   if (claim.tok.work.items[0].alt.visible) spinSwap(false);
   say('Kreisch!', 1300);
   feathers.fire(x0, y0 - gag.s * 0.6, nx, ny, comp.on ? 0.72 : 1);
@@ -1131,7 +1140,7 @@ function endGag() {
   plateMat.uniforms.uGullShadow.value.w = 0;
 }
 function resetLetter(l) {
-  Object.assign(l, { x: l.xA, y: 0, jump: 0, jv: 0, rz: 0, rzT: 0, rv: 0, spin: 0, air: false, up: false, crouch: false, ox: 0, ov: 0 });
+  Object.assign(l, { x: l[homeSlot()], y: 0, jump: 0, jv: 0, rz: 0, rzT: 0, rv: 0, spin: 0, air: false, up: false, crouch: false, ox: 0, ov: 0 });
 }
 function abortGag() {
   const g = window.gsap;
@@ -1223,7 +1232,7 @@ function layout() {
   const dpr = Math.min(devicePixelRatio || 1, dprCap);
   renderer.setPixelRatio(dpr); renderer.setSize(w, h, false);
   glint.value.y = 1 / (w * dpr);
-  claim.on = !portrait;
+  claim.on = true;
   compose(portrait);
   measureSticker();
   measureWater();
@@ -1231,14 +1240,36 @@ function layout() {
   const u = plateMat.uniforms;
   u.uView.value.set(x0, y0, vw, vh);
   u.uShadowOff.value.set(14 / vw, 15 / vh);
-  u.uStretch.value = vh > H ? clamp(86 / (vh - 640 - 30), 0.22, 1) : 1;
+  u.uStretch.value = !portrait && vh > H ? clamp(86 / (vh - 640 - 30), 0.22, 1) : 1;
+  u.uMirror.value = portrait ? 1 : 0;
   const rw = Math.max(2, Math.round(w * dpr / 4)), rh = Math.max(2, Math.round(h * dpr / 4));
   rtA.setSize(rw, rh); rtB.setSize(rw, rh);
   blurMat.userData.rw = rw; blurMat.userData.rh = rh;
-  setFly(!portrait && !reduced.matches);
+  setFly(!reduced.matches);
+}
+const homeSlot = () => (comp.on ? 'xP' : 'xA');
+// Der Satz bekommt im Hochformat seine eigene Fläche unter dem Schriftzug, mit derselben Flucht nach rechts hinten.
+function claimLayout(portrait) {
+  if (!claim.group) return;
+  if (portrait) {
+    const v = view, L = v.x0 + v.vw * 0.06, R = v.x0 + v.vw * 0.94, T = comp.qy + 511 * comp.a / 2 + 18;
+    const hq = (R - L) * claim.hP / claim.wP, hr = hq * 0.9, tr = T + (hq - hr) * 0.45;
+    const inv = ([x, y]) => [(x - comp.qx) / comp.a + comp.px, (y - comp.qy) / comp.a + comp.py];
+    const quad = [[L, T], [R, tr], [R, tr + hr], [L, T + hq]].map(inv);
+    claim.inv = solveH(quad, [[0, claim.hP], [claim.wP, claim.hP], [claim.wP, 0], [0, 0]]);
+    const base = basisFromQuad(quad, claim.wP, claim.hP, claim.depth), far = -new THREE.Vector3(claim.wP / 2, claim.hP / 2, claim.depth).applyMatrix4(base).z;
+    claim.basis = new THREE.Matrix4().makeScale(700 / far, 700 / far, 700 / far).multiply(base);
+  } else { claim.basis = claim.basisA; claim.inv = claim.invA; }
+  claim.group.userData.basis = claim.basis;
+  for (const l of claim.items) {
+    if (!l.air) { l.x = l[homeSlot()]; l.y = 0; }
+    l.ly = portrait ? l.lyP : 0;
+    const p = claimToStage(l[homeSlot()], 26 + l.ly); l.sx = p.x; l.sy = p.y;
+  }
 }
 function compose(portrait) {
   const v = view;
+  if (comp.on !== portrait && gag.tl) abortGag();
   comp.on = portrait;
   comp.a = portrait ? Math.min(v.vw * 0.94 / 904, 0.5) : 1;
   comp.qx = portrait ? v.x0 + v.vw / 2 : comp.px;
@@ -1248,7 +1279,6 @@ function compose(portrait) {
   camL.setViewOffset(W, H, comp.px - (comp.qx - v.x0) / comp.a, comp.py - (comp.qy - v.y0) / comp.a, v.vw / comp.a, v.vh / comp.a);
   camL.updateProjectionMatrix();
   if (portrait) cam.layers.disable(1); else cam.layers.enable(1);
-  hero.style.setProperty('--claim-top', `${((comp.qy + 511 * comp.a / 2 - v.y0) * v.s + 8).toFixed(1)}px`);
   // Der Ball wird kleiner und liegt links vom festen Aufkleber.
   ballR = portrait ? clamp(v.vw * 0.125, 40, 58) : BALL_R;
   REST.x = portrait ? v.x0 + v.vw * 0.42 : 1128;
@@ -1256,6 +1286,7 @@ function compose(portrait) {
   if (mode !== 'intro' && mode !== 'free') { B.r = ballR; B.y = Math.min(B.y, REST.y); if (mode === 'rest') B.y = REST.y; }
   gag.s = GULL_S * (portrait ? 0.62 : 1);
   gull?.setSize(gag.s);
+  claimLayout(portrait);
   if (grip) { const g = ballR * 2.5 * v.s; grip.style.width = grip.style.height = `${g.toFixed(0)}px`; grip.style.margin = `${(-g / 2).toFixed(0)}px 0 0 ${(-g / 2).toFixed(0)}px`; }
 }
 function setFly(on) {
@@ -1287,6 +1318,9 @@ function updateFly(dt) {
   const fade = 1 - smooth(0, 0.12, p);
   bottom.style.opacity = fade.toFixed(3);
   bottom.style.visibility = fade < 0.01 ? 'hidden' : '';
+  formLink.style.opacity = bottom.style.opacity; formLink.style.visibility = bottom.style.visibility;
+  // Nach dem Flug liegt hinter der Kopfzeile Creme statt Himmel: Dann wird die Schrift dunkel.
+  root.classList.toggle('past', p > 0.62);
   canvas.style.pointerEvents = p > 0.6 ? 'none' : '';
   const gone = p > 0.985;
   canvas.style.visibility = gone ? 'hidden' : '';
@@ -1305,7 +1339,8 @@ function applyLetters() {
     const w = g.userData.w, dz = w * (1 - 1 / gain);
     // Die Zeilen weichen beim Näherkommen zur Seite aus und verlassen das Bild.
     const away = (fly.k - 1) * (li === 0 ? -130 : li === 1 ? -190 : 120), drop = (fly.k - 1) * (li === 0 ? -110 : li === 1 ? 90 : 170);
-    const dx = ((fly.tx - CX) / gain + CX - RING_C.x + away / gain) * w / F, dy = -((fly.ty - CY) / gain + CY - RING_C.y + drop / gain) * w / F;
+    const ka = comp.a, ftx = (fly.tx - comp.qx) / ka + comp.px, fty = (fly.ty - comp.qy) / ka + comp.py, rcx = (RING_C.x - comp.qx) / ka + comp.px, rcy = (RING_C.y - comp.qy) / ka + comp.py;
+    const dx = ((ftx - CX) / gain + CX - rcx + away / (gain * ka)) * w / F, dy = -((fty - CY) / gain + CY - rcy + drop / (gain * ka)) * w / F;
     g.visible = gain < 9 && (li < 3 || claim.on);
     tmpD.makeTranslation(fly.k > 1.0001 ? dx : 0, fly.k > 1.0001 ? dy : 0, dz);
     const par = li === 3 ? 1.5 : 2 + li * 1.2;
@@ -1315,7 +1350,7 @@ function applyLetters() {
   for (const l of claim.items) {
     const q = l.pivot, sq = Math.min(0.55, l.sq);
     q.visible = l.on;
-    q.position.set(l.x + l.ox, l.y + l.jump - l.press * 9, -l.press * 2);
+    q.position.set(l.x + l.ox, l.y + l.ly + l.jump - l.press * 9, -l.press * 2);
     q.rotation.set(0, l.spin, l.rz + l.wob);
     q.scale.set(l.s / Math.sqrt(1 - sq), l.s * (1 - sq), l.s);
   }
@@ -1453,10 +1488,10 @@ function pressLetters(h) {
       phys.vx *= drag; phys.vy *= phys.vy < 0 ? drag : Math.exp(-h * over * 0.02);
     }
   }
-  if (B.y + B.r < 610) return;
+  if (!comp.on && B.y + B.r < 610) return;
   for (const l of claim.items) {
     if (!l.on || l.air) continue;
-    const c = claimToStage(l.x, 26), dx = c.x + l.ox * 0.58 - B.x, d = Math.hypot(dx, c.y - B.y), reach = B.r + 8;
+    const c = claimToStage(l.x, 26 + l.ly), dx = c.x + l.ox * 0.58 - B.x, d = Math.hypot(dx, c.y - B.y), reach = B.r + 8;
     if (d >= reach || d === 0) continue;
     const over = reach - d;
     l.ov += (dx >= 0 ? 1 : -1) * over * 190 * h;
@@ -1772,7 +1807,12 @@ function playIntro() {
   // Im Hochformat steht das Bild sofort. Der Auftakt ist nur der Ball, der von oben durch den Schriftzug fällt.
   if (comp.on) {
     settle();
-    if (!reduced.matches && window.gsap && scrollY < 5) { Object.assign(B, { x: REST.x - view.vw * 0.08, y: -140 }); lastBx = B.x; phys.idle = 9; gag.next = 7; launch(view.vw * 0.05, 0); }
+    if (!reduced.matches && window.gsap && scrollY < 5) {
+      Object.assign(B, { x: REST.x - view.vw * 0.08, y: -140 }); lastBx = B.x; phys.idle = 9; gag.next = 7; launch(view.vw * 0.05, 0);
+      // Die Sonne blitzt im Ring auf, und ein Lichtstreif läuft über die Buchstaben.
+      window.gsap.fromTo(S, { flare: 1.05 }, { flare: 0.2, duration: 1.7, delay: 0.3, ease: 'power2.out' });
+      window.gsap.fromTo(S, { glint: -0.2 }, { glint: 1.4, duration: 1.5, delay: 0.75, ease: 'sine.inOut' });
+    }
     return;
   }
   if (reduced.matches || !window.gsap) { settle(); return; }
@@ -1818,7 +1858,7 @@ function initPointer() {
     const speed = Math.hypot(p.x - pointer.x, p.y - pointer.y);
     if (!still() && p.x < 470 && p.y < 360 && speed < 300) S.gust = Math.min(1, S.gust + speed * 0.004);
     pointer.x = p.x; pointer.y = p.y; pointer.mx = clamp(p.nx, -1, 1); pointer.my = clamp(p.ny, -1, 1);
-    pointer.over = e.pointerType !== 'touch' && e.target === canvas;
+    pointer.over = (e.pointerType !== 'touch' || pointer.touch) && e.target === canvas;
     if (mode === 'drag') {
       phys.grab.x = p.x; phys.grab.y = Math.min(p.y, FLOOR - B.r);
       phys.hist.push({ x: p.x, y: p.y, t: performance.now() }); if (phys.hist.length > 6) phys.hist.shift();
@@ -1827,11 +1867,25 @@ function initPointer() {
     }
   }, { passive: true });
   hero.addEventListener('pointerleave', () => { pointer.over = false; pointer.mx = 0; pointer.my = 0; });
+  if (!finePointer.matches) {
+    const base = { g: null, b: null };
+    addEventListener('deviceorientation', (e) => {
+      if (e.gamma == null || pointer.touch || still()) return;
+      if (base.g === null) { base.g = e.gamma; base.b = e.beta; }
+      // Die Ruhelage wandert langsam mit, so zählt nur die Bewegung, nicht wie man das Handy gerade hält.
+      base.g += (e.gamma - base.g) * 0.02; base.b += (e.beta - base.b) * 0.02;
+      pointer.mx = clamp((e.gamma - base.g) / 14, -1, 1); pointer.my = clamp((e.beta - base.b) / 14, -1, 1);
+    }, { passive: true });
+  }
   canvas.addEventListener('pointerdown', (e) => {
     const p = toStage(e);
     if (mode === 'intro') { skipIntro(); return; }
     if (gag.canHit && gull?.root.visible && Math.hypot(p.x - gag.P.x, p.y - (gag.P.y - gag.s * 0.6)) < gag.s * 0.85) { gullHit(); return; }
     if (p.x > 490 && p.x < 670 && p.y > 40 && p.y < 180) startle();
+    if (e.pointerType === 'touch') {
+      Object.assign(pointer, { touch: true, over: true, x: p.x, y: p.y, lx: p.x, px: p.x, py: p.y });
+      if (letters.some((l) => Math.hypot(l.sx - p.x, l.sy - p.y) < 70 * comp.a + 20)) impact(p.x, p.y, 0.26);
+    }
     if (nearBall(p)) { grabBall(e, p, canvas); return; }
     if (p.y > 275 && p.y < 610 && !inPoly(RING, p.x, p.y) && !(p.x > 1216 && p.y > 372)) ripple = { x: p.x, y: p.y, t: 0 };
   });
@@ -1845,8 +1899,9 @@ function initPointer() {
     if (performance.now() - b.t > 90) { vx *= 0.2; vy *= 0.2; }
     launch(vx, vy);
   };
-  canvas.addEventListener('pointerup', release);
-  canvas.addEventListener('pointercancel', release);
+  const lift = (e) => { if (e.pointerType === 'touch') { pointer.touch = false; setTimeout(() => { if (!pointer.touch) pointer.over = false; }, 160); } };
+  canvas.addEventListener('pointerup', (e) => { lift(e); release(); });
+  canvas.addEventListener('pointercancel', (e) => { lift(e); release(); });
   grip.addEventListener('pointerup', release);
   grip.addEventListener('pointercancel', release);
   addEventListener('wheel', skipIntro, { passive: true });
@@ -1918,7 +1973,7 @@ async function start() {
       uBall: { value: new THREE.Vector4() }, uBallShadow: { value: 0 }, uRipple: { value: new THREE.Vector4(0, 0, 0, 9) }, uMouse: { value: new THREE.Vector2() },
       uRevealC: { value: new THREE.Vector2(330, 700) }, uShadowOff: { value: new THREE.Vector2() }, uPtr: { value: new THREE.Vector2() },
       uC: { value: new THREE.Vector2(RING_C.x, RING_C.y) }, uTarget: { value: new THREE.Vector2(RING_C.x, RING_C.y) },
-      uStretch: { value: 1 }, uTime: { value: 0 }, uDawn: { value: 1 }, uReveal: { value: 0 }, uFlare: { value: 0 }, uGust: { value: 0 }, uSheen: { value: 0 },
+      uStretch: { value: 1 }, uMirror: { value: 0 }, uTime: { value: 0 }, uDawn: { value: 1 }, uReveal: { value: 0 }, uFlare: { value: 0 }, uGust: { value: 0 }, uSheen: { value: 0 },
       uZoom: { value: 1 }, uBlur: { value: 0 }, uHole: { value: 0 }, uFx: { value: 1 },
     },
   });
