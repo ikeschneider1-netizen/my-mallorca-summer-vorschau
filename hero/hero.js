@@ -1318,6 +1318,8 @@ function layout() {
   glint.value.y = 1 / (w * dpr);
   claim.on = true;
   compose(portrait);
+  // Die Unterzeile beginnt bündig mit dem Spruch auf dem Boden.
+  if (claim.basis && !portrait) { const k = claimToStage(0, 0); hero.style.setProperty('--claim-x', `${Math.round((k.x - view.x0) * view.s)}px`); }
   measureSticker();
   measureWater();
   cam.setViewOffset(W, H, x0, y0, vw, vh); cam.updateProjectionMatrix();

@@ -12,6 +12,9 @@
   --terra: #c4502a;
   /* Weiches Petrol für Menü und Kopf: Das volle Petrol wirkt in Shrikhand zu schwer (Ike, 02.11.2026). */
   --petrol-weich: #3f6f7c;
+  /* Lautstärke der Schrift (Ike, 02.11.2026). Die 3D-Tiefe ist ein Regler, kein Schalter:
+     laut = volle Tiefe (Hero-Schriftzug, Kapiteltitel), mittel = eine feine Kante (Fakt-Titel, Kernsatz, Menü, Wege),
+     leise = Nunito ohne Kante (alles Funktionale: Nebenwege, Hinweise, Unterzeilen, Dachzeilen). */
   /* Feine Kontur für Wörter im hellen WhatsApp-Grün: Auf der hellen Wand fehlt dem Grün sonst der Rand, Buchstaben verschmelzen
      und in Shrikhand liest sich z. B. das z in „Jetzt“ wie ein x (Ike, 02.11.2026). */
   --wa-kontur: .02em 0 0 #0b6f60, -.02em 0 0 #0b6f60, 0 .02em 0 #0b6f60, 0 -.02em 0 #0b6f60, .014em .014em 0 #0b6f60, -.014em .014em 0 #0b6f60, .014em -.014em 0 #0b6f60, -.014em -.014em 0 #0b6f60;
@@ -149,6 +152,18 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 .szene-vanille { padding-top: clamp(118px, 13cqw, 210px); padding-bottom: max(240px, 24.5cqw); }
 .job-kopf { margin-left: clamp(0px, 13cqw, 220px); max-width: 780px; }
 .job-kopf .vorspann { max-width: 44ch; }
+/* Titel, Kernsatz, Details (Ike, 02.11.2026): Gleich unter dem Titel steht das Wichtigste in drei Wörtern, wie die Zeile unter dem großen Wort
+   auf einem Reiseplakat. Etiketten leise, Werte mittel, je mit dem Leuchtmarker, der sich nacheinander zieht. Danach folgen die Einzelheiten. */
+.kernsatz { display: flex; flex-wrap: wrap; gap: .7rem clamp(20px, 2.6vw, 44px); margin: .15em 0 clamp(14px, 1.6vw, 22px); }
+/* Am Rechner in einer Zeile, auch wenn sie etwas breiter wird als die Einleitung darunter. */
+@media (min-width: 761px) { .job-kopf .kernsatz { flex-wrap: nowrap; width: max-content; } }
+.kernsatz > div { display: grid; gap: .2rem; }
+.kernsatz dt { font-size: var(--t-klein); font-weight: 800; letter-spacing: .04em; color: var(--petrol-weich); }
+.kernsatz dd { margin: 0; font: 400 clamp(1.4rem, 1rem + 1vw, 1.85rem)/1.15 Shrikhand, Georgia, serif; color: var(--terra); text-shadow: 0 -.012em 0 #e8835a, -.022em .022em 0 #a8411f, -.05em .08em .07em rgba(110, 50, 0, .24); }
+.site-js .kernsatz[data-zeigen] .marker { background-size: 0% .66em; transition: background-size 900ms var(--out) 450ms; }
+.site-js .kernsatz[data-zeigen] > div:nth-child(2) .marker { transition-delay: 700ms; }
+.site-js .kernsatz[data-zeigen] > div:nth-child(3) .marker { transition-delay: 950ms; }
+.site-js .kernsatz[data-zeigen].da .marker { background-size: 100% .66em; }
 .job .fakten { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(28px, 4cqw, 60px); }
 .job .fakt dd { font-size: 1.0625rem; line-height: 1.55; }
 @media (min-width: 1101px) {
@@ -199,7 +214,8 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 @keyframes flow { to { -webkit-mask-position: -22px 0; mask-position: -22px 0; } }
 
 /* „Lieber per Formular“ und andere Nebenwege: dieselbe Schrift wie der Hauptweg, kleiner und ohne Unterstrich. Beim Überfahren klappt das Wort um. */
-.nebenweg { --flip: var(--meer); position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 6px 0; font: 400 clamp(1rem, .92rem + .3vw, 1.18rem)/1 Shrikhand, Georgia, serif; letter-spacing: .01em; text-decoration: none; }
+/* Der Nebenweg ist leise: Nunito ohne Kante, damit der Hauptweg daneben klar führt. */
+.nebenweg { --flip: var(--meer); position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 6px 0; font: 800 clamp(1rem, .95rem + .2vw, 1.125rem)/1.2 UI, system-ui, sans-serif; letter-spacing: .01em; text-decoration: none; }
 
 /* Weiter-Link: Shrikhand, daneben der Ball, der beim Überfahren losrollt. */
 .weiter { --flip: var(--meer); display: inline-flex; align-items: center; gap: .55em; min-height: 44px; padding: 6px 0; font: 400 clamp(1.1rem, 1rem + .5vw, 1.4rem)/1 Shrikhand, Georgia, serif; text-decoration: none; }
@@ -208,11 +224,11 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 /* WhatsApp in den Kapiteln: dasselbe Wort-Format mit WhatsApp-Zeichen. Der Aufkleber bleibt der einzige große Knopf. */
 .weiter.wa svg { flex: none; width: 1.15em; height: 1.15em; fill: currentColor; transition: transform 600ms var(--boing); }
 .weiter.wa:focus-visible svg { transform: rotate(-14deg) scale(1.12); }
-/* Auf hellen Wänden stehen Hauptweg und Nebenweg plastisch wie die Begriffe darüber: weiches Petrol mit Kante und Schatten. */
-.szene-vanille .weiter, .szene-vanille .nebenweg { color: var(--petrol-weich); text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763, -.045em .045em 0 #214b56, -.08em .12em .1em rgba(0, 40, 50, .22); }
+/* Auf hellen Wänden: Der Hauptweg spricht mittel (weiches Petrol, eine feine Kante), der Nebenweg leise. */
+.szene-vanille .weiter, .szene-vanille .nebenweg { color: var(--petrol-weich); text-shadow: -.022em .022em 0 #2a5763, -.05em .08em .07em rgba(0, 40, 50, .2); }
 /* Mit der Breite mitwachsen, damit der Satz auch auf kleinen Handys in eine Zeile passt. */
 .szene-vanille .weiter { font-size: clamp(1rem, 5vw, 1.8rem); }
-.szene-vanille .nebenweg { text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763, -.06em .09em .08em rgba(0, 40, 50, .2); }
+.szene-vanille .nebenweg { text-shadow: none; }
 /* „Jetzt per WhatsApp bewerben“ im Original-Grün von WhatsApp (#25D366), mit Kanten in den dunklen WhatsApp-Tönen. */
 .szene-vanille .weiter.wa { --flip: #075e54; color: #25d366; letter-spacing: .015em; text-shadow: var(--wa-kontur), -.015em .015em 0 #0b6f60, -.03em .03em 0 #0a6458, -.045em .045em 0 #085a50, -.06em .06em 0 #075047, -.09em .13em .12em rgba(0, 60, 40, .3); }
 /* Beim Überfahren dreht sich die Schrift ins dunkle WhatsApp-Grün, dann tragen hellgrüne Kanten das Plastische. */
@@ -238,7 +254,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 /* Fakten-Tafel: Begriff und Antwort, getrennt durch Wellenlinien statt Kästen. */
 .fakten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(28px, 4vw, 64px); margin: 0; }
 .fakt { position: relative; padding: 18px 0 22px; }
-.fakt dt { display: flex; flex-direction: column; align-items: flex-start; gap: .3em; margin-bottom: .45em; font: 400 clamp(1.32rem, .95rem + .75vw, 1.75rem)/1.12 Shrikhand, Georgia, serif; color: var(--terra); text-shadow: 0 -.012em 0 #e8835a, -.015em .015em 0 #a8411f, -.03em .03em 0 #963819, -.045em .045em 0 #842f14, -.06em .06em 0 #74290f, -.09em .13em .12em rgba(110, 50, 0, .28); }
+.fakt dt { display: flex; flex-direction: column; align-items: flex-start; gap: .3em; margin-bottom: .45em; font: 400 clamp(1.32rem, .95rem + .75vw, 1.75rem)/1.12 Shrikhand, Georgia, serif; color: var(--terra); text-shadow: 0 -.012em 0 #e8835a, -.022em .022em 0 #a8411f, -.05em .08em .07em rgba(110, 50, 0, .24); }
 .fakt { --ding: clamp(64px, 7.4cqw, 128px); --ding-schatten: drop-shadow(-3px 5px 4px rgba(110, 50, 0, .28)); }
 .fakt-ding { flex: none; width: var(--ding); height: auto; margin-bottom: -.12em; filter: var(--ding-schatten); transform-origin: 50% 80%; transition: rotate 700ms var(--boing), scale 700ms var(--boing), translate 700ms var(--out); }
 .fakt dd { margin: 0; }
@@ -352,7 +368,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   .site-js .fakt[data-zeigen] .fakt-ding { scale: 1; rotate: 0deg; opacity: 1; transition: none; }
   .fakt.spielt .fakt-ding { animation: none !important; }
   .fakt-ding, .fakt dt { animation: none; }
-  .site-js .fakt[data-zeigen] .marker { background-size: 100% .66em; transition: none; }
+  .site-js .fakt[data-zeigen] .marker, .site-js .kernsatz[data-zeigen] .marker { background-size: 100% .66em; transition: none; }
   .szene-vanille > .szene-licht::before, .szene-vanille .job::before { animation: none; }
   .site-js [data-zeigen], .site-js .titel[data-zeigen] .w, .site-js .foto[data-zeigen] { opacity: 1; translate: none; transition: none; }
   .site-js .foto[data-zeigen] { rotate: var(--kipp); }
@@ -384,7 +400,7 @@ html.im-hero .seitenkopf { translate: 0 -120%; opacity: 0; visibility: hidden; t
 .seitenkopf-logo .hell, html[data-kopf='dunkel'] .seitenkopf-logo .dunkel { display: none; }
 html[data-kopf='dunkel'] .seitenkopf-logo .hell { display: block; filter: drop-shadow(0 1px 8px rgba(0, 34, 44, .6)); }
 html[data-kopf='dunkel'] .seitenkopf { color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .5); }
-.seitenmenue { --flip: var(--plum); display: flex; align-items: center; gap: clamp(18px, 2.4vw, 38px); margin-left: auto; font: 400 clamp(17px, 1.25vw, 21px)/1.2 Shrikhand, Georgia, serif; letter-spacing: .01em; text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763, 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); }
+.seitenmenue { --flip: var(--plum); display: flex; align-items: center; gap: clamp(18px, 2.4vw, 38px); margin-left: auto; font: 400 clamp(17px, 1.3vw, 23px)/1.2 Shrikhand, Georgia, serif; letter-spacing: .01em; text-shadow: -.022em .022em 0 #2a5763, 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); }
 html[data-kopf='dunkel'] .seitenmenue { text-shadow: inherit; }
 .seitenmenue > a { padding: 8px 0; text-decoration: none; }
 html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }

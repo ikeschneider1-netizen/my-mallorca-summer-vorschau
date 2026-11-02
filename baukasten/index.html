@@ -37,7 +37,7 @@
 <main id="oben">
   <section class="kapitel bk-intro">
     <div>
-      <p class="dach">Baukasten · Stand Runde 13 · 02.11.2026</p>
+      <p class="dach">Baukasten · Stand Runde 15 · 02.11.2026</p>
       <h1 class="titel" data-zeigen>Alles nach dem Hero, <em>aus einem Guss.</em></h1>
       <p class="vorspann" data-zeigen>Hier steht, woraus jede weitere Seite gebaut wird: Gliederung, Logo, Farben, Schrift, Knöpfe und Bewegung. Weiter unten steht das erste Kapitel der Startseite im Stil des Heros: echte Kulisse, 3D-Schrift, Licht, Ball und Möwe. Der Maßstab für jede Seite: verspielt, aber so hochwertig, dass man die Mühe dahinter sieht, am Rechner wie am Handy.</p>
     </div>
@@ -92,7 +92,7 @@
         <div class="bk-probe" data-zeigen><span class="bk-etikett">Einleitung · Nunito 600 · 18 bis 23 px</span><p class="vorspann">Bevor du dich bewirbst, sollst du genau wissen, worauf du dich einlässt.</p></div>
         <div class="bk-probe" data-zeigen><span class="bk-etikett">Fließtext · Nunito 400 · 17 bis 19 px</span><p>Mitten in der Hochsaison allein ein Zimmer auf Mallorca suchen? Das ist ein Hobby für Leute mit zu viel Zeit. Wir helfen dir, eine gute und günstige Unterkunft in der Nähe zu finden, meistens zusammen mit anderen aus dem Team.</p></div>
       </div>
-      <p class="klein" data-zeigen>Shrikhand trägt Titel, Zwischentitel und alles, was man drücken kann. Nunito trägt Menü und Lesetext, mit runden Enden wie Shrikhand, Ball und Ring. Größen wachsen fließend mit dem Bildschirm, am Handy bleibt der Fließtext bei 17 px.</p>
+      <p class="klein" data-zeigen>Shrikhand trägt alles, was laut oder mittel spricht: Titel mit voller Tiefe, Zwischentitel, Kernsatz, Menü und Hauptwege mit einer feinen Kante. Nunito trägt alles Leise: Lesetext, Dachzeilen, Hinweise, Unterzeilen und Nebenwege, mit runden Enden wie Shrikhand, Ball und Ring. Größen wachsen fließend mit dem Bildschirm, am Handy bleibt der Fließtext bei 17 px.</p>
     </div>
   </section>
 
@@ -118,6 +118,11 @@
       <div class="job-kopf">
         <p class="dach">Der Job</p>
         <h2 class="titel raum" id="job-t" data-zeigen>Der Job auf einen Blick</h2>
+        <dl class="kernsatz" data-zeigen>
+          <div><dt>Was</dt><dd><mark class="marker">Event-Promoter</mark></dd></div>
+          <div><dt>Wo</dt><dd><mark class="marker">Playa de Palma</mark></dd></div>
+          <div><dt>Wann</dt><dd><mark class="marker">Saison 2027</mark></dd></div>
+        </dl>
         <p class="vorspann" data-zeigen>Bevor du dich bewirbst, sollst du genau wissen, worauf du dich einlässt. Hier steht alles Wichtige, ohne Werbesprech und ohne Hochglanz-Gelaber.</p>
       </div>
       <dl class="fakten">
@@ -183,7 +188,8 @@
         <li data-zeigen><strong>Licht wie im Hero.</strong> Von oben rechts fallen weiche Sonnenstrahlen, die sich kaum merklich drehen. Hinter dem Inhalt wandert ein zweiter Palmenschatten, gegenläufig zum ersten. Hinter jedem Gegenstand liegt ein warmer Sonnenfleck. Das Licht blendet oben weich ein, damit zwischen zwei Kapiteln keine Naht entsteht.</li>
         <li data-zeigen><strong>Die Szene lebt.</strong> Palmwedel und Pflanzen sind freigestellt und wiegen sich im Wind, fest am Bildrand und in der Erde (<code>tools/site/blaetter.cjs</code>, WebGL). Ohne WebGL steht das ruhige Bild.</li>
         <li data-zeigen><strong>Gegenstände zum Anfassen.</strong> 3D wie Ball und Ring, groß genug zum Hinschauen (am Rechner bis 128 px). Sie schweben leicht vor der Wand und werfen dort einen Schatten, der kleiner wird, wenn sie steigen. Beim Scrollen gleiten sie etwas langsamer als die Seite, mit der Maus rücken sie ein wenig mit. Beim Überfahren oder Antippen spielen sie eine eigene kleine Szene, weich und ohne Ruck: Das Ticket wird angeschnippt, die Sonne dreht eine Runde, die Discokugel pendelt. Am Rechner hängen die Fakten versetzt, wie von Hand an die Wand gehängt.</li>
-        <li data-zeigen><strong>Wörter mit Kante.</strong> Menü, Wege und Bewerbungssatz sind plastisch wie die Titel: über dem Bild Creme mit Sandkante und dunklem Schein, auf heller Wand weiches Petrol mit dunkler Kante. „Jetzt per WhatsApp bewerben“ steht auf hellen Wänden im Original-WhatsApp-Grün (#25D366) mit dunkelgrüner Kante und feiner dunkelgrüner Kontur (<code>--wa-kontur</code>). Ohne Kontur fehlt dem hellen Grün auf heller Wand der Rand, die Buchstaben verschmelzen, und in „Jetzt“ liest sich das z wie ein x. Der Aufkleber bleibt pink.</li>
+        <li data-zeigen><strong>Lautstärke der Schrift.</strong> Die 3D-Tiefe ist ein Regler, kein Schalter, wie auf einem Reiseplakat: Das große Wort strahlt, die kleine Zeile darunter ist schlicht. <em>Laut</em> mit voller Tiefe sprechen nur Hero-Schriftzug und Kapiteltitel. <em>Mittel</em> mit einer feinen Kante sprechen Fakt-Titel, Kernsatz, Menü und Hauptwege: über dem Bild Creme mit Sandkante und dunklem Schein, auf heller Wand weiches Petrol oder Terrakotta. <em>Leise</em> in Nunito ohne Kante steht alles Funktionale: Nebenwege wie „Lieber per Formular“, Hinweise, Dachzeilen und Unterzeilen. „Jetzt per WhatsApp bewerben“ steht auf hellen Wänden im Original-WhatsApp-Grün (#25D366) mit dunkelgrüner Kante und feiner dunkelgrüner Kontur (<code>--wa-kontur</code>). Ohne Kontur fehlt dem hellen Grün auf heller Wand der Rand, die Buchstaben verschmelzen, und in „Jetzt“ liest sich das z wie ein x. Der Aufkleber bleibt pink.</li>
+        <li data-zeigen><strong>Titel, Kernsatz, Details.</strong> Jedes Kapitel sagt das Wichtigste zuerst: Unter dem Titel steht der Kernsatz in drei Wörtern (Etikett leise, Wert mittel, je mit Leuchtmarker), danach die Einleitung, dann die Einzelheiten. Im Hero übernimmt das die Unterzeile, die stehen bleibt, während sich alles andere bewegt. Bewegte Schrift ist nie die einzige Erklärung.</li>
         <li data-zeigen><strong>Ein Leuchtmarker je Fakt.</strong> Der Kernbegriff bekommt einen Strich in Sonnengelb, der sich zieht, wenn der Fakt ins Bild kommt. Nur einer pro Fakt, sonst verliert er seine Wirkung.</li>
         <li data-zeigen><strong>Der Ball ist ein echter Ball.</strong> Er stößt an Flächen, Kanten und Ecken des Szenenbildes (<code>data-boden</code>, ein Eintrag mit vier Werten ist schräg), rollt mit Drall, staucht beim Aufprall und kommt nur auf flachem Boden zur Ruhe. Auf einer Kante oder dem Kübel bleibt er nie liegen. Antippen schießt ihn in einem Bogen gegen die Titelbuchstaben, die federnd hochspringen. Unter der Maus heben sich Titelbuchstaben als Welle und sinken federnd zurück, hoch und runter, nie wie eine Taste nach hinten.</li>
         <li data-zeigen><strong>Die Möwe ist ein Charakter.</strong> Sie fliegt wie eine Möwe: kurz in die Knie, steigen mit schnellem Schlag, gleiten mit ausgebreiteten Flügeln, vor der Landung aufrichten und bremsen. Trifft sie der Ball hart, fliegt sie wie aus der Kanone, überschlägt sich, fängt sich, schüttelt sich und schaut frech zurück. Sie setzt sich nie auf Text. Was sie trägt, hält sie sichtbar im Schnabel: Buchstabe für Buchstabe vom Boden gelöst, dann als Banner hinter ihr her, warm leuchtend, damit es sich vom Schriftzug abhebt. Wer Platz machen muss, hüpft flach, nie quer über einen Titel. Schießt der Ball auf sie, holt er erst Anlauf und schießt flach, damit man den Schuss sieht.</li>
