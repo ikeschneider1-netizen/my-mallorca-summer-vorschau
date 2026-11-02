@@ -1605,7 +1605,8 @@ function frame() {
   tick(Math.min(1 / 24, Math.max(0.001, ms / 1000)));
 }
 // Die Flugbahn des Werbefliegers. Er kommt von weit hinten über dem Horizont, steigt im Bogen auf, wird größer und zieht dann über die Szene.
-const PLANE_CYCLE = 64, PLANE_START = 8, PLANE_SPEED = 40, PLANE_ARC = 13;
+// Der Flieger kommt erst, wenn die Möwe gelandet ist und ihre Show läuft, damit beide nicht gleichzeitig um den Blick kämpfen.
+const PLANE_CYCLE = 64, PLANE_START = 16, PLANE_SPEED = 40, PLANE_ARC = 13;
 const planeP = { x: 0, y: 0, s: 1 }, planeQ = { x: 0, y: 0, s: 1 }, planeR = { x: 0, y: 0, s: 1 };
 function planeAt(t, o) {
   if (t < PLANE_ARC) {
@@ -1809,7 +1810,7 @@ function playIntro() {
   if (comp.on) {
     settle();
     if (!reduced.matches && window.gsap && scrollY < 5) {
-      Object.assign(B, { x: REST.x - view.vw * 0.08, y: -140 }); lastBx = B.x; phys.idle = 9; gag.next = 7; launch(view.vw * 0.05, 0);
+      Object.assign(B, { x: REST.x - view.vw * 0.08, y: -140 }); lastBx = B.x; phys.idle = 9; gag.next = 1.2; launch(view.vw * 0.05, 0);
       // Die Sonne blitzt im Ring auf, und ein Lichtstreif läuft über die Buchstaben.
       window.gsap.fromTo(S, { flare: 1.05 }, { flare: 0.2, duration: 1.7, delay: 0.3, ease: 'power2.out' });
       window.gsap.fromTo(S, { glint: -0.2 }, { glint: 1.4, duration: 1.5, delay: 0.75, ease: 'sine.inOut' });
@@ -1821,7 +1822,8 @@ function playIntro() {
   window.gsap.killTweensOf(S);
   abortGag();
   feathers.clear();
-  gag.next = 5.5;
+  // Die Möwe kommt gleich, wenn der Ball ausgerollt ist: kein Loch zwischen Auftakt und erstem Lacher.
+  gag.next = 0.6;
   plop.splat.visible = false;
   mode = 'intro';
   intro = buildIntro();
