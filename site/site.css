@@ -14,7 +14,7 @@
   --petrol-weich: #3f6f7c;
   /* Lautstärke der Schrift (Ike, 02.11.2026). Die 3D-Tiefe ist ein Regler, kein Schalter:
      laut = volle Tiefe (Hero-Schriftzug, Kapiteltitel), mittel = eine feine Kante (Fakt-Titel, Kernsatz, Menü, Wege),
-     leise = Nunito ohne Kante (alles Funktionale: Nebenwege, Hinweise, Unterzeilen, Dachzeilen). */
+     leise = Nunito ohne Kante (alles Funktionale: Nebenwege, Hinweise, Dachzeilen). */
   /* Feine Kontur für Wörter im hellen WhatsApp-Grün: Auf der hellen Wand fehlt dem Grün sonst der Rand, Buchstaben verschmelzen
      und in Shrikhand liest sich z. B. das z in „Jetzt“ wie ein x (Ike, 02.11.2026). */
   --wa-kontur: .02em 0 0 #0b6f60, -.02em 0 0 #0b6f60, 0 .02em 0 #0b6f60, 0 -.02em 0 #0b6f60, .014em .014em 0 #0b6f60, -.014em .014em 0 #0b6f60, .014em -.014em 0 #0b6f60, -.014em -.014em 0 #0b6f60;
