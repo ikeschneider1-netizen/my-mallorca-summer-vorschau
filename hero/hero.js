@@ -3,6 +3,7 @@ import { FontLoader } from '../vendor/three/FontLoader.js';
 import { RoomEnvironment } from '../vendor/three/RoomEnvironment.js';
 import { buildGull } from './gull.js';
 import { buildFeathers } from './feathers.js';
+import { planeAtlas } from './plane.js';
 
 // Bühnenmaße und Kamera entsprechen dem freigegebenen Entwurf (1440 x 756).
 const W = 1440, H = 756, F = 1500, CX = W / 2, CY = H / 2;
@@ -226,29 +227,27 @@ const PLATE_FRAG = /* glsl */`
     c = mix(c, vec3(1., .985, .95), smoothstep(aa, -aa, length(u - vec2(.27, .14)) - .16) * m);
     return mix(c, vec3(1., .75, .1), smoothstep(aa, -aa, cap(u, vec2(.38, .125), vec2(.62, .075), .072, .026)) * m);
   }
-  // Der Werbeflieger in den Farben des Balls. Er fliegt nach links, das Banner weht hinterher. b ist der Abstand zur Mitte des Flugzeugs.
+  // Der Werbeflieger. Er fliegt nach links, das Banner weht hinterher. b ist der Abstand zur Mitte des Flugzeugs.
+  // Die Bilder sind vormultipliziert: So entsteht beim Verkleinern kein dunkler Rand ums Banner.
   vec3 planeBanner(vec3 c, vec2 b, float m, float px) {
-    float aa = px / uPlaneT.z * 1.1, u = (b.x - 58.) / 238.;
-    float line = min(cap(b, vec2(19., 0.), vec2(58., -13.), .34, .34), cap(b, vec2(19., 0.), vec2(58., 13.), .34, .34));
-    c = mix(c, vec3(.2, .24, .3), smoothstep(aa, -aa, line) * m * .8);
-    if (u > -.02 && u < 1.02) {
+    float aa = px / uPlaneT.z * 1.1, u = (b.x - 66.) / 250.;
+    float line = min(cap(b, vec2(40., -1.), vec2(66., -14.), .36, .36), cap(b, vec2(40., -1.), vec2(66., 14.), .36, .36));
+    c = mix(c, vec3(.2, .24, .3), smoothstep(aa, -aa, line) * m * .85);
+    if (u > 0. && u < 1.) {
       float ph = u * 15. - uTime * 5.2, wave = sin(ph) * (1.1 + u * 3.) + sin(u * 31. - uTime * 8.) * .55 * u;
-      float v = (b.y - wave - uPlaneT.w * u * u) / 30. + .5;
-      float a = smoothstep(-aa / 238., aa / 238., u) * smoothstep(-aa / 238., aa / 238., 1. - u) * smoothstep(-aa / 30., aa / 30., v) * smoothstep(-aa / 30., aa / 30., 1. - v);
-      vec3 cloth = texture2D(tBanner, vec2(u, 1. - v)).rgb * (1. + .2 * cos(ph) * (.35 + u * .65));
-      c = mix(c, cloth, a * m);
+      float v = (b.y - wave - uPlaneT.w * u * u) / 32. + .5;
+      if (v > 0. && v < 1.) {
+        vec4 t = texture2D(tBanner, vec2(u, 1. - v * 132. / 512.));
+        c = c * (1. - t.a * m) + t.rgb * (1. + .2 * cos(ph) * (.35 + u * .65)) * m;
+      }
     }
-    float tail = cap(b, vec2(11., -2.), vec2(20., -12.), 3., 1.5);
-    c = mix(c, vec3(.05, .5, .68), smoothstep(aa, -aa, tail) * m);
-    float body = cap(b, vec2(-23., 0.), vec2(19., -1.), 6.6, 2.3);
-    vec3 paint = mix(vec3(1., .86, .24), vec3(.96, .62, .08), smoothstep(-5., 6., b.y));
-    paint = mix(paint, vec3(.91, .26, .5), smoothstep(aa, -aa, abs(b.y - 1.4 - b.x * .02) - 1.2) * step(-16., b.x));
-    c = mix(c, paint, smoothstep(aa, -aa, body) * m);
-    c = mix(c, vec3(.13, .26, .38), smoothstep(aa, -aa, cap(b, vec2(-14., -4.), vec2(-6., -4.6), 2.8, 2.5)) * m);
-    float wing = cap(b, vec2(-11., 3.), vec2(5., 9.), 3.4, 1.7);
-    c = mix(c, vec3(.94, .34, .56), smoothstep(aa, -aa, wing) * m);
-    c = mix(c, vec3(.12, .13, .16), smoothstep(aa, -aa, length(b - vec2(-29.5, 0.)) - 2.2) * m);
-    return mix(c, vec3(.92, .94, .95), smoothstep(aa, -aa, length((b - vec2(-31., 0.)) / vec2(.9, 1.)) - (6.6 + sin(uTime * 41.) * 2.4)) * m * .32);
+    vec2 pu = (b + vec2(50., 25.)) / vec2(100., 50.);
+    if (pu.x > 0. && pu.x < 1. && pu.y > 0. && pu.y < 1.) {
+      float f = step(.5, fract(uTime * 8.));
+      vec4 t = texture2D(tBanner, vec2((pu.x + f) * .5, 1. - (160. + pu.y * 256.) / 512.));
+      c = c * (1. - t.a * m) + t.rgb * m;
+    }
+    return c;
   }
   float pane(vec2 d) { return 1. - smoothstep(.7, 1.3, length(d * vec2(.42, .2))); }
   // Das Segelboot, dieselbe Bildsprache wie der Rest: Großsegel mit Bauch und Schatten, davor ein bunter Spinnaker in den Farben des Balls.
@@ -341,7 +340,9 @@ const PLATE_FRAG = /* glsl */`
     float blue = smoothstep(.2, .5, col.b - col.r);
     // Zwischen Ufer und Horizont liegt Wasser, auch wenn die Tiefenkarte dort flach ist: Bis dahin reicht der Himmel, nicht weiter.
     float skyCut = mix(226., 261., smoothstep(700., 780., q.x));
-    float sky = smoothstep(.09, .06, depth) * blue * (1. - smoothstep(skyCut - 3., skyCut, q.y));
+    // Die Grenze zu Kathedrale und Palme kommt aus dem Bild selbst, nicht aus der gröberen Tiefenkarte. So bleibt kein blauer Saum stehen.
+    float landBand = smoothstep(.1, .15, depth) * (1. - smoothstep(.22, .3, depth));
+    float sky = smoothstep(.12, .26, col.b - col.r) * smoothstep(.62, .8, col.b) * (1. - landBand) * (1. - smoothstep(skyCut - 3., skyCut, q.y));
     if (sky > .005) {
       // Das Muster wird verzerrt und jede Lage gedreht: So verschwindet das Raster, und die Wolken bleiben weich.
       vec2 cp = vec2(p.x * .0038 + uTime * .011, p.y * .012 - uTime * .0016);
@@ -363,7 +364,7 @@ const PLATE_FRAG = /* glsl */`
       // Das Flugzeug fliegt in seiner eigenen Richtung und wird mit der Entfernung kleiner. In der Ferne verschwimmt es im Dunst.
       vec2 bq = p - uPlane;
       vec2 bn = vec2(dot(bq, uPlaneT.xy), uPlaneT.x * bq.y - uPlaneT.y * bq.x) / uPlaneT.z;
-      if (bn.x > -40. && bn.x < 304. && abs(bn.y) < 34. + abs(uPlaneT.w)) col = planeBanner(col, bn, sky * (.42 + .58 * smoothstep(.24, .72, uPlaneT.z)), px);
+      if (bn.x > -52. && bn.x < 320. && abs(bn.y) < 36. + abs(uPlaneT.w)) col = planeBanner(col, bn, sky * (.42 + .58 * smoothstep(.24, .72, uPlaneT.z)), px);
       // Ein harter Aufprall scheucht die Tauben von den Türmen der Kathedrale auf.
       if (uFlock < 9.) {
         for (int i = 0; i < 7; i++) {
@@ -1595,7 +1596,7 @@ function flyPlane(u) {
   planeAt(t, planeP); planeAt(t + 0.05, planeQ);
   const dx = planeP.x - planeQ.x, dy = (planeP.y - planeQ.y) * 0.72, len = Math.hypot(dx, dy) || 1, tx = dx / len, ty = dy / len;
   // Das Banner folgt der Bahn: Sein Ende hängt dort, wo das Flugzeug vor ein paar Sekunden war.
-  planeAt(t - 5.4, planeR);
+  planeAt(t - 6.2, planeR);
   const bx = planeR.x - planeP.x, by = planeR.y - planeP.y;
   u.uPlane.value.set(planeP.x, planeP.y);
   T.set(tx, ty, planeP.s, clamp((tx * by - ty * bx) / planeP.s * 0.8, -44, 44));
@@ -1899,17 +1900,10 @@ async function start() {
   ]);
   for (const t of [plateTex, mapsTex]) { t.generateMipmaps = false; t.minFilter = THREE.LinearFilter; t.magFilter = THREE.LinearFilter; }
 
-  // Das Banner: echte Schrift, gezeichnet im Browser.
+  // Banner und Flugzeug: echte Schrift und Zeichnung aus dem Browser.
   await document.fonts?.load('400 80px Shrikhand').catch(() => {});
-  const bannerCanvas = document.createElement('canvas');
-  bannerCanvas.width = 1024; bannerCanvas.height = 128;
-  const bc = bannerCanvas.getContext('2d');
-  bc.fillStyle = '#fff4df'; bc.fillRect(0, 0, 1024, 128);
-  bc.fillStyle = '#e8437f'; bc.fillRect(0, 0, 1024, 9); bc.fillRect(0, 119, 1024, 9);
-  bc.fillStyle = '#00343a'; bc.font = '400 76px Shrikhand, Georgia, serif'; bc.textAlign = 'center'; bc.textBaseline = 'middle';
-  bc.fillText('Event-Promoter gesucht', 512, 66, 980);
-  const bannerTex = new THREE.CanvasTexture(bannerCanvas);
-  bannerTex.generateMipmaps = true; bannerTex.minFilter = THREE.LinearMipmapLinearFilter; bannerTex.anisotropy = 4;
+  const bannerTex = new THREE.CanvasTexture(planeAtlas('Event-Promoter gesucht'));
+  bannerTex.premultiplyAlpha = true; bannerTex.generateMipmaps = true; bannerTex.minFilter = THREE.LinearMipmapLinearFilter; bannerTex.anisotropy = 4;
   const noiseData = new Uint8Array(256 * 256);
   for (let i = 0, n = 1234567; i < noiseData.length; i++) { n = (Math.imul(n, 1664525) + 1013904223) | 0; noiseData[i] = (n >>> 24) & 255; }
   const noiseTex = new THREE.DataTexture(noiseData, 256, 256, THREE.RedFormat);
