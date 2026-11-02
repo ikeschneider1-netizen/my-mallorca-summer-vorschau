@@ -10,6 +10,8 @@
   --meer: #0a6f94; --meer-tief: #08506c;
   /* Terrakotta wie der Boden im Hero: warmer Akzent für Begriffe, damit Petrol nicht zu schwer wird. */
   --terra: #c4502a;
+  /* Weiches Petrol für Menü und Kopf: Das volle Petrol wirkt in Shrikhand zu schwer (Ike, 02.11.2026). */
+  --petrol-weich: #3f6f7c;
   /* Kapitel-Welten: die Treppe vom Hero hinunter zum Pool */
   --terrasse: #e4572e; --vanille: #fcead1; --orange: #ff741f; --lagune: #1ec8d0; --creme: #fff4df; --zitrone: #ffe600; --petrol: #00343a;
   /* Ball */
@@ -261,11 +263,15 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 
 /* Kopf wie im Hero: kein Balken, keine Fläche. Logo und Wörter schweben über der Szene, der eine Aufkleber hängt oben rechts.
    Beim Scrollen nach unten weicht der Kopf aus, nach oben kommt er zurück. Der Aufkleber bleibt immer. */
-.seitenkopf { position: fixed; z-index: 15; inset: 0 0 auto 0; display: flex; align-items: center; gap: clamp(16px, 3vw, 40px); padding: clamp(12px, 1.5vw, 22px) calc(clamp(108px, 9.8vw, 148px) + clamp(28px, 3.4vw, 56px)) clamp(12px, 1.5vw, 22px) var(--rand); color: var(--ink); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); pointer-events: none; transition: translate 460ms var(--out), opacity 320ms ease, color 400ms ease; }
+.seitenkopf { position: fixed; z-index: 15; inset: 0 0 auto 0; display: flex; align-items: center; gap: clamp(16px, 3vw, 40px); padding: clamp(12px, 1.5vw, 22px) calc(clamp(108px, 9.8vw, 148px) + clamp(28px, 3.4vw, 56px)) clamp(12px, 1.5vw, 22px) var(--rand); color: var(--petrol-weich); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); pointer-events: none; transition: translate 460ms var(--out), opacity 320ms ease, color 400ms ease; }
 .seitenkopf a, .seitenkopf button { pointer-events: auto; }
 /* Kein Balken, nur ein weicher Lichtschleier ohne Kante, sobald unter dem Kopf Text vorbeiläuft. Ganz oben bleibt die Szene frei. */
 .seitenkopf::before { content: ''; position: absolute; z-index: -1; inset: 0 0 -70px; background: linear-gradient(rgba(252, 234, 209, .94), rgba(252, 234, 209, .72) 45%, rgba(252, 234, 209, 0)); opacity: 0; transition: opacity 320ms ease; pointer-events: none; }
 html.gescrollt .seitenkopf::before { opacity: 1; }
+/* Der Schleier spart den Aufkleber rund aus. Auf der Startseite hängt der Aufkleber im Hero und liegt darum unter dem Kopf; ohne Aussparung würde der Schleier ihn blass machen. */
+@media (min-width: 761px) and (min-height: 541px) {
+  .seitenkopf::before { --a-d: clamp(108px, 9.8vw, 148px); --loch: radial-gradient(circle at calc(100% - clamp(14px, 2.2vw, 34px) - var(--a-d) / 2) calc(clamp(6px, 1vw, 14px) + var(--a-d) / 2), transparent calc(var(--a-d) / 2 + 6px), #000 calc(var(--a-d) / 2 + 36px)); -webkit-mask-image: var(--loch); mask-image: var(--loch); }
+}
 html[data-kopf='dunkel'] .seitenkopf::before { background: linear-gradient(rgba(0, 52, 58, .9), rgba(0, 52, 58, .65) 45%, rgba(0, 52, 58, 0)); }
 html.kopf-weg:not(.menue-offen) .seitenkopf { translate: 0 -120%; opacity: 0; }
 /* Ohne Skript gibt es kein Ausweichen und kein Menü: Auf Seiten mit Hero zeigt dann nur der Hero seinen Kopf. */
@@ -277,7 +283,7 @@ html.im-hero .seitenkopf { translate: 0 -120%; opacity: 0; visibility: hidden; t
 .seitenkopf-logo .hell, html[data-kopf='dunkel'] .seitenkopf-logo .dunkel { display: none; }
 html[data-kopf='dunkel'] .seitenkopf-logo .hell { display: block; filter: drop-shadow(0 1px 8px rgba(0, 34, 44, .6)); }
 html[data-kopf='dunkel'] .seitenkopf { color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .5); }
-.seitenmenue { --flip: var(--plum); display: flex; align-items: center; gap: clamp(18px, 2.4vw, 38px); margin-left: auto; font: 800 clamp(15px, 1.15vw, 18px)/1.2 UI, system-ui, sans-serif; }
+.seitenmenue { --flip: var(--plum); display: flex; align-items: center; gap: clamp(18px, 2.4vw, 38px); margin-left: auto; font: 400 clamp(17px, 1.25vw, 21px)/1.2 Shrikhand, Georgia, serif; letter-spacing: .01em; }
 .seitenmenue > a { padding: 8px 0; text-decoration: none; }
 html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }
 .menue-knopf, .menue-wege { display: none; }
@@ -291,10 +297,10 @@ html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }
   .menue-knopf { position: relative; z-index: 22; display: block; min-height: 44px; margin-left: auto; border: 0; padding: 10px 0; font: 800 clamp(16px, 4.1vw, 20px)/1.2 UI, system-ui, sans-serif; color: inherit; background: none; text-shadow: inherit; cursor: pointer; }
   .menue-zu, .menue-offen .menue-auf { display: none; }
   .menue-offen .menue-zu { display: inline; }
-  .menue-offen .menue-knopf { color: var(--ink); text-shadow: none; }
+  .menue-offen .menue-knopf { color: var(--petrol-weich); text-shadow: none; }
   html.menue-offen { overflow: hidden; }
   html.menue-offen .seitenkopf { z-index: 30; }
-  .seitenmenue { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); margin: 0; padding: 72px var(--rand) calc(28px + env(safe-area-inset-bottom, 0px)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; color: var(--ink); text-shadow: none; background: var(--sun); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 420ms var(--key), visibility 0s linear 420ms; }
+  .seitenmenue { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); margin: 0; padding: 72px var(--rand) calc(28px + env(safe-area-inset-bottom, 0px)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; color: var(--petrol-weich); text-shadow: none; background: var(--sun); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 420ms var(--key), visibility 0s linear 420ms; }
   .menue-offen .seitenmenue { clip-path: circle(150vmax at calc(100% - 44px) 34px); visibility: visible; transition: clip-path 560ms var(--out); }
   .seitenmenue > a { padding: 2px 0; }
   .menue-offen .seitenmenue > a { animation: hoch 460ms var(--out) both; }
@@ -302,7 +308,7 @@ html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }
   .menue-wege { display: grid; gap: 6px; margin-top: clamp(14px, 3vh, 30px); }
   .menue-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); text-decoration: none; }
   .menue-wa svg { flex: none; width: 1.1em; height: 1.1em; fill: currentColor; }
-  .menue-form { min-height: 44px; padding: 10px 0; font: 800 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--ink); }
+  .menue-form { min-height: 44px; padding: 10px 0; font: 800 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--petrol-weich); }
   .der-aufkleber { --d: clamp(100px, 27vw, 150px); top: auto; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
   .der-aufkleber .nur-gross { display: none; }
   .der-aufkleber .nur-klein { display: block; }

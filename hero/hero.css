@@ -2,7 +2,7 @@
 
 :root {
   --sticker: clamp(108px, 9.8vw, 148px);
-  --ink: #00343a; --cream: #fff4df; --sun: #ffd21f; --coral: #d6336f; --dawn: #0d2a55;
+  --ink: #00343a; --cream: #fff4df; --sun: #ffd21f; --coral: #d6336f; --dawn: #0d2a55; --petrol-weich: #3f6f7c;
   --key: cubic-bezier(.65, 0, .15, 1); --out: cubic-bezier(.23, 1, .32, 1); --flap: cubic-bezier(.36, .02, .14, 1); --plum: #a80f4b;
   font-family: UI, system-ui, sans-serif; font-synthesis: none; color: var(--ink); background: var(--dawn);
   -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
@@ -49,13 +49,13 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 .f + .f { position: absolute; left: 0; top: 0; color: var(--flip, var(--plum)); transform-origin: 50% 100%; transform: rotateX(90deg); visibility: hidden; transition: transform 560ms var(--flap) calc(var(--i) * 30ms), visibility 0s linear calc(var(--i) * 30ms + 560ms); }
 a:focus-visible .f { transform: rotateX(90deg); transition-delay: calc(var(--i) * 30ms); }
 a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition: transform 560ms var(--flap) calc(var(--i) * 30ms + 100ms), visibility 0s; }
-.hero.dusk .links { --flip: var(--sun); }
 [data-nav="welle"] .links .f { transform: none; transition: none; }
 [data-nav="welle"] .links .f + .f { display: none; }
 
 /* Menü: nur Wörter, keine Fläche und kein Rahmen. */
-.links { position: relative; display: flex; align-items: center; gap: clamp(20px, 2.5vw, 38px); font-size: clamp(15px, 1.15vw, 18px); font-weight: 800; letter-spacing: .002em; transition: color 480ms ease; }
-.hero.dusk .links { color: var(--cream); }
+/* Das Menü steht in Shrikhand wie der Schriftzug, „bewerben“ und „Job entdecken“: Es gehört zur Szene, nicht zu einer normalen Webseite.
+   Über dem Bild in Creme mit dunklem Schein wie das Logo links, beim Überfahren klappt es auf Sonnengelb um wie „Job entdecken“. */
+.links { --flip: var(--sun); position: relative; display: flex; align-items: center; gap: clamp(20px, 2.5vw, 38px); font-family: Shrikhand, Georgia, serif; font-size: clamp(17px, 1.25vw, 21px); font-weight: 400; letter-spacing: .01em; color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); transition: color 480ms ease, text-shadow 480ms ease; }
 .links a { position: relative; display: block; padding: 10px 0 14px; white-space: nowrap; }
 /* Eine kleine laufende Welle zieht sich unter das Wort. */
 .wave { position: absolute; left: 0; right: 0; bottom: 3px; height: 7px; background: var(--coral); -webkit-mask: var(--wave) repeat-x 0 0 / 22px 7px; mask: var(--wave) repeat-x 0 0 / 22px 7px; clip-path: inset(0 100% 0 0); transition: clip-path 520ms var(--key); animation: flow 1.5s linear infinite; animation-play-state: paused; }
@@ -103,8 +103,10 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .lead { position: absolute; left: clamp(20px, 3vw, 48px); top: clamp(14px, 1.7vw, 24px); display: flex; align-items: center; gap: 8px; color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); }
 .kicker { padding: 10px 0 14px; font-size: clamp(14px, 1.08vw, 17px); font-weight: 800; white-space: nowrap; }
 .js.fallback .kicker { display: none; }
-/* Nach der Landung liegt die Terrasse hinter dem Kopf: dunkle Schrift mit hellem Lichtschein, damit sie auch über den Palmblättern lesbar bleibt. */
-.past .lead, .past .menu-btn { color: var(--ink); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); transition: color 300ms ease; }
+/* Nach der Landung liegt die Terrasse hinter dem Kopf: dunkle Schrift mit hellem Lichtschein, damit sie auch über den Palmblättern lesbar bleibt.
+   Weiches Petrol statt des vollen, das in Shrikhand zu schwer wirkt. */
+.past .lead, .past .menu-btn { color: var(--petrol-weich); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); transition: color 300ms ease; }
+@media (orientation: landscape) and (min-height: 541px) { .past .links { --flip: var(--plum); color: var(--petrol-weich); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); } }
 .discover { --flip: var(--sun); position: relative; display: inline-flex; align-items: center; flex: none; gap: 12px; margin-left: auto; font: 400 clamp(16px, 1.42vw, 21px)/1 Shrikhand, Georgia, serif; padding: 6px 0; }
 .discover img { width: 26px; height: 26px; filter: drop-shadow(0 3px 4px rgba(60, 0, 0, .45)); animation: nudge 3.4s var(--key) infinite; }
 @keyframes nudge { 0%, 68%, 100% { transform: translateY(0) scale(1); } 76% { transform: translateY(-9px) scale(.96, 1.04); } 84% { transform: translateY(0) scale(1.1, .9); } 90% { transform: translateY(-3px); } 95% { transform: translateY(0); } }
@@ -144,10 +146,10 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   .menu-btn:focus-visible { outline-color: currentColor; }
   .menu-x, .menu-open .menu-o { display: none; }
   .menu-open .menu-x { display: inline; }
-  .menu-open .menu-btn { color: var(--ink); text-shadow: none; }
+  .menu-open .menu-btn { color: var(--petrol-weich); text-shadow: none; }
   html.menu-open { overflow: hidden; }
   /* Das Menü geht als Sonne vom Knopf aus auf. */
-  .links { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); padding: 72px var(--m) calc(28px + var(--safe)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; letter-spacing: 0; color: var(--ink); background: var(--sun); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 340ms var(--out), visibility 0s 340ms; pointer-events: auto; }
+  .links { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); padding: 72px var(--m) calc(28px + var(--safe)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; letter-spacing: 0; color: var(--petrol-weich); text-shadow: none; background: var(--sun); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 340ms var(--out), visibility 0s 340ms; pointer-events: auto; }
   .menu-open .links { clip-path: circle(150vmax at calc(100% - 44px) 34px); visibility: visible; transition: clip-path 560ms var(--out); }
   .links a { padding: 2px 0; }
   .menu-open .links > a { animation: rise 460ms var(--out) both; }
@@ -155,7 +157,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   .menu-cta { display: grid; gap: 6px; margin-top: clamp(14px, 3vh, 30px); }
   .menu-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); }
   .menu-wa .wa-i { flex: none; width: 1.1em; height: 1.1em; }
-  .menu-form { min-height: 44px; padding: 10px 0 !important; font: 800 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--ink); }
+  .menu-form { min-height: 44px; padding: 10px 0 !important; font: 800 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--petrol-weich); }
 }
 /* Hochformat: eigener Bildaufbau. Oben die Kathedrale, darunter Schriftzug und Satz, unten Terrasse, Ball und der feste Aufkleber. */
 @media (orientation: portrait) {
