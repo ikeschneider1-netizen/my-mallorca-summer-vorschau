@@ -69,6 +69,7 @@
       faecher();
       const titel = raumTitel();
       spielbaelle(titel);
+      wind();
 
       // Einblenden, sobald ein Teil ins Bild kommt. Einmal, nicht bei jedem Scrollen.
       const io = new IntersectionObserver((entries) => {
@@ -98,6 +99,129 @@
       if (takt.size) requestAnimationFrame(schritt); else tickt = false;
     });
   };
+
+  // Blätter im Wind: Palmwedel und Kübelpflanze werden auf einer kleinen WebGL-Fläche verbogen, wie die Szene im Hero lebt.
+  // Wo ein Blatt am Bildrand oder in der Erde hängt (data-halt, data-anker), steht es fest, nach außen wiegt es immer stärker.
+  // data-weit ist der größte Ausschlag in Bildpunkten des Blattbildes. Ohne WebGL, bei weniger Bewegung oder bei einem Fehler
+  // bleibt das ruhige Bild stehen; die Fläche übernimmt erst, wenn sie ihr erstes Bild gezeichnet hat.
+  function wind() {
+    if (reduced.matches) return;
+    const RAND = 0.08;
+    const VS = `attribute vec2 a;
+uniform float t, amp, asp, rand;
+uniform vec2 uvs;
+uniform vec4 halt;
+uniform vec3 anker;
+varying vec2 v;
+void main() {
+  v = a * uvs;
+  vec2 p = vec2(a.x, a.y * asp);
+  float d = 9.0;
+  if (halt.x > .5) d = min(d, p.y);
+  if (halt.y > .5) d = min(d, p.x);
+  if (halt.z > .5) d = min(d, asp - p.y);
+  if (halt.w > .5) d = min(d, 1.0 - p.x);
+  float w = smoothstep(0.0, 0.42, d);
+  if (anker.z > 0.0) w *= smoothstep(0.0, anker.z, distance(p, vec2(anker.x, anker.y * asp)));
+  float ph = dot(p, vec2(4.2, 2.6));
+  float boe = 0.62 + 0.38 * sin(t * 0.29) * sin(t * 0.13 + 1.3);
+  vec2 s = vec2(sin(t * 1.15 - ph), 0.4 * sin(t * 0.93 - ph * 1.3 + 1.7)) * boe
+         + vec2(sin(t * 4.1 - ph * 3.3), cos(t * 3.6 - ph * 2.7)) * 0.09;
+  vec2 q = a + vec2(s.x, s.y / asp) * amp * w;
+  vec2 c = (q + rand) / (1.0 + 2.0 * rand) * 2.0 - 1.0;
+  gl_Position = vec4(c.x, -c.y, 0.0, 1.0);
+}`;
+    // Leicht zur schärferen Mipmap-Stufe hin, damit die Fiedern so klar bleiben wie im ruhigen Bild.
+    const FS = 'precision mediump float; uniform sampler2D bild; varying vec2 v; void main() { gl_FragColor = texture2D(bild, v, -0.6); }';
+    const imFlug = () => root.classList.contains('fly') && !root.classList.contains('past');
+    const alle = [];
+    for (const blatt of document.querySelectorAll('.blatt[data-halt]')) {
+      try {
+        const bild = blatt.querySelector('img');
+        const flaeche = document.createElement('canvas');
+        flaeche.setAttribute('aria-hidden', 'true');
+        const gl = flaeche.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false });
+        if (!gl) continue;
+        const shader = (typ, quelle) => { const sh = gl.createShader(typ); gl.shaderSource(sh, quelle); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh)); return sh; };
+        const prog = gl.createProgram();
+        gl.attachShader(prog, shader(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+        gl.useProgram(prog);
+        const bw = +bild.getAttribute('width'), asp = +bild.getAttribute('height') / bw;
+        // Ein feines Netz über dem Blatt: Jeder Knoten wird einzeln verschoben, so biegen sich die Wedel statt sich steif zu drehen.
+        const NX = 40, NY = Math.max(8, Math.round(NX * asp)), netz = [];
+        for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) {
+          const x0 = i / NX, x1 = (i + 1) / NX, y0 = j / NY, y1 = (j + 1) / NY;
+          netz.push(x0, y0, x1, y0, x0, y1, x0, y1, x1, y0, x1, y1);
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(netz), gl.STATIC_DRAW);
+        const lage = gl.getAttribLocation(prog, 'a');
+        gl.enableVertexAttribArray(lage); gl.vertexAttribPointer(lage, 2, gl.FLOAT, false, 0, 0);
+        const u = (n) => gl.getUniformLocation(prog, n);
+        const halt = blatt.dataset.halt.split(/\s+/);
+        gl.uniform4f(u('halt'), +halt.includes('oben'), +halt.includes('links'), +halt.includes('unten'), +halt.includes('rechts'));
+        const [ax = 0, ay = 0, ar = 0] = (blatt.dataset.anker || '').split(/\s+/).filter(Boolean).map(Number);
+        gl.uniform3f(u('anker'), ax, ay, ar);
+        gl.uniform1f(u('asp'), asp); gl.uniform1f(u('rand'), RAND);
+        const uT = u('t'), uAmp = u('amp');
+        const weit = (+blatt.dataset.weit || 8) / bw;
+        const B = { blatt, landung: !!blatt.closest('.landung'), t: Math.random() * 40, stark: 0, sicht: false, laeuft: false, bereit: false, aus: false };
+        // Bild ungestreckt in eine Fläche mit Zweierpotenz-Maßen legen: So gibt es Mipmaps, und feine Fiedern flimmern beim Verkleinern nicht.
+        const laden = () => {
+          if (B.bereit || !bild.naturalWidth) return;
+          const pot = (n) => 2 ** Math.ceil(Math.log2(n));
+          const c = document.createElement('canvas'); c.width = pot(bild.naturalWidth); c.height = pot(bild.naturalHeight);
+          c.getContext('2d').drawImage(bild, 0, 0);
+          gl.uniform2f(u('uvs'), bild.naturalWidth / c.width, bild.naturalHeight / c.height);
+          gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+          gl.generateMipmap(gl.TEXTURE_2D);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          B.bereit = true; pruefen(B);
+        };
+        // Beim ersten Start wächst der Ausschlag von null an: Das erste Bild der Fläche gleicht dem ruhigen Bild aufs Haar.
+        const malen = () => {
+          const e = B.stark * B.stark * (3 - 2 * B.stark);
+          gl.uniform1f(uT, B.t); gl.uniform1f(uAmp, weit * e);
+          gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.drawArrays(gl.TRIANGLES, 0, netz.length / 2);
+          blatt.classList.add('wind');
+        };
+        B.zeichnen = (dt) => {
+          if (B.aus || !B.sicht || !B.bereit || (B.landung && imFlug())) { B.laeuft = false; return false; }
+          B.t += dt; B.stark = Math.min(1, B.stark + dt / 1.8);
+          malen();
+          return true;
+        };
+        new ResizeObserver(([e]) => {
+          const dpr = Math.min(2, devicePixelRatio || 1), k = 1 + 2 * RAND;
+          flaeche.width = Math.max(1, Math.round(e.contentRect.width * k * dpr)); flaeche.height = Math.max(1, Math.round(e.contentRect.height * k * dpr));
+          gl.viewport(0, 0, flaeche.width, flaeche.height);
+          // Eine neue Größe leert die Fläche: Steht der Wind gerade, gleich wieder das letzte Bild zeichnen.
+          if (B.bereit && !B.aus && blatt.classList.contains('wind')) malen();
+        }).observe(blatt);
+        flaeche.addEventListener('webglcontextlost', () => { B.aus = true; blatt.classList.remove('wind'); });
+        blatt.append(flaeche);
+        new IntersectionObserver(([e]) => { B.sicht = e.isIntersecting; pruefen(B); }, { rootMargin: '120px 0px' }).observe(blatt);
+        if (bild.complete) laden(); else bild.addEventListener('load', laden, { once: true });
+        alle.push(B);
+      } catch (err) {
+        blatt.classList.remove('wind');
+      }
+    }
+    function pruefen(B) {
+      if (B.laeuft || B.aus || !B.sicht || !B.bereit) return;
+      if (B.landung && imFlug()) return;
+      B.laeuft = true; laufen(B.zeichnen);
+    }
+    // Die Landung liegt in der Bühne des Heros: Ihre Palmen wiegen sich erst, wenn der Flug durch den Ring ankommt.
+    if (alle.some((B) => B.landung)) new MutationObserver(() => alle.forEach(pruefen)).observe(root, { attributes: true, attributeFilter: ['class'] });
+    reduced.addEventListener('change', () => { if (!reduced.matches) return; for (const B of alle) { B.aus = true; B.blatt.classList.remove('wind'); } });
+  }
 
   // Kopf wie im Hero: Menü als Sonne am Handy, Ausweichen beim Scrollen nach unten, Farbe passend zur Wand darunter.
   function seitenkopf() {

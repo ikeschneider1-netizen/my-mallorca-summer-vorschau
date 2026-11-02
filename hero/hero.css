@@ -105,7 +105,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .js.fallback .kicker { display: none; }
 /* Nach der Landung liegt die Terrasse hinter dem Kopf: dunkle Schrift mit hellem Lichtschein, damit sie auch über den Palmblättern lesbar bleibt.
    Weiches Petrol statt des vollen, das in Shrikhand zu schwer wirkt. */
-.past .lead, .past .menu-btn { color: var(--petrol-weich); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); transition: color 300ms ease; }
+.past .lead, .past .menu-btn { color: var(--petrol-weich); text-shadow: 0 0 14px rgb(255, 246, 230), 0 0 6px rgba(255, 246, 230, .95), 0 0 2px rgb(255, 246, 230); transition: color 300ms ease; }
 @media (orientation: landscape) and (min-height: 541px) { .past .links { --flip: var(--plum); color: var(--petrol-weich); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); } }
 .discover { --flip: var(--sun); position: relative; display: inline-flex; align-items: center; flex: none; gap: 12px; margin-left: auto; font: 400 clamp(16px, 1.42vw, 21px)/1 Shrikhand, Georgia, serif; padding: 6px 0; }
 .discover img { width: 26px; height: 26px; filter: drop-shadow(0 3px 4px rgba(60, 0, 0, .45)); animation: nudge 3.4s var(--key) infinite; }
