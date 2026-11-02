@@ -46,13 +46,13 @@
 .bk-knoepfe .weiter { --flip: var(--cream); }
 .bk-textlink { max-width: 52ch; }
 
-/* Beispiel-Kapitel „Der Job auf einen Blick“ */
-.job { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); grid-template-areas: "kopf foto" "fakten foto" "los foto"; column-gap: clamp(32px, 6vw, 96px); align-items: start; }
-.job-kopf { grid-area: kopf; }
-.job-foto { grid-area: foto; position: sticky; top: 140px; margin-top: clamp(24px, 6vw, 96px); }
-.job-ball { position: absolute; width: clamp(44px, 4.4vw, 60px); height: auto; left: -18px; bottom: 34px; filter: drop-shadow(0 8px 8px rgba(60, 20, 0, .35)); rotate: calc(var(--kipp) * -1); }
-.job .fakten { grid-area: fakten; margin-top: clamp(16px, 2.4vw, 32px); }
-.job-los { grid-area: los; display: flex; flex-wrap: wrap; align-items: center; gap: 18px 36px; margin-top: clamp(28px, 4vw, 48px); }
+/* Beispiel-Kapitel „Der Job auf einen Blick“: Text an der sonnigen Wand, unten Kübel, Treppe und Boden frei für den Ball. */
+.szene-vanille { padding-top: clamp(118px, 13cqw, 210px); padding-bottom: clamp(240px, 22cqw, 330px); }
+.job-kopf { margin-left: clamp(0px, 13cqw, 220px); max-width: 780px; }
+.job-kopf .lead { max-width: 44ch; }
+.job .fakten { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(28px, 4cqw, 60px); }
+.job .fakt dd { font-size: 1.0625rem; line-height: 1.55; }
+.job-los { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 36px; margin-top: clamp(24px, 3cqw, 44px); margin-left: clamp(0px, 13cqw, 220px); }
 
 .bk-unter { margin-top: clamp(48px, 6vw, 88px); margin-bottom: clamp(20px, 2.6vw, 32px); }
 .bk-fotos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 3vw, 48px); max-width: 980px; }
@@ -67,6 +67,9 @@
 .fuss-credit { flex-basis: 100%; margin: 12px 0 0; opacity: .8; }
 .fuss .offen { color: var(--cream); background: rgba(255, 255, 255, .12); }
 
+@media (max-width: 1100px) {
+  .job .fakten { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 960px) {
   .kopf-nav { display: none; }
   .kopf .aufkleber { margin-left: auto; }
@@ -77,8 +80,9 @@
   .stufe { --stufe: 3.2vw; width: auto; grid-template-columns: auto 1fr; padding: 16px 16px 14px; }
   .stufe code { grid-column: 2; }
   .bk-logos { grid-template-columns: 1fr; }
-  .job { grid-template-columns: 1fr; grid-template-areas: "kopf" "foto" "fakten" "los"; }
-  .job-foto { position: relative; top: 0; width: 78%; margin: 12px auto 8px; }
+  .szene-vanille { --ow: 2.3; --ol: -.45; --uw: 2.6; --ul: -1.17; --mx: .704; --my: .54; padding-top: 150px; padding-bottom: 300px; }
+  .job .fakten { grid-template-columns: 1fr; }
+  .job-kopf, .job-los { margin-left: 0; }
   .bk-fotos { grid-template-columns: repeat(3, 72%); overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px 4px 24px; margin-inline: calc(var(--rand) * -1); padding-inline: var(--rand); }
   .bk-fotos .foto { scroll-snap-align: center; }
   .fuss-nav { margin-left: 0; }

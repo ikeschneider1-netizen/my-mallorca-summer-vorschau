@@ -53,6 +53,41 @@ p { margin: 0 0 1em; max-width: 62ch; }
 .lead { font-size: var(--t-lead); font-weight: 500; line-height: 1.45; max-width: 40ch; text-wrap: pretty; }
 .klein { font-size: var(--t-klein); }
 
+/* Kapiteltitel im Hero-Look: cremefarbene Buchstaben mit Tiefe. Das Licht kommt wie in der Szene von rechts oben,
+   die Tiefe zeigt nach links unten, der Schatten fällt weich auf die Wand. Die Buchstaben federn wie im Hero. */
+.raum { --wurf: 110, 50, 0; color: #fff7e8; text-shadow: -.01em .01em 0 #f6e3c6, -.02em .02em 0 #f0d9b8, -.03em .03em 0 #ebcfaa, -.04em .04em 0 #e5c59c, -.05em .05em 0 #dfbb8f, -.06em .06em 0 #d8b083, -.07em .07em 0 #d1a678, -.13em .17em .15em rgba(var(--wurf), .38), -.24em .32em .38em rgba(var(--wurf), .22); }
+.raum em { color: #fff7e8; }
+.welt-lagune .raum { --wurf: 0, 60, 70; }
+.raum .w { white-space: nowrap; }
+.raum .b { display: inline-block; position: relative; transform-origin: 50% 90%; }
+
+/* Szene: Das Kapitel ist eine Stufe der gerenderten Terrasse. Oben Himmel und Palme, unten Treppe und Kante zur nächsten Wand,
+   dazwischen wächst die Wand mit dem Inhalt. */
+.szene { --ball-d: clamp(64px, 6.6cqw, 104px); container-type: inline-size; background: var(--band) 0 0 / 100% 100% no-repeat, var(--welt); }
+.szene::before { display: none; }
+.kapitel > .spielball, .kapitel > .spielball-schatten { max-width: none; margin: 0; }
+.szene-vanille { --moewe-b: clamp(104px, 11.5cqw, 176px); --mx: .072; --my: .44; }
+.kapitel > .szene-oben, .kapitel > .szene-unten { position: absolute; z-index: -1; max-width: none; height: auto; margin: 0; pointer-events: none; user-select: none; }
+.szene-oben { top: 0; left: calc(var(--ol, 0) * 100cqw); width: calc(var(--ow, 1) * 100cqw); -webkit-mask: linear-gradient(#000 66%, transparent); mask: linear-gradient(#000 66%, transparent); }
+.szene-unten { bottom: 0; left: calc(var(--ul, 0) * 100cqw); width: calc(var(--uw, 1) * 100cqw); -webkit-mask: linear-gradient(transparent, #000 24%); mask: linear-gradient(transparent, #000 24%); }
+/* Die Möwe aus dem Hero, freigestellt in drei Haltungen. Sie steht mit den Füßen auf einer Stelle des unteren Szenenbilds (--mx, --my). */
+.kapitel > .moewe { position: absolute; z-index: 2; max-width: none; margin: 0; width: var(--moewe-b, 150px); aspect-ratio: 420 / 291; left: calc((var(--ul, 0) + var(--mx, .1) * var(--uw, 1)) * 100cqw - .61 * var(--moewe-b, 150px)); bottom: calc(var(--uw, 1) * 100cqw * 750 / 1740 * (1 - var(--my, .5)) - .02 * var(--moewe-b, 150px)); transform-origin: 61% 100%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.moewe img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; filter: drop-shadow(0 6px 5px rgba(80, 30, 0, .28)); }
+.moewe img:first-child, .moewe[data-lage='frech'] img:nth-child(2), .moewe[data-lage='schreck'] img:nth-child(3) { opacity: 1; }
+.moewe[data-lage='frech'] img:first-child, .moewe[data-lage='schreck'] img:first-child { opacity: 0; }
+.moewe-atem { position: absolute; inset: 0; transform-origin: 61% 100%; animation: atmen 3.4s ease-in-out infinite alternate; }
+@keyframes atmen { to { scale: 1 1.018; } }
+.szene-vanille { --welt: #fcead1; --band: url('szene/vanille-band.webp'); }
+
+/* Der Spielball: dasselbe Muster wie im Hero, Licht von rechts oben. Er rollt wirklich: Das Muster dreht sich, das Licht bleibt. */
+.spielball { position: absolute; z-index: 3; right: 16%; bottom: 13%; width: var(--ball-d, 90px); height: var(--ball-d, 90px); border-radius: 50%; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.js .spielball { right: auto; bottom: auto; left: 0; top: 0; transform: translate(-300px, -300px); }
+.spielball-muster { position: absolute; inset: 0; border-radius: 50%; background: url('ball.svg') center / 100% 100% no-repeat; }
+.spielball::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 67% 29%, rgba(255, 255, 255, .8) 0 3.5%, rgba(255, 255, 255, .28) 13%, transparent 32%), radial-gradient(circle at 44% 44%, transparent 50%, rgba(80, 30, 0, .28) 84%, rgba(50, 15, 0, .5) 100%); pointer-events: none; }
+.spielball:focus-visible { outline-offset: 6px; border-radius: 50%; }
+.spielball-schatten { position: absolute; z-index: 2; left: 0; top: 0; width: var(--ball-d, 90px); height: calc(var(--ball-d, 90px) * .22); border-radius: 50%; background: radial-gradient(closest-side, rgba(80, 30, 0, .42), transparent); transform: translate(-300px, -300px); pointer-events: none; }
+html:not(.js) .spielball-schatten { display: none; }
+
 /* Markierung für offene Kundenfragen: sichtbar, aber ohne die Gestaltung zu sprengen. */
 .offen { display: inline-block; margin-left: .25em; padding: 0 .4em; font-size: .78em; font-weight: 600; line-height: 1.5; color: var(--plum); background: color-mix(in srgb, var(--coral) 14%, transparent); border-radius: 3px; white-space: nowrap; vertical-align: .08em; }
 
@@ -155,7 +190,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .kapitel::before { animation: none; }
+  .kapitel::before, .moewe-atem { animation: none; }
   .js [data-zeigen], .js .titel[data-zeigen] .w, .js .foto[data-zeigen] { opacity: 1; translate: none; transition: none; }
   .js .foto[data-zeigen] { rotate: var(--kipp); }
   .f, .f + .f, .wave, .weiter img, .aufkleber, .aufkleber-in, .foto, .frage summary img { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }

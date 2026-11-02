@@ -32,9 +32,9 @@
 <main id="oben">
   <section class="kapitel bk-intro">
     <div>
-      <p class="dach">Baukasten · Runde 1 · 02.11.2026</p>
+      <p class="dach">Baukasten · Runde 2 · 02.11.2026</p>
       <h1 class="titel" data-zeigen>Alles nach dem Hero, <em>aus einem Guss.</em></h1>
-      <p class="lead" data-zeigen>Hier steht, woraus jede weitere Seite gebaut wird: Gliederung, Logo, Farben, Schrift, Knöpfe und Bewegung. Weiter unten steht das erste Kapitel der Startseite schon fertig gesetzt als Beispiel.</p>
+      <p class="lead" data-zeigen>Hier steht, woraus jede weitere Seite gebaut wird: Gliederung, Logo, Farben, Schrift, Knöpfe und Bewegung. Weiter unten steht das erste Kapitel der Startseite im Stil des Heros: echte Kulisse, 3D-Schrift, Ball und Möwe.</p>
     </div>
   </section>
 
@@ -45,7 +45,7 @@
       <p class="lead" data-zeigen>Sieben Kapitel statt zwölf Abschnitten. Kein Text geht verloren, er wird nur zusammengelegt. Jedes Kapitel ist eine Stufe der Terrasse aus dem Hero, mit eigener Wandfarbe aus dem Gesamtentwurf. Der Ball hüpft von Stufe zu Stufe.</p>
       <ol class="treppe">
         <li class="stufe" style="--n:0;--welt:var(--terrasse)" data-zeigen><span class="stufe-nr">1</span><div><h3>Hero</h3><p>Terrasse, Ring, Ball, Möwe. Steht.</p><p class="stufe-ball">Ball: fliegt durch den Ring ins nächste Kapitel.</p></div><code>Terrakotta #e4572e</code></li>
-        <li class="stufe" style="--n:1;--welt:var(--vanille)" data-zeigen><span class="stufe-nr">2</span><div><h3>Der Job auf einen Blick</h3><p>Alle Fakten zuerst, dazu kurz „Über uns“. Am wichtigsten für Google und KI-Suchen.</p><p class="stufe-ball">Ball: landet aus dem Ringflug auf der Fakten-Tafel.</p></div><code>Vanille #fcead1</code></li>
+        <li class="stufe" style="--n:1;--welt:var(--vanille)" data-zeigen><span class="stufe-nr">2</span><div><h3>Der Job auf einen Blick</h3><p>Alle Fakten zuerst, dazu kurz „Über uns“. Am wichtigsten für Google und KI-Suchen.</p><p class="stufe-ball">Ball: fällt auf die Treppe und hüpft die Stufen hinunter. Die Möwe wartet auf dem Kübel.</p></div><code>Vanille #fcead1</code></li>
         <li class="stufe" style="--n:2;--welt:var(--orange)" data-zeigen><span class="stufe-nr">3</span><div><h3>Dein Sommer auf Mallorca</h3><p>„Was für dich drin ist“ und „Ein typischer Tag“ in einem: Die Vorteile hängen an den Uhrzeiten.</p><p class="stufe-ball">Ball: hüpft die Uhrzeiten hinunter wie Stufen.</p></div><code>Orange #ff741f</code></li>
         <li class="stufe" style="--n:3;--welt:var(--lagune)" data-zeigen><span class="stufe-nr">4</span><div><h3>Dein Team</h3><p>„Wer wir sind“, die Galerie, später Stimmen aus dem Team. Am Ende: „Lust auf die Saison 2027?“</p><p class="stufe-ball">Ball: plumpst in den Pool und spritzt.</p></div><code>Lagune #1ec8d0</code></li>
         <li class="stufe" style="--n:4;--welt:var(--creme)" data-zeigen><span class="stufe-nr">5</span><div><h3>Passt das? So läuft's</h3><p>Was du mitbringst, Kurz-Check, Bewerbung in vier Schritten.</p><p class="stufe-ball">Ball: hakt den Kurz-Check ab.</p></div><code>Creme #fff4df</code></li>
@@ -104,18 +104,15 @@
     </div>
   </section>
 
-  <section class="kapitel welt-vanille" id="der-job" aria-labelledby="job-t">
+  <section class="kapitel szene szene-vanille" id="der-job" aria-labelledby="job-t" data-boden="[[0,0.108,0.44],[0.108,0.6,0.75],[0.6,0.643,0.673],[0.643,0.684,0.607],[0.684,0.724,0.54],[0.724,0.92,0.493],[0.92,1,0.5]]">
+    <img class="szene-oben" src="../site/szene/vanille-oben.webp" width="1740" height="700" alt="" decoding="async">
+    <img class="szene-unten" src="../site/szene/vanille-unten.webp" width="1740" height="750" alt="" loading="lazy" decoding="async">
     <div class="job">
       <div class="job-kopf">
         <p class="dach">Der Job</p>
-        <h2 class="titel" id="job-t" data-zeigen>Der Job auf einen Blick</h2>
+        <h2 class="titel raum" id="job-t" data-zeigen>Der Job auf einen Blick</h2>
         <p class="lead" data-zeigen>Bevor du dich bewirbst, sollst du genau wissen, worauf du dich einlässt. Hier steht alles Wichtige, ohne Werbesprech und ohne Hochglanz-Gelaber.</p>
       </div>
-      <figure class="foto job-foto" style="--kipp:2deg" data-zeigen>
-        <img src="../fotos/team-gallery-15-768.webp" srcset="../fotos/team-gallery-15-768.webp 768w, ../fotos/team-gallery-15-1536.webp 1536w" sizes="(max-width: 760px) 86vw, 34vw" width="768" height="1024" alt="Gruppenfoto vor einem geschmückten Holzboot mit spanischer Flagge" loading="lazy" decoding="async">
-        <figcaption>Einblick aus einer vergangenen Saison.</figcaption>
-        <img class="job-ball" src="../hero/assets/ball-96.png" alt="" width="64" height="64">
-      </figure>
       <dl class="fakten">
         <div class="fakt" data-zeigen><dt>Was du machst</dt><dd>Du sprichst Urlauber an der Playa de Palma an, stellst ihnen Events, Partys und Locations unserer Partner vor und verkaufst Tickets oder bringst Gäste direkt hin. Je nach Einsatz hilfst du auch beim Einlass oder an Events mit. <span class="offen">⚠️ Aufgaben mit Kunde bestätigen</span></dd></div>
         <div class="fakt" data-zeigen><dt>Wo</dt><dd>Playa de Palma und El Arenal auf Mallorca, rund um die bekannten Hotspots und Balnearios.</dd></div>
@@ -131,6 +128,9 @@
         <a class="nebenweg" href="https://www.mymallorcasummer.com/jetzt-bewerben/" target="_blank" rel="noopener noreferrer"><span data-key>Lieber per Formular</span><i class="wave"></i></a>
       </div>
     </div>
+    <span class="moewe" aria-hidden="true"><span class="moewe-atem"><img src="../site/moewe/moewe-ruhe.webp" width="420" height="291" alt="" loading="lazy" decoding="async"><img src="../site/moewe/moewe-frech.webp" width="420" height="291" alt="" loading="lazy" decoding="async"><img src="../site/moewe/moewe-schreck.webp" width="420" height="291" alt="" loading="lazy" decoding="async"></span></span>
+    <div class="spielball" aria-hidden="true"><span class="spielball-muster"></span></div>
+    <span class="spielball-schatten" aria-hidden="true"></span>
   </section>
 
   <section class="kapitel bk-bausteine" id="bausteine" aria-labelledby="bausteine-t">
@@ -168,9 +168,9 @@
       <h2 class="titel" id="bewegung-t" data-zeigen>Lebendig, <em>aber lesbar.</em></h2>
       <ol class="bk-regeln">
         <li data-zeigen><strong>Einmal hereinkommen.</strong> Titel hüpfen Wort für Wort an ihren Platz, Text gleitet nach, Fotos landen schräg. Einmal pro Besuch, nicht bei jedem Scrollen.</li>
-        <li data-zeigen><strong>Die Wand lebt.</strong> Auf jeder Kapitel-Wand wiegt langsam der Palmenschatten, wie auf dem Boden im Hero.</li>
+        <li data-zeigen><strong>Jedes Kapitel ist eine Stufe der Terrasse.</strong> Dieselbe gerenderte Welt wie im Hero, geschärft wie die Hero-Szene. Wo noch keine Kulisse steht, wiegt ein Palmenschatten auf der Wand.</li>
         <li data-zeigen><strong>Antworten auf Maus und Finger.</strong> Wörter klappen um wie im Menü des Heros, Wellen laufen, der Ball rollt, der Aufkleber richtet sich auf.</li>
-        <li data-zeigen><strong>Der Ball spielt mit.</strong> In jedem Kapitel hat er genau einen Auftritt (siehe Treppe). Antippen schießt ihn ins nächste Kapitel.</li>
+        <li data-zeigen><strong>Ball und Möwe spielen mit.</strong> Der Ball fällt in jedes Kapitel und springt die Stufen hinunter. Antippen schießt ihn gegen die Titelbuchstaben, die wie Klaviertasten federn. Die Möwe schaut, erschrickt und hüpft.</li>
         <li data-zeigen><strong>Weniger Bewegung heißt Stillstand.</strong> Wer das am Gerät eingestellt hat, sieht alles sofort und vollständig. Ohne JavaScript genauso.</li>
       </ol>
     </div>
