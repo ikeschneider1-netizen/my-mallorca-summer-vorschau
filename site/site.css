@@ -8,6 +8,8 @@
   --ink: #00343a; --cream: #fff4df; --sun: #ffd21f; --coral: #d6336f; --plum: #a80f4b;
   /* Pink gehört allein dem Bewerben-Aufkleber. Akzente sonst in Meerblau. */
   --meer: #0a6f94; --meer-tief: #08506c;
+  /* Terrakotta wie der Boden im Hero: warmer Akzent für Begriffe, damit Petrol nicht zu schwer wird. */
+  --terra: #c4502a;
   /* Kapitel-Welten: die Treppe vom Hero hinunter zum Pool */
   --terrasse: #e4572e; --vanille: #fcead1; --orange: #ff741f; --lagune: #1ec8d0; --creme: #fff4df; --zitrone: #ffe600; --petrol: #00343a;
   /* Ball */
@@ -139,7 +141,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 /* Fakten-Tafel: Begriff und Antwort, getrennt durch Wellenlinien statt Kästen. */
 .fakten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(28px, 4vw, 64px); margin: 0; }
 .fakt { position: relative; padding: 18px 0 22px; }
-.fakt dt { display: flex; flex-direction: column; align-items: flex-start; gap: .3em; margin-bottom: .45em; font: 400 1.32rem/1.12 Shrikhand, Georgia, serif; color: var(--ink); text-shadow: -.015em .015em 0 #0a4c52, -.03em .03em 0 #08454b, -.045em .045em 0 #063d42, -.09em .13em .12em rgba(110, 50, 0, .28); }
+.fakt dt { display: flex; flex-direction: column; align-items: flex-start; gap: .3em; margin-bottom: .45em; font: 400 1.32rem/1.12 Shrikhand, Georgia, serif; color: var(--terra); text-shadow: -.015em .015em 0 #a8411f, -.03em .03em 0 #963819, -.045em .045em 0 #842f14, -.09em .13em .12em rgba(110, 50, 0, .28); }
 .fakt-ding { flex: none; width: clamp(58px, 5.4cqw, 82px); height: auto; margin-bottom: -.12em; filter: drop-shadow(-6px 9px 7px rgba(110, 50, 0, .3)); transform-origin: 50% 80%; transition: rotate 700ms var(--boing), scale 700ms var(--boing); }
 .fakt dd { margin: 0; }
 
