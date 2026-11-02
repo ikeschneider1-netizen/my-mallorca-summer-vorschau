@@ -154,7 +154,7 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 html:not(.site-js) .spielball-schatten { display: none; }
 
 /* Markierung für offene Kundenfragen: sichtbar, aber ohne die Gestaltung zu sprengen. */
-.offen { position: relative; display: inline-block; margin: .35em 0 0 .2em; padding: .15em .55em .2em; font-size: .78em; font-weight: 800; line-height: 1.4; color: var(--ink); background: #fffdf6; box-shadow: -2px 3px 6px rgba(90, 40, 0, .16); rotate: -1.4deg; white-space: nowrap; vertical-align: .08em; }
+.offen { position: relative; display: inline-block; margin: .35em 0 0 .2em; padding: .15em .55em .2em; font-size: max(.78em, 14px); font-weight: 800; line-height: 1.4; color: var(--ink); background: #fffdf6; box-shadow: -2px 3px 6px rgba(90, 40, 0, .16); rotate: -1.4deg; white-space: nowrap; vertical-align: .08em; }
 .offen::before { content: ''; position: absolute; left: 50%; top: -.45em; width: 2.4em; height: .8em; translate: -50% 0; rotate: 3deg; background: rgba(255, 214, 80, .55); }
 
 /* Links: keine Rahmen, keine Pillen. Wörter, die umklappen, und eine Welle darunter. */
@@ -168,10 +168,10 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 @keyframes flow { to { -webkit-mask-position: -22px 0; mask-position: -22px 0; } }
 
 /* „Lieber per Formular“ und andere Nebenwege: dieselbe Schrift wie der Hauptweg, kleiner und ohne Unterstrich. Beim Überfahren klappt das Wort um. */
-.nebenweg { --flip: var(--meer); position: relative; display: inline-block; padding: 6px 0; font: 400 clamp(1rem, .92rem + .3vw, 1.18rem)/1 Shrikhand, Georgia, serif; letter-spacing: .01em; text-decoration: none; }
+.nebenweg { --flip: var(--meer); position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 6px 0; font: 400 clamp(1rem, .92rem + .3vw, 1.18rem)/1 Shrikhand, Georgia, serif; letter-spacing: .01em; text-decoration: none; }
 
 /* Weiter-Link: Shrikhand, daneben der Ball, der beim Überfahren losrollt. */
-.weiter { --flip: var(--meer); display: inline-flex; align-items: center; gap: .55em; padding: 6px 0; font: 400 clamp(1.1rem, 1rem + .5vw, 1.4rem)/1 Shrikhand, Georgia, serif; text-decoration: none; }
+.weiter { --flip: var(--meer); display: inline-flex; align-items: center; gap: .55em; min-height: 44px; padding: 6px 0; font: 400 clamp(1.1rem, 1rem + .5vw, 1.4rem)/1 Shrikhand, Georgia, serif; text-decoration: none; }
 .weiter img { width: 1.25em; height: 1.25em; filter: drop-shadow(0 3px 4px rgba(60, 0, 0, .3)); transition: transform 700ms var(--boing); }
 .weiter:focus-visible img { transform: translateX(.5em) rotate(200deg); }
 /* WhatsApp in den Kapiteln: dasselbe Wort-Format mit WhatsApp-Zeichen. Der Aufkleber bleibt der einzige große Knopf. */
@@ -179,7 +179,8 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .weiter.wa:focus-visible svg { transform: rotate(-14deg) scale(1.12); }
 /* Auf hellen Wänden stehen Hauptweg und Nebenweg plastisch wie die Begriffe darüber: weiches Petrol mit Kante und Schatten. */
 .szene-vanille .weiter, .szene-vanille .nebenweg { color: var(--petrol-weich); text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763, -.045em .045em 0 #214b56, -.08em .12em .1em rgba(0, 40, 50, .22); }
-.szene-vanille .weiter { font-size: clamp(1.25rem, .95rem + .95vw, 1.8rem); }
+/* Mit der Breite mitwachsen, damit der Satz auch auf kleinen Handys in eine Zeile passt. */
+.szene-vanille .weiter { font-size: clamp(1rem, 5vw, 1.8rem); }
 .szene-vanille .nebenweg { text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763, -.06em .09em .08em rgba(0, 40, 50, .2); }
 .szene-vanille .weiter.wa svg { filter: drop-shadow(-.03em .03em 0 #2a5763) drop-shadow(-.05em .08em .06em rgba(0, 40, 50, .25)); }
 
@@ -279,9 +280,12 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 /* Kein Balken, nur ein weicher Lichtschleier ohne Kante, sobald unter dem Kopf Text vorbeiläuft. Ganz oben bleibt die Szene frei. */
 .seitenkopf::before { content: ''; position: absolute; z-index: -1; inset: 0 0 -70px; background: linear-gradient(rgba(252, 234, 209, .94), rgba(252, 234, 209, .72) 45%, rgba(252, 234, 209, 0)); opacity: 0; transition: opacity 320ms ease; pointer-events: none; }
 html.gescrollt .seitenkopf::before { opacity: 1; }
+/* Aussparung für den Aufkleber oben rechts, so groß wie er gerade ist: Macht er Platz (.platz), schrumpft sie mit. */
+.seitenkopf::before { --a-d: calc(clamp(108px, 9.8vw, 148px) * var(--a-s, 1)); --loch: radial-gradient(circle at calc(100% - clamp(14px, 2.2vw, 34px) - var(--a-d) / 2) calc(clamp(6px, 1vw, 14px) + var(--a-d) / 2), transparent calc(var(--a-d) / 2 + 5px), #000 calc(var(--a-d) / 2 + 30px)); }
+html:has(.apply.platz, .der-aufkleber.platz) .seitenkopf::before { --a-s: .56; }
 /* Der Schleier spart den Aufkleber rund aus. Auf der Startseite hängt der Aufkleber im Hero und liegt darum unter dem Kopf; ohne Aussparung würde der Schleier ihn blass machen. */
 @media (min-width: 761px) and (min-height: 541px) {
-  .seitenkopf::before { --a-d: clamp(108px, 9.8vw, 148px); --loch: radial-gradient(circle at calc(100% - clamp(14px, 2.2vw, 34px) - var(--a-d) / 2) calc(clamp(6px, 1vw, 14px) + var(--a-d) / 2), transparent calc(var(--a-d) / 2 + 6px), #000 calc(var(--a-d) / 2 + 36px)); -webkit-mask-image: var(--loch); mask-image: var(--loch); }
+  .seitenkopf::before { -webkit-mask-image: var(--loch); mask-image: var(--loch); }
 }
 html[data-kopf='dunkel'] .seitenkopf::before { background: linear-gradient(rgba(0, 52, 58, .9), rgba(0, 52, 58, .65) 45%, rgba(0, 52, 58, 0)); }
 html.kopf-weg:not(.menue-offen) .seitenkopf { translate: 0 -120%; opacity: 0; }
@@ -311,19 +315,40 @@ html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }
   .menue-offen .menue-knopf { color: var(--petrol-weich); text-shadow: none; }
   html.menue-offen { overflow: hidden; }
   html.menue-offen .seitenkopf { z-index: 30; }
-  .seitenmenue { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); margin: 0; padding: 72px var(--rand) calc(28px + env(safe-area-inset-bottom, 0px)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; color: var(--petrol-weich); text-shadow: none; background: var(--sun); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 420ms var(--key), visibility 0s linear 420ms; }
+  .seitenmenue { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); margin: 0; padding: 72px var(--rand) calc(28px + env(safe-area-inset-bottom, 0px)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; color: var(--petrol-weich); text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763, -.045em .045em 0 #214b56, -.08em .12em .1em rgba(90, 60, 0, .22); background: radial-gradient(120% 70% at calc(100% - 44px) 34px, #ffe46a, var(--sun) 46%, #ffc61a); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 420ms var(--key), visibility 0s linear 420ms; }
   .menue-offen .seitenmenue { clip-path: circle(150vmax at calc(100% - 44px) 34px); visibility: visible; transition: clip-path 560ms var(--out); }
   .seitenmenue > a { padding: 2px 0; }
   .menue-offen .seitenmenue > a { animation: hoch 460ms var(--out) both; }
   .seitenmenue > a:nth-child(2) { animation-delay: 40ms; } .seitenmenue > a:nth-child(3) { animation-delay: 80ms; } .seitenmenue > a:nth-child(4) { animation-delay: 120ms; } .seitenmenue > a:nth-child(5) { animation-delay: 160ms; } .seitenmenue > a:nth-child(6) { animation-delay: 200ms; } .seitenmenue > a:nth-child(7) { animation-delay: 240ms; }
   .menue-wege { display: grid; gap: 6px; margin-top: clamp(14px, 3vh, 30px); }
-  .menue-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); text-decoration: none; }
-  .menue-wa svg { flex: none; width: 1.1em; height: 1.1em; fill: currentColor; }
-  .menue-form { min-height: 44px; padding: 10px 0; font: 800 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--petrol-weich); }
+  .menue-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); text-decoration: none; text-shadow: -.015em .015em 0 #8e0c40, -.03em .03em 0 #760a35, -.07em .1em .1em rgba(90, 0, 30, .2); }
+  .menue-wa svg { flex: none; width: 1.1em; height: 1.1em; fill: currentColor; filter: drop-shadow(-.03em .03em 0 #760a35); }
+  .menue-form { display: inline-flex; align-items: center; min-height: 44px; padding: 0; font: 400 clamp(17px, 4.6vw, 21px)/1.1 Shrikhand, Georgia, serif; color: var(--petrol-weich); text-decoration: none; text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763; }
   .der-aufkleber { --d: clamp(100px, 27vw, 150px); top: auto; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
   .der-aufkleber .nur-gross { display: none; }
   .der-aufkleber .nur-klein { display: block; }
 }
+/* Handy quer: Das Menü läuft in zwei Spalten wie im Hero, sonst ragt es oben und unten aus dem Bild.
+   Auf der Startseite hängt der Aufkleber dann oben rechts: Der Kopf rückt neben ihn, der Schleier spart ihn aus. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .seitenmenue { flex-flow: column wrap; align-content: flex-start; justify-content: flex-start; column-gap: 56px; padding: 50px var(--rand) 10px; font-size: clamp(24px, 8.4vh, 34px); }
+  .menue-wege { margin-top: 6px; }
+  .menue-wa { font-size: clamp(18px, 6vh, 24px); }
+  html:has(.track) .seitenkopf { padding-right: calc(clamp(108px, 9.8vw, 148px) + 28px); }
+  html:has(.track) .seitenkopf::before { -webkit-mask-image: var(--loch); mask-image: var(--loch); }
+  html:has(.track) .seitenmenue { clip-path: circle(0 at calc(100% - clamp(108px, 9.8vw, 148px) - 60px) 26px); }
+  html:has(.track).menue-offen .seitenmenue { clip-path: circle(150vmax at calc(100% - clamp(108px, 9.8vw, 148px) - 60px) 26px); }
+}
+/* Liegt Text unter dem Aufkleber, macht er Platz (site.js setzt .platz): Er schrumpft in seiner Ecke zur kleinen WhatsApp-Sonne.
+   Sobald darunter wieder Szene ist, springt er groß zurück. */
+.der-aufkleber { transform-origin: 100% 0; }
+.aufkleber-in > * { transition: opacity 240ms ease, scale 460ms var(--boing), translate 460ms var(--boing); }
+.der-aufkleber.platz { scale: .56; }
+.der-aufkleber.platz .aufkleber-in > :not(svg) { opacity: 0; }
+.der-aufkleber.platz .aufkleber-in svg { scale: 1.8; translate: 0 .92em; }
+@media (max-width: 760px), (orientation: landscape) and (max-height: 540px) { .der-aufkleber { transform-origin: 100% 100%; } }
+/* Handy hochkant: Der Titel der Landung füllt die Breite wie der Schriftzug im Hero. */
+@media (max-width: 760px) and (orientation: portrait) { .landung .titel { font-size: clamp(2.9rem, 14vw, 4.6rem); } }
 @keyframes hoch { from { opacity: 0; transform: translateY(14px); } }
 @media (prefers-reduced-motion: reduce) {
   .seitenkopf, .seitenmenue { transition: none !important; }

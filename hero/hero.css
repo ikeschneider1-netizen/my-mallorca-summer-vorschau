@@ -81,7 +81,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .apply-mob { display: none; }
 .menu-btn, .menu-cta, .ball-grip { display: none; }
 /* Die Alternative zum WhatsApp-Weg steht klein unter dem Aufkleber. */
-.form-link { --flip: var(--sun); position: absolute; z-index: 2; right: clamp(14px, 2.2vw, 34px); top: calc(clamp(6px, 1vw, 14px) + var(--sticker) + 2px); width: var(--sticker); padding: 6px 0; text-align: center; font-size: clamp(12.5px, .92vw, 14px); font-weight: 800; color: var(--cream); text-shadow: 0 1px 8px rgba(70, 12, 0, .8), 0 0 2px rgba(70, 12, 0, .5); pointer-events: auto; }
+.form-link { --flip: var(--sun); position: absolute; z-index: 2; right: clamp(14px, 2.2vw, 34px); top: calc(clamp(6px, 1vw, 14px) + var(--sticker) + 2px); width: var(--sticker); padding: 6px 0; text-align: center; font: 400 clamp(13px, 1vw, 15.5px)/1.1 Shrikhand, Georgia, serif; letter-spacing: .01em; color: var(--cream); text-shadow: 0 1px 8px rgba(70, 12, 0, .8), 0 0 2px rgba(70, 12, 0, .5); pointer-events: auto; }
 .apply .wave { display: none; }
 [data-cta="wort"] { --sticker: clamp(120px, 11.5vw, 172px); }
 [data-cta="wort"] .burst { display: none; }
@@ -149,15 +149,16 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   .menu-open .menu-btn { color: var(--petrol-weich); text-shadow: none; }
   html.menu-open { overflow: hidden; }
   /* Das Menü geht als Sonne vom Knopf aus auf. */
-  .links { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); padding: 72px var(--m) calc(28px + var(--safe)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; letter-spacing: 0; color: var(--petrol-weich); text-shadow: none; background: var(--sun); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 340ms var(--out), visibility 0s 340ms; pointer-events: auto; }
+  .links { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); padding: 72px var(--m) calc(28px + var(--safe)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; letter-spacing: 0; color: var(--petrol-weich); text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763, -.045em .045em 0 #214b56, -.08em .12em .1em rgba(90, 60, 0, .22); background: radial-gradient(120% 70% at calc(100% - 44px) 34px, #ffe46a, var(--sun) 46%, #ffc61a); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 340ms var(--out), visibility 0s 340ms; pointer-events: auto; }
   .menu-open .links { clip-path: circle(150vmax at calc(100% - 44px) 34px); visibility: visible; transition: clip-path 560ms var(--out); }
   .links a { padding: 2px 0; }
   .menu-open .links > a { animation: rise 460ms var(--out) both; }
   .links > a:nth-child(2) { animation-delay: 40ms; } .links > a:nth-child(3) { animation-delay: 80ms; } .links > a:nth-child(4) { animation-delay: 120ms; } .links > a:nth-child(5) { animation-delay: 160ms; } .links > a:nth-child(6) { animation-delay: 200ms; }
   .menu-cta { display: grid; gap: 6px; margin-top: clamp(14px, 3vh, 30px); }
-  .menu-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); }
+  .menu-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); text-shadow: -.015em .015em 0 #8e0c40, -.03em .03em 0 #760a35, -.07em .1em .1em rgba(90, 0, 30, .2); }
+  .menu-wa .wa-i { filter: drop-shadow(-.03em .03em 0 #760a35); }
   .menu-wa .wa-i { flex: none; width: 1.1em; height: 1.1em; }
-  .menu-form { min-height: 44px; padding: 10px 0 !important; font: 800 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--petrol-weich); }
+  .menu-form { display: inline-flex; align-items: center; min-height: 44px; padding: 0 !important; font: 400 clamp(17px, 4.6vw, 21px)/1.1 Shrikhand, Georgia, serif; color: var(--petrol-weich); text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763; }
 }
 /* Hochformat: eigener Bildaufbau. Oben die Kathedrale, darunter Schriftzug und Satz, unten Terrasse, Ball und der feste Aufkleber. */
 @media (orientation: portrait) {
@@ -174,7 +175,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   .apply-desk { display: none; }
   .apply-mob { display: block; font: inherit; font-size: .86em; line-height: 1.05; }
   .apply-in .wa-i { width: 1.05em; height: 1.05em; }
-  .form-link { top: auto; right: auto; left: var(--m); bottom: calc(10px + var(--safe)); width: auto; min-height: 44px; display: inline-flex; align-items: center; padding: 0; text-align: left; font-size: clamp(14px, 3.6vw, 17px); }
+  .form-link { top: auto; right: auto; left: var(--m); bottom: calc(10px + var(--safe)); width: auto; min-height: 44px; display: inline-flex; align-items: center; padding: 0; text-align: left; font-size: clamp(15px, 4vw, 18px); }
   .hit { position: fixed; z-index: 20; top: auto; right: 12px; bottom: calc(var(--sticker) + 16px + var(--safe)); max-width: 74vw; white-space: normal; text-align: right; font-size: clamp(18px, 5vw, 26px); transform-origin: 100% 100%; }
   .bottom { inset: 0; display: block; padding: 0; text-shadow: none; }
   /* Der Satz steht im Bild als 3D-Schrift und im Standbild. Im Dokument bleibt er als Text für Suchmaschinen und Screenreader. */
@@ -204,6 +205,21 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   .discover img { width: 18px; height: 18px; }
 }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+/* Liegt Text unter dem Aufkleber, macht er Platz (site.js setzt .platz): Er schrumpft in seiner Ecke zur kleinen WhatsApp-Sonne.
+   Sobald darunter wieder Szene ist, springt er groß zurück. */
+.apply { transform-origin: 100% 0; }
+.apply-in > * { transition: opacity 240ms ease, scale 460ms cubic-bezier(.34, 1.56, .64, 1), translate 460ms cubic-bezier(.34, 1.56, .64, 1); }
+.apply.platz { scale: .56; }
+.apply.platz .apply-top, .apply.platz .apply-txt { opacity: 0; }
+.apply.platz .wa-i { scale: 1.8; translate: 0 .92em; }
+@media (orientation: portrait) { .apply { transform-origin: 100% 100%; } }
+/* Auf Touchgeräten ist jede Tippfläche mindestens 44 px groß. */
+@media (pointer: coarse) {
+  .tool { width: 44px; height: 44px; }
+  .menu-btn { min-width: 44px; }
+  .discover { min-height: 44px; }
+  .form-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; }
+}
 @media (prefers-reduced-motion: reduce) {
   html.fly { scroll-behavior: auto; }
   .wave, .apply, .apply-in, .links, .hop, .f, .poster { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }

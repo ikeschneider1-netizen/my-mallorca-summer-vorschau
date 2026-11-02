@@ -70,6 +70,7 @@
       const titel = raumTitel();
       spielbaelle(titel);
       wind();
+      aufkleberPlatz();
 
       // Einblenden, sobald ein Teil ins Bild kommt. Einmal, nicht bei jedem Scrollen.
       const io = new IntersectionObserver((entries) => {
@@ -99,6 +100,48 @@
       if (takt.size) requestAnimationFrame(schritt); else tickt = false;
     });
   };
+
+  // Der eine Aufkleber macht Platz, wenn Text unter ihm liegt: Er schrumpft in seiner Ecke zur kleinen WhatsApp-Sonne (.platz)
+  // und springt groß zurück, sobald darunter wieder Szene ist. Geprüft wird an neun Punkten innerhalb der Sonne.
+  function aufkleberPlatz() {
+    const a = document.querySelector('a.apply, a.der-aufkleber');
+    if (!a || !document.elementsFromPoint) return;
+    const TEXT = 'p, dd, dt, h1, h2, h3, li, figcaption, summary, .job-los, .offen';
+    const PUNKTE = [[0, 0], [-0.3, -0.3], [0.3, -0.3], [-0.3, 0.3], [0.3, 0.3], [0, -0.38], [0, 0.38], [-0.38, 0], [0.38, 0]];
+    let geplant = false, frei = 0, spaet = 0;
+    const pruefen = () => {
+      geplant = false;
+      // Die Ecke, in der er hängt, bleibt beim Schrumpfen fest. Daraus und aus der vollen Größe ergibt sich sein voller Platz.
+      const r = a.getBoundingClientRect(), w = a.offsetWidth, h = a.offsetHeight;
+      if (!w) return;
+      const unten = getComputedStyle(a).transformOrigin.split(' ')[1] !== '0px';
+      const imFlugVerdeckt = root.classList.contains('fly') && !root.classList.contains('past');
+      const x = r.right - w, y = unten ? r.bottom - h : r.top;
+      let text = false;
+      for (const [dx, dy] of PUNKTE) {
+        const px = x + w * (0.5 + dx), py = y + h * (0.5 + dy);
+        if (px < 0 || py < 0 || px >= innerWidth || py >= innerHeight) continue;
+        for (const el of document.elementsFromPoint(px, py)) {
+          if (el === a || a.contains(el)) continue;
+          // Die Landung liegt während des Flugs noch verdeckt hinter dem Hero.
+          if (imFlugVerdeckt && el.closest('.landung')) continue;
+          if (el.closest(TEXT) && !el.closest('.hero, .seitenkopf, [aria-hidden="true"]')) { text = true; break; }
+        }
+        if (text) break;
+      }
+      // Kleiner wird er sofort, groß erst nach einer kurzen Ruhe. So flackert er nicht an Textkanten.
+      if (text) { frei = 0; a.classList.add('platz'); }
+      else if (a.classList.contains('platz')) {
+        frei = frei || performance.now();
+        if (performance.now() - frei > 260) { a.classList.remove('platz'); frei = 0; } else nachher();
+      }
+    };
+    const anstossen = () => { if (!geplant) { geplant = true; requestAnimationFrame(pruefen); } };
+    const nachher = () => { clearTimeout(spaet); spaet = setTimeout(anstossen, 300); };
+    addEventListener('scroll', () => { anstossen(); nachher(); }, { passive: true });
+    addEventListener('resize', anstossen);
+    anstossen();
+  }
 
   // Blätter im Wind: Palmwedel und Kübelpflanze werden auf einer kleinen WebGL-Fläche verbogen, wie die Szene im Hero lebt.
   // Wo ein Blatt am Bildrand oder in der Erde hängt (data-halt, data-anker), steht es fest, nach außen wiegt es immer stärker.

@@ -38,6 +38,7 @@ const root = document.documentElement;
 const hero = document.querySelector('.hero');
 const track = document.querySelector('.track');
 const canvas = document.querySelector('.gl');
+const landung = document.querySelector('.landung');
 const bottom = document.querySelector('.bottom');
 const formLink = document.querySelector('.form-link');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -498,12 +499,20 @@ const PLATE_FRAG = /* glsl */`
     col += (hash(gl_FragCoord.xy + fract(uTime) * 91.) - .5) * .016;
 
     float alpha = 1.;
+    vec3 glow = vec3(0.);
     if (uHole > .001) {
       vec2 d = st - uC;
       float e = length(vec2(dot(d, vec2(.769, -.639)) / 297., dot(d, vec2(.639, .769)) / 160.));
-      alpha = max(ring, 1. - (1. - smoothstep(.96, 1.04, e)) * uHole);
+      // Durch den Ring hindurch: Im Inneren öffnet sich von der Bildmitte aus eine Blende mit hellem Rand.
+      // Dahinter liegt die Terrasse. So wird nicht flächig überblendet, und das Bild wird nie matt.
+      vec2 a = vec2(uView.z / uView.w, 1.);
+      float q = length((vUv - .5) * a) / length(a * .5);
+      float r = uHole * 1.25 - .1;
+      float innen = (1. - smoothstep(.96, 1.04, e)) * (1. - ring);
+      alpha = 1. - innen * (1. - smoothstep(r - .14, r, q));
+      glow = vec3(1., .94, .78) * exp(-pow((q - r + .05) / .06, 2.)) * innen * smoothstep(0., .2, uHole) * (1. - smoothstep(.8, 1., uHole)) * .7;
     }
-    gl_FragColor = vec4(col * alpha, alpha);
+    gl_FragColor = vec4(col * alpha + glow, alpha);
   }`;
 
 const BLUR_FRAG = /* glsl */`
@@ -1315,13 +1324,15 @@ function updateFly(dt) {
   u.uTarget.value.set(fly.tx, fly.ty);
   u.uBlur.value = clamp(fly.v * 0.05, 0, 0.09) * smooth(0.04, 0.2, p);
   u.uHole.value = smooth(0.4, 0.66, p);
+  // Die Terrasse kommt beim Öffnen der Blende ein wenig auf einen zu und setzt sich.
+  if (landung) landung.style.scale = fly.on ? (1.06 - 0.06 * u.uHole.value).toFixed(4) : '';
   u.uFx.value = 1 - smooth(0.02, 0.2, p);
   const fade = 1 - smooth(0, 0.12, p);
   bottom.style.opacity = fade.toFixed(3);
   bottom.style.visibility = fade < 0.01 ? 'hidden' : '';
   formLink.style.opacity = bottom.style.opacity; formLink.style.visibility = bottom.style.visibility;
   // Nach dem Flug liegt hinter der Kopfzeile Creme statt Himmel: Dann wird die Schrift dunkel.
-  root.classList.toggle('past', p > 0.62);
+  root.classList.toggle('past', p > 0.6);
   canvas.style.pointerEvents = p > 0.6 ? 'none' : '';
   const gone = p > 0.985;
   canvas.style.visibility = gone ? 'hidden' : '';
