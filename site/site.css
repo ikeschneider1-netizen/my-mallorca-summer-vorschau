@@ -205,11 +205,14 @@ html:not(.site-js) .spielball-schatten { display: none; }
 
 /* Links: keine Rahmen, keine Pillen. Wörter, die umklappen, und eine Welle darunter. */
 [data-key] { white-space: nowrap; }
-.ch { position: relative; display: inline-block; white-space: pre; perspective: 420px; }
-.f { display: inline-block; backface-visibility: hidden; transform-origin: 50% 25%; transition: transform 560ms var(--flap) calc(var(--i) * 30ms + 100ms); }
-.f + .f { position: absolute; left: 0; top: 0; color: var(--flip, var(--plum)); transform-origin: 50% 100%; transform: rotateX(90deg); visibility: hidden; transition: transform 560ms var(--flap) calc(var(--i) * 30ms), visibility 0s linear calc(var(--i) * 30ms + 560ms); }
-a:focus-visible .f { transform: rotateX(90deg); transition-delay: calc(var(--i) * 30ms); }
-a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition: transform 560ms var(--flap) calc(var(--i) * 30ms + 100ms), visibility 0s; }
+.ch { position: relative; display: inline-block; white-space: pre; perspective: 520px; }
+/* Die Klappe, weich (Ike, 02.11.2026): Jeder Buchstabe kippt nur bis 75 Grad weg und blendet dabei aus, die zweite Farbe kippt
+   herein und blendet ein. So steht nie ein Buchstabe hochkant als Strich unter dem Wort, und die zweite Farbe ist erst da, wenn sie kommt.
+   Die Welle läuft von der Seite los, von der die Maus kommt (--i). */
+.f { display: inline-block; backface-visibility: hidden; transform-origin: 50% 30%; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
+.f + .f { position: absolute; left: 0; top: 0; color: var(--flip, var(--plum)); transform-origin: 50% 90%; transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
+a:focus-visible .f { transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
+a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
 .wave { position: absolute; left: 0; right: 0; bottom: -2px; height: 7px; background: var(--meer); -webkit-mask: var(--wave) repeat-x 0 0 / 22px 7px; mask: var(--wave) repeat-x 0 0 / 22px 7px; clip-path: inset(0 100% 0 0); transition: clip-path 520ms var(--key); animation: flow 1.5s linear infinite; animation-play-state: paused; }
 @keyframes flow { to { -webkit-mask-position: -22px 0; mask-position: -22px 0; } }
 
@@ -340,8 +343,8 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .site-js .foto[data-zeigen].da { translate: 0 0; rotate: var(--kipp); }
 
 @media (hover: hover) and (pointer: fine) {
-  a:hover .f { transform: rotateX(90deg); transition-delay: calc(var(--i) * 30ms); }
-  a:hover .f + .f { transform: rotateX(0); visibility: visible; transition: transform 560ms var(--flap) calc(var(--i) * 30ms + 100ms), visibility 0s; }
+  a:hover .f { transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
+  a:hover .f + .f { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
   .weiter:hover img { transform: translateX(.5em) rotate(200deg); }
   .weiter.wa:hover svg { transform: rotate(-14deg) scale(1.12); }
   .text a:hover { color: var(--meer); text-decoration-color: var(--meer); }
