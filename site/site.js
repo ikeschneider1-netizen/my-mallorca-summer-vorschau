@@ -251,6 +251,7 @@
       const schatten = feld.querySelector('.spielball-schatten');
       const bild = feld.querySelector('.szene-unten');
       const stufen = JSON.parse(feld.dataset.boden);
+      new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { feld.classList.add('nah'); io.disconnect(); } }, { rootMargin: '900px 0px' }).observe(feld);
       const B = { x: 0, y: 0, vx: 0, vy: 0, rot: 0, r: 40, lage: 'warten' };
       let W = 1, H = 1, s = 1, links = 0, oben = 0, unten = { x: 0, y: 0, w: 1, h: 1 };
       // Maße einmal pro Bild: Feld und unteres Szenenbild, auf das Feld bezogen.
@@ -269,7 +270,9 @@
       };
       const zeigen = () => {
         ball.style.transform = `translate(${(B.x - B.r).toFixed(1)}px, ${(B.y - B.r).toFixed(1)}px)`;
-        muster.style.rotate = `${B.rot.toFixed(3)}rad`;
+        const schritt = Math.PI / 8, k = Math.round(B.rot / schritt), bild = ((k % 16) + 16) % 16;
+        muster.style.backgroundPositionX = `${(bild / 15 * 100).toFixed(3)}%`;
+        muster.style.rotate = `${(B.rot - k * schritt).toFixed(3)}rad`;
         const g = boden(B.x), hoch = Math.max(0, g - B.y - B.r);
         schatten.style.transform = `translate(${(B.x - B.r).toFixed(1)}px, ${(g - B.r * 0.22).toFixed(1)}px) scale(${(1 + hoch / 600).toFixed(3)})`;
         schatten.style.opacity = Math.max(0.15, 1 - hoch / 500).toFixed(3);
@@ -287,7 +290,8 @@
         if (ms) moeweZeit = setTimeout(() => haltung(l === 'schreck' ? 'frech' : 'ruhe', l === 'schreck' ? 1600 : 0), ms);
       };
       const sitzPunkt = (i) => ({ x: unten.x + sitze[i][0] * unten.w, y: unten.y + sitze[i][1] * unten.h });
-      const sichtbar = (i) => { const q = sitzPunkt(i); return q.x > W * 0.08 && q.x < W * 0.92; };
+      // Ein Platz zählt, wenn er im Bild ist und nicht dort, wo der Ball gerade liegt.
+      const sichtbar = (i) => { const q = sitzPunkt(i); return q.x > W * 0.08 && q.x < W * 0.92 && (B.lage !== 'ruhe' || Math.abs(q.x - B.x) > B.r * 3.2); };
       // Die Füße stehen im Bild bei 54,7 % der Breite, ganz unten.
       const stellen = () => { const w = moewe.offsetWidth, h = moewe.offsetHeight; moewe.style.transform = `translate(${(M.x - 0.547 * w).toFixed(1)}px, ${(M.y - 0.995 * h).toFixed(1)}px)`; };
       const setzen = (i) => { platz = i; const q = sitzPunkt(i); M.x = q.x; M.y = q.y; moewe.classList.toggle('links', sitze[i][0] > 0.55); stellen(); };
@@ -390,7 +394,12 @@
           B.rot += (B.x - altX) / B.r;
         }
         zeigen();
-        if (Math.abs(B.vy) < 1 && Math.abs(B.vx) < 6 * s && B.y + B.r >= boden(B.x) - 0.5) { B.vx = 0; B.lage = 'ruhe'; return false; }
+        if (Math.abs(B.vy) < 1 && Math.abs(B.vx) < 6 * s && B.y + B.r >= boden(B.x) - 0.5) {
+          B.vx = 0; B.lage = 'ruhe';
+          // Liegt der Ball dort, wo die Möwe steht, macht sie Platz.
+          if (moewe && platz >= 0 && !fliegt && Math.abs(M.x - B.x) < B.r * 3.2) setTimeout(wegfliegen, 350);
+          return false;
+        }
         return true;
       };
       const herein = () => {

@@ -75,7 +75,7 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 .kapitel > .szene-licht::after { content: ''; position: absolute; right: -6%; top: 22%; width: min(1100px, 95%); aspect-ratio: 5 / 4; background: url('palme-schatten.svg') no-repeat right top / contain; opacity: .1; mix-blend-mode: multiply; transform-origin: 100% 0; animation: wiegen 11s ease-in-out infinite alternate; }
 .szene::before { display: none; }
 .kapitel > .spielball, .kapitel > .spielball-schatten { max-width: none; margin: 0; }
-.szene-vanille { --moewe-b: clamp(104px, 11.5cqw, 176px); --mx: .16; --my: .747; }
+.szene-vanille { --moewe-b: clamp(104px, 11.5cqw, 176px); --mx: .2; --my: .747; }
 .kapitel > .szene-oben, .kapitel > .szene-unten { position: absolute; z-index: -1; max-width: none; height: auto; margin: 0; pointer-events: none; user-select: none; }
 .szene-oben { top: 0; left: calc(var(--ol, 0) * 100%); width: calc(var(--ow, 1) * 100%); -webkit-mask: linear-gradient(#000 66%, transparent); mask: linear-gradient(#000 66%, transparent); }
 .szene-unten { bottom: 0; left: calc(var(--ul, 0) * 100%); width: calc(var(--uw, 1) * 100%); -webkit-mask: linear-gradient(transparent, #000 24%); mask: linear-gradient(transparent, #000 24%); }
@@ -106,7 +106,9 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 
 /* Kapitel „Der Job auf einen Blick“: Text an der sonnigen Wand, unten Kübel, Treppe und Boden frei für Ball und Möwe.
    Auf der Startseite ist es zweigeteilt: Die Landung liegt in der Bühne des Heros (durch den Ring sieht man sie), die Fortsetzung folgt darunter. */
-.szene-vanille { padding-top: clamp(118px, 13cqw, 210px); padding-bottom: clamp(240px, 22cqw, 330px); }
+/* Unten bleibt Platz für Kübel, Boden und Treppe. Das untere Bild ist 0,431 der Breite hoch, die Kübelkante liegt bei 44 % davon:
+   Der Abstand wächst deshalb mit der Breite mit, sonst ragt auf großen Bildschirmen der Kübel in den Text. */
+.szene-vanille { padding-top: clamp(118px, 13cqw, 210px); padding-bottom: max(240px, 24.5cqw); }
 .job-kopf { margin-left: clamp(0px, 13cqw, 220px); max-width: 780px; }
 .job-kopf .vorspann { max-width: 44ch; }
 .job .fakten { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(28px, 4cqw, 60px); }
@@ -126,11 +128,13 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
   .job-kopf, .job-los { margin-left: 0; }
 }
 
-/* Der Spielball: dasselbe Muster wie im Hero, Licht von rechts oben. Er rollt wirklich: Das Muster dreht sich, das Licht bleibt. */
+/* Der Spielball ist der echte Ball aus dem Hero, gerendert in 16 Drehstellungen mit festem Licht (ball-bilder.webp).
+   Beim Rollen zeigt die Seite die passende Stellung und dreht nur den kleinen Rest dazwischen: Das Muster rollt, das Licht bleibt. */
 .spielball { position: absolute; z-index: 3; right: 16%; bottom: 13%; width: var(--ball-d, 90px); height: var(--ball-d, 90px); border-radius: 50%; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .site-js .spielball { right: auto; bottom: auto; left: 0; top: 0; transform: translate(-300px, -300px); }
 .spielball-muster { position: absolute; inset: 0; border-radius: 50%; background: url('ball.svg') center / 100% 100% no-repeat; }
-.spielball::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 67% 29%, rgba(255, 255, 255, .8) 0 3.5%, rgba(255, 255, 255, .28) 13%, transparent 32%), radial-gradient(circle at 44% 44%, transparent 50%, rgba(80, 30, 0, .28) 84%, rgba(50, 15, 0, .5) 100%); pointer-events: none; }
+/* Das Bildband lädt erst, wenn das Kapitel in die Nähe kommt; bis dahin steht die gezeichnete Kugel. */
+.nah .spielball-muster { background: url('ball-bilder.webp') 0 0 / 1600% 100% no-repeat; }
 .spielball:focus-visible { outline-offset: 6px; border-radius: 50%; }
 .spielball-schatten { position: absolute; z-index: 2; left: 0; top: 0; width: var(--ball-d, 90px); height: calc(var(--ball-d, 90px) * .22); border-radius: 50%; background: radial-gradient(closest-side, rgba(80, 30, 0, .42), transparent); transform: translate(-300px, -300px); pointer-events: none; }
 html:not(.site-js) .spielball-schatten { display: none; }
