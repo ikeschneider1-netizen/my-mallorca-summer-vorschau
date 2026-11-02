@@ -1,0 +1,208 @@
+@font-face { font-family: Shrikhand; src: url('assets/fonts/shrikhand-latin.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: UI; src: url('assets/fonts/ui.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
+
+:root {
+  --sticker: clamp(108px, 9.8vw, 148px);
+  --ink: #00343a; --cream: #fff4df; --sun: #ffd21f; --coral: #d6336f; --dawn: #0d2a55;
+  --key: cubic-bezier(.65, 0, .15, 1); --out: cubic-bezier(.23, 1, .32, 1); --flap: cubic-bezier(.36, .02, .14, 1); --plum: #a80f4b;
+  font-family: UI, system-ui, sans-serif; font-synthesis: none; color: var(--ink); background: var(--dawn);
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+html.fly { scroll-behavior: smooth; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+[hidden] { display: none !important; }
+.sr-only, .skip:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip:focus { position: fixed; z-index: 30; left: 24px; top: 16px; padding: 10px 4px; font-weight: 600; color: var(--cream); }
+
+/* Ohne Flug ist alles normaler Seitenfluss; mit Flug steht die Bühne, während die Seite läuft. */
+.track { position: relative; }
+.stage { position: relative; }
+.hero { position: relative; height: 100vh; height: 100svh; min-height: 540px; overflow: hidden; background: var(--dawn); isolation: isolate; }
+.anchor { position: absolute; left: 0; bottom: 0; width: 1px; height: 100vh; pointer-events: none; }
+.through { display: grid; place-content: center; justify-items: center; gap: 14px; min-height: 58vh; padding: 72px 24px; text-align: center; color: var(--ink); background: var(--cream); }
+.through h2 { margin: 0; font: 400 clamp(40px, 6.4vw, 88px)/1.04 Shrikhand, Georgia, serif; }
+.through p { font-size: clamp(17px, 1.6vw, 21px); }
+.through a { margin-top: 10px; font-weight: 600; font-size: 16px; color: var(--coral); }
+
+.fly .track { height: calc(100vh + 190vh); height: calc(100svh + 190vh); }
+.fly .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--cream); }
+.fly:not(.ready) .stage { background: var(--dawn); }
+.fly .hero { position: absolute; inset: 0; z-index: 2; background: transparent; pointer-events: none; }
+.fly .through { position: absolute; inset: 0; z-index: 1; min-height: 0; }
+.gl, .poster { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.gl { z-index: 0; touch-action: pan-y; pointer-events: auto; }
+.poster { z-index: 0; object-fit: cover; object-position: 0 0; }
+.js .poster { visibility: hidden; }
+.js.fallback .poster { visibility: visible; }
+.js.fallback .gl { display: none; }
+
+.top, .bottom { position: absolute; z-index: 2; left: 0; right: 0; display: flex; align-items: center; pointer-events: none; padding-inline: clamp(20px, 3vw, 48px); }
+.top a, .top button, .bottom a, .bottom button { pointer-events: auto; }
+.top { top: 0; padding-block: clamp(14px, 1.7vw, 24px); justify-content: flex-end; padding-right: calc(var(--sticker) + clamp(24px, 3.2vw, 52px)); }
+.bottom { bottom: 0; padding-block: clamp(16px, 2.2vw, 32px); justify-content: space-between; gap: 24px; color: var(--cream); text-shadow: 0 1px 14px rgba(70, 12, 0, .55); }
+
+/* Jeder Buchstabe ist eine kleine Klappe: Die Wörter wechseln beim Überfahren Buchstabe für Buchstabe die Farbe.
+   Prinzip nach "Text Roll" aus Motion Primitives (MIT, Julien Thibeaut), hier ohne React mit CSS umgesetzt. */
+[data-key] { white-space: nowrap; }
+.ch { position: relative; display: inline-block; white-space: pre; perspective: 420px; }
+.f { display: inline-block; backface-visibility: hidden; transform-origin: 50% 25%; transition: transform 560ms var(--flap) calc(var(--i) * 30ms + 100ms); }
+.f + .f { position: absolute; left: 0; top: 0; color: var(--flip, var(--plum)); transform-origin: 50% 100%; transform: rotateX(90deg); visibility: hidden; transition: transform 560ms var(--flap) calc(var(--i) * 30ms), visibility 0s linear calc(var(--i) * 30ms + 560ms); }
+a:focus-visible .f { transform: rotateX(90deg); transition-delay: calc(var(--i) * 30ms); }
+a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition: transform 560ms var(--flap) calc(var(--i) * 30ms + 100ms), visibility 0s; }
+.hero.dusk .links { --flip: var(--sun); }
+[data-nav="welle"] .links .f { transform: none; transition: none; }
+[data-nav="welle"] .links .f + .f { display: none; }
+
+/* Menü: nur Wörter, keine Fläche und kein Rahmen. */
+.links { position: relative; display: flex; align-items: center; gap: clamp(20px, 2.5vw, 38px); font-size: clamp(15px, 1.15vw, 18px); font-weight: 600; letter-spacing: .002em; transition: color 480ms ease; }
+.hero.dusk .links { color: var(--cream); }
+.links a { position: relative; display: block; padding: 10px 0 14px; white-space: nowrap; }
+/* Eine kleine laufende Welle zieht sich unter das Wort. */
+.wave { position: absolute; left: 0; right: 0; bottom: 3px; height: 7px; background: var(--coral); -webkit-mask: var(--wave) repeat-x 0 0 / 22px 7px; mask: var(--wave) repeat-x 0 0 / 22px 7px; clip-path: inset(0 100% 0 0); transition: clip-path 520ms var(--key); animation: flow 1.5s linear infinite; animation-play-state: paused; }
+:root { --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 7'%3E%3Cpath d='M0 3.5c2.75 0 2.75-2.5 5.5-2.5s2.75 2.5 5.5 2.5 2.75 2.5 5.5 2.5 2.75-2.5 5.5-2.5' fill='none' stroke='%23000' stroke-width='2.1'/%3E%3C/svg%3E"); }
+@keyframes flow { to { -webkit-mask-position: -22px 0; mask-position: -22px 0; } }
+.links a:focus-visible .wave { clip-path: inset(0); animation-play-state: running; }
+:root:not([data-nav="welle"]) .links .wave { display: none; }
+.hop { display: none; position: absolute; left: 0; bottom: -6px; width: 18px; height: 18px; margin-left: -9px; opacity: 0; pointer-events: none; transform: translateX(var(--hx, 0)); transition: transform 460ms cubic-bezier(.3, .8, .3, 1), opacity 240ms ease; filter: drop-shadow(0 2px 3px rgba(0, 40, 44, .35)); }
+[data-nav="ball"] .hop { display: block; }
+[data-nav="ball"] .links.on .hop { opacity: 1; }
+
+/* Bewerben: eine Sonne als Aufkleber statt eines Knopfs. */
+.apply { --flip: var(--ink); position: absolute; display: grid; place-items: center; right: clamp(14px, 2.2vw, 34px); top: clamp(6px, 1vw, 14px); width: var(--sticker); height: var(--sticker); font: 400 clamp(15px, 1.28vw, 19px)/1 Shrikhand, Georgia, serif; color: var(--cream); transition: scale 460ms cubic-bezier(.34, 1.56, .64, 1), translate 260ms var(--out); }
+.apply:active { scale: .94; transition-duration: 130ms; }
+.burst { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 10px 16px rgba(130, 10, 60, .42)); }
+.burst path { fill: var(--coral); transition: fill 320ms ease; }
+.apply-in { position: relative; display: grid; justify-items: center; rotate: -9deg; transition: rotate 460ms cubic-bezier(.34, 1.56, .64, 1); }
+.apply-txt { position: relative; }
+.wa-i { width: 1.3em; height: 1.3em; fill: currentColor; }
+.apply-in .wa-i { margin-bottom: .14em; }
+.apply-top { font: 600 .64em/1.15 UI, system-ui, sans-serif; letter-spacing: .01em; white-space: nowrap; }
+.apply-mob { display: none; }
+.menu-btn, .menu-cta, .ball-grip { display: none; }
+/* Die Alternative zum WhatsApp-Weg steht klein unter dem Aufkleber. */
+.form-link { --flip: var(--sun); position: absolute; z-index: 2; right: clamp(14px, 2.2vw, 34px); top: calc(clamp(6px, 1vw, 14px) + var(--sticker) + 2px); width: var(--sticker); padding: 6px 0; text-align: center; font-size: clamp(12.5px, .92vw, 14px); font-weight: 600; color: var(--cream); text-shadow: 0 1px 8px rgba(70, 12, 0, .8), 0 0 2px rgba(70, 12, 0, .5); pointer-events: auto; }
+.apply .wave { display: none; }
+[data-cta="wort"] { --sticker: clamp(120px, 11.5vw, 172px); }
+[data-cta="wort"] .burst { display: none; }
+[data-cta="wort"] .apply { --flip: var(--plum); height: auto; padding: 8px 0 14px; top: clamp(8px, 1vw, 15px); font-size: clamp(22px, 2vw, 30px); color: var(--ink); }
+[data-cta="wort"] .apply-in { rotate: 0deg; }
+[data-cta="wort"] .apply .wave { display: block; bottom: 2px; }
+.hit { position: absolute; right: clamp(20px, 3vw, 48px); top: calc(var(--sticker) + 48px); font: 400 clamp(20px, 1.7vw, 26px)/1.1 Shrikhand, Georgia, serif; color: var(--ink); -webkit-text-stroke: 6px var(--cream); paint-order: stroke fill; filter: drop-shadow(0 3px 5px rgba(70, 16, 0, .45)); white-space: nowrap; rotate: -4deg; transform-origin: 100% 0; animation: pop 520ms cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes pop { from { opacity: 0; transform: translateY(-10px) scale(.8); } }
+.apply.cheer .burst path { fill: var(--sun); }
+.apply.cheer .f { color: var(--ink); }
+.squawk { position: absolute; z-index: 3; left: 0; top: 0; margin: 0; font: 400 clamp(22px, 2vw, 32px)/1 Shrikhand, Georgia, serif; color: var(--ink); -webkit-text-stroke: 6px var(--cream); paint-order: stroke fill; filter: drop-shadow(0 3px 5px rgba(70, 16, 0, .45)); white-space: nowrap; pointer-events: none; rotate: -5deg; animation: pop 460ms cubic-bezier(.34, 1.56, .64, 1); }
+
+/* Der Satz steht als echter Text im Dokument. Sichtbar liegt er auf der Terrasse in der 3D-Szene; ohne WebGL und auf dem Handy erscheint er hier. */
+.claim { display: grid; gap: 5px; min-width: 0; }
+.js:not(.fallback) .claim { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.role { font-size: clamp(11.5px, .86vw, 13px); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.line { font: 400 clamp(22px, 2.2vw, 32px)/1.15 Shrikhand, Georgia, serif; }
+/* Oben links steht in einem Satz, worum es geht, daneben die Bedienung der Bewegung. */
+.lead { position: absolute; left: clamp(20px, 3vw, 48px); top: clamp(14px, 1.7vw, 24px); display: flex; align-items: center; gap: 8px; color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); }
+.kicker { padding: 10px 0 14px; font-size: clamp(14px, 1.08vw, 17px); font-weight: 600; white-space: nowrap; }
+.js.fallback .kicker { display: none; }
+.discover { --flip: var(--sun); position: relative; display: inline-flex; align-items: center; flex: none; gap: 12px; margin-left: auto; font: 400 clamp(16px, 1.42vw, 21px)/1 Shrikhand, Georgia, serif; padding: 6px 0; }
+.discover img { width: 26px; height: 26px; filter: drop-shadow(0 3px 4px rgba(60, 0, 0, .45)); animation: nudge 3.4s var(--key) infinite; }
+@keyframes nudge { 0%, 68%, 100% { transform: translateY(0) scale(1); } 76% { transform: translateY(-9px) scale(.96, 1.04); } 84% { transform: translateY(0) scale(1.1, .9); } 90% { transform: translateY(-3px); } 95% { transform: translateY(0); } }
+.tools { display: flex; align-items: center; gap: 2px; }
+.tool { width: 38px; height: 38px; display: grid; place-items: center; border: 0; padding: 0; border-radius: 50%; color: var(--cream); background: transparent; cursor: pointer; opacity: .72; transition: opacity 220ms ease, transform 220ms var(--out); }
+.tool svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 3px rgba(60, 10, 0, .6)); }
+.tool:active { transform: scale(.92); }
+.tool:focus-visible, .discover:focus-visible, .probe button:focus-visible { outline-color: var(--cream); }
+.i-play { display: none; }
+.tool[aria-pressed="true"] .i-pause { display: none; }
+.tool[aria-pressed="true"] .i-play { display: block; }
+.probe { display: flex; align-items: center; gap: 2px; margin-inline: auto; font-size: 13px; font-weight: 600; }
+.probe span { margin: 0 4px 0 12px; opacity: .78; }
+.probe button { border: 0; padding: 6px 7px; font: inherit; color: inherit; background: transparent; text-shadow: inherit; cursor: pointer; transition: color 200ms ease; }
+.probe button.on { color: var(--sun); }
+
+@media (hover: hover) and (pointer: fine) {
+  a:hover .f { transform: rotateX(90deg); transition-delay: calc(var(--i) * 30ms); }
+  a:hover .f + .f { transform: rotateX(0); visibility: visible; transition: transform 560ms var(--flap) calc(var(--i) * 30ms + 100ms), visibility 0s; }
+  [data-nav="welle"] .links a:hover .f { transform: none; }
+  .links a:hover .wave, .apply:hover .wave { clip-path: inset(0); animation-play-state: running; }
+  .apply:hover { scale: 1.1; }
+  .apply:hover .burst path { fill: var(--sun); }
+  .apply:hover .apply-in { rotate: 0deg; }
+  [data-cta="wort"] .apply:hover { scale: 1.04; }
+  .discover:hover img { animation-duration: 1.05s; }
+  .tool:hover { opacity: 1; transform: scale(1.08); }
+}
+.apply:focus-visible .burst path { fill: var(--sun); }
+
+@media (max-height: 620px) { .role { display: none; } }
+/* Auf schmalen Bildschirmen wird das Menü zur Sonne, die vom Knopf aus aufgeht. */
+@media (orientation: portrait), (max-height: 540px) {
+  :root { --m: clamp(14px, 4.2vw, 28px); --safe: env(safe-area-inset-bottom, 0px); }
+  .top { z-index: 5; }
+  .menu-btn { position: absolute; z-index: 22; right: var(--m); top: max(8px, env(safe-area-inset-top, 0px)); display: block; min-height: 44px; border: 0; padding: 10px 0; font: 600 clamp(16px, 4.1vw, 20px)/1.2 UI, system-ui, sans-serif; color: var(--cream); background: none; text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+  .menu-btn:focus-visible { outline-color: currentColor; }
+  .menu-x, .menu-open .menu-o { display: none; }
+  .menu-open .menu-x { display: inline; }
+  .menu-open .menu-btn { color: var(--ink); text-shadow: none; }
+  html.menu-open { overflow: hidden; }
+  /* Das Menü geht als Sonne vom Knopf aus auf. */
+  .links { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); padding: 72px var(--m) calc(28px + var(--safe)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; letter-spacing: 0; color: var(--ink); background: var(--sun); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 340ms var(--out), visibility 0s 340ms; pointer-events: auto; }
+  .menu-open .links { clip-path: circle(150vmax at calc(100% - 44px) 34px); visibility: visible; transition: clip-path 560ms var(--out); }
+  .links a { padding: 2px 0; }
+  .menu-open .links > a { animation: rise 460ms var(--out) both; }
+  .links > a:nth-child(2) { animation-delay: 40ms; } .links > a:nth-child(3) { animation-delay: 80ms; } .links > a:nth-child(4) { animation-delay: 120ms; } .links > a:nth-child(5) { animation-delay: 160ms; } .links > a:nth-child(6) { animation-delay: 200ms; }
+  .menu-cta { display: grid; gap: 6px; margin-top: clamp(14px, 3vh, 30px); }
+  .menu-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); }
+  .menu-wa .wa-i { flex: none; width: 1.1em; height: 1.1em; }
+  .menu-form { min-height: 44px; padding: 10px 0 !important; font: 600 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--ink); }
+}
+/* Hochformat: eigener Bildaufbau. Oben die Kathedrale, darunter Schriftzug und Satz, unten Terrasse, Ball und der feste Aufkleber. */
+@media (orientation: portrait) {
+  :root { --sticker: clamp(106px, 28vw, 168px); }
+  .hero { min-height: 520px; }
+  .poster { object-position: 50% 0; }
+  .js .poster { visibility: visible; transition: opacity 280ms ease; }
+  .ready .poster { opacity: 0; pointer-events: none; }
+  .top { padding: 0; height: 0; }
+  .lead { left: var(--m); top: max(8px, env(safe-area-inset-top, 0px)); gap: 0; }
+  .kicker { padding: 10px 0; font-size: clamp(14px, 3.7vw, 19px); }
+  #replay { display: none; }
+  .apply { position: fixed; z-index: 20; top: auto; right: 8px; bottom: calc(8px + var(--safe)); font-size: clamp(17px, 4.7vw, 26px); }
+  .apply-desk { display: none; }
+  .apply-mob { display: block; font: inherit; font-size: .86em; line-height: 1.05; }
+  .apply-in .wa-i { width: 1.05em; height: 1.05em; }
+  .form-link { top: auto; right: auto; left: var(--m); bottom: calc(10px + var(--safe)); width: auto; min-height: 44px; display: inline-flex; align-items: center; padding: 0; text-align: left; font-size: clamp(14px, 3.6vw, 17px); }
+  .hit { position: fixed; z-index: 20; top: auto; right: 12px; bottom: calc(var(--sticker) + 16px + var(--safe)); max-width: 74vw; white-space: normal; text-align: right; font-size: clamp(18px, 5vw, 26px); transform-origin: 100% 100%; }
+  .bottom { inset: 0; display: block; padding: 0; text-shadow: none; }
+  .js:not(.fallback) .claim, .claim { position: absolute; left: var(--m); right: var(--m); top: var(--claim-top, 58%); width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; rotate: -1.6deg; transform-origin: 0 50%; }
+  .role { display: none; }
+  .line { font-size: clamp(25px, 7.4vw, 46px); line-height: 1.08; color: var(--cream); text-wrap: balance; text-shadow: 0 2px 0 rgba(0, 54, 84, .45), 0 3px 16px rgba(0, 30, 54, .6); }
+  .discover { position: absolute; left: var(--m); bottom: calc(52px + var(--safe)); margin: 0; min-height: 40px; font-size: clamp(17px, 4.6vw, 24px); text-shadow: 0 1px 12px rgba(70, 12, 0, .7); }
+  .discover img { width: 22px; height: 22px; }
+  .probe { display: none; }
+  .squawk { font-size: clamp(20px, 5.4vw, 30px); -webkit-text-stroke-width: 5px; }
+  .ball-grip { position: absolute; z-index: 1; left: 0; top: 0; display: block; border-radius: 50%; touch-action: none; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+  .js.fallback .ball-grip { display: none; }
+}
+/* Querformat am Handy: alles passt auf eine Bildschirmhöhe, das Menü läuft in zwei Spalten. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .hero { min-height: 0; }
+  .lead { top: 2px; }
+  .kicker { padding-block: 8px; }
+  .menu-btn { top: 2px; right: calc(var(--sticker) + 24px); }
+  .links { flex-flow: column wrap; align-content: flex-start; justify-content: flex-start; column-gap: 56px; padding: 50px var(--m) 10px; font-size: clamp(24px, 8.4vh, 34px); clip-path: circle(0 at calc(100% - var(--sticker) - 60px) 26px); }
+  .menu-open .links { clip-path: circle(150vmax at calc(100% - var(--sticker) - 60px) 26px); }
+  .menu-cta { margin-top: 6px; }
+  .menu-wa { font-size: clamp(18px, 6vh, 24px); }
+  .bottom { padding-block: 6px; }
+  .discover { gap: 6px; font-size: 14px; }
+  .discover img { width: 18px; height: 18px; }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) {
+  html.fly { scroll-behavior: auto; }
+  .wave, .apply, .apply-in, .links, .hop, .f, .poster { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }
+  .hit, .discover img, .links > a { animation: none !important; }
+}

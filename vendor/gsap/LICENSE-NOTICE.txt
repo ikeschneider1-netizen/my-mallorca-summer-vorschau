@@ -1,0 +1,1 @@
+GSAP 3.15.0. Copyright GreenSock. Standard no-charge license: https://gsap.com/standard-license . See original license headers and UPSTREAM-README.md. Official npm package contains no separate LICENSE file.
