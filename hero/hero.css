@@ -99,10 +99,14 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .js:not(.fallback) .claim { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .role { font-size: clamp(11.5px, .86vw, 13px); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .line { font: 400 clamp(22px, 2.2vw, 32px)/1.15 Shrikhand, Georgia, serif; }
-/* Oben links steht in einem Satz, worum es geht, daneben die Bedienung der Bewegung. */
+/* Oben links die Bedienung der Bewegung: „Animation wiederholen“, daneben Pause und Nochmal (Ike, 02.11.2026).
+   Die Zeile steht nur da, wo es die Knöpfe gibt, also nicht ohne JavaScript, ohne WebGL oder bei weniger Bewegung. */
 .lead { position: absolute; left: clamp(20px, 3vw, 48px); top: clamp(14px, 1.7vw, 24px); display: flex; align-items: center; gap: 8px; color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); }
 .kicker { padding: 10px 0 14px; font-size: clamp(14px, 1.08vw, 17px); font-weight: 800; white-space: nowrap; }
 .js.fallback .kicker { display: none; }
+.lead:has(.tools[hidden]) .kicker { display: none; }
+/* Die Zeile ist die Beschriftung des Nochmal-Knopfs und lässt sich genauso anklicken. */
+.kicker { pointer-events: auto; cursor: pointer; }
 /* Nach der Landung liegt die Terrasse hinter dem Kopf: dunkle Schrift mit hellem Lichtschein, damit sie auch über den Palmblättern lesbar bleibt.
    Weiches Petrol statt des vollen, das in Shrikhand zu schwer wirkt. */
 .past .lead, .past .menu-btn { color: var(--petrol-weich); text-shadow: 0 0 14px rgb(255, 246, 230), 0 0 6px rgba(255, 246, 230, .95), 0 0 2px rgb(255, 246, 230); transition: color 300ms ease; }

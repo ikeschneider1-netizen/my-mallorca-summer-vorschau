@@ -123,6 +123,12 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
   const tongue = mesh(new THREE.SphereGeometry(1, 14, 10), tongueMat, jaw, 0.13, 0.024, 0);
   // Der rote Fleck sitzt wie bei echten Möwen vorn am Unterschnabel, nicht am Mundwinkel.
   const spot = mesh(new THREE.SphereGeometry(1, 14, 10), redMat, jaw, 0.33, -0.03, 0);
+  // Die Schnabelspitze: Dort hält sie fest, was sie aufpickt.
+  const tip = new THREE.Object3D();
+  tip.position.set(0.68, -0.07, 0);
+  head.add(tip);
+  const tipW = new THREE.Vector3();
+  function beak(out) { tip.getWorldPosition(tipW); const s = focal / -tipW.z; out.x = cx + tipW.x * s; out.y = cy - tipW.y * s; return out; }
   spot.scale.set(0.026, 0.024, 0.05);
 
   // Die Mundwinkel laufen in die Wange und gehen nach oben: Daher kommt das freche Grinsen.
@@ -413,5 +419,5 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
   // Ein Treffer kostet sie Schwanzfedern. Bis zum nächsten Auftritt sieht man ihr das an.
   function pluck(on) { tailFeathers.forEach((m, i) => { m.visible = !on || i === 0 || i === 3; }); }
   function reset(over = {}) { Object.assign(pose, DEFAULTS, over); pluck(false); shades.visible = shadesOn; }
-  return { root, pose, update, place, reset, pluck, flyer, fling, stepFlyer, setShades, hideFlyer, setSize(v) { size = v; }, get bobPx() { return bob * size; } };
+  return { root, pose, update, place, reset, pluck, flyer, fling, stepFlyer, setShades, hideFlyer, beak, setSize(v) { size = v; }, get bobPx() { return bob * size; } };
 }

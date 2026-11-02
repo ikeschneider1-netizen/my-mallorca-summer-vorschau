@@ -545,8 +545,8 @@ const flock = { t: 99 };
 // Im Hochformat wird der Schriftzug als Ganzes verkleinert und neu gesetzt, ohne seine Perspektive zu verlieren.
 const comp = { on: false, a: 1, px: 560, py: 346, qx: 560, qy: 346 };
 let ballR = BALL_R, camL = null, grip = null;
-const claim = { on: true, group: null, tok: {}, items: [], basis: null, inv: null, depth: 13, w: 0 };
-const gag = { s: GULL_S, tl: null, P: { x: -300, y: 100 }, next: 5.5, canHit: false, onClaim: false, bubble: document.getElementById('squawk'), sayT: null, nodes: [], rope: false };
+const claim = { on: true, group: null, tok: {}, items: [], basis: null, inv: null, depth: 13, w: 0, carry: null, glow: { v: 0 } };
+const gag = { s: GULL_S, tl: null, P: { x: -300, y: 100 }, next: 5.5, canHit: false, onClaim: false, bubble: document.getElementById('squawk'), sayT: null, nodes: [], rope: false, grip: 0, tip: { x: 0, y: 0 }, from: { x: 0, y: 0 }, hold: 0, shifted: false };
 const plop = { mesh: null, splat: null, on: false, x: 0, y: 0, vx: 0, vy: 0 };
 let gull = null;
 
@@ -736,6 +736,8 @@ function buildClaim(font) {
   const front = warmFoot(new THREE.MeshPhysicalMaterial({ color: CREAM.clone(), roughness: 0.5, clearcoat: 0.28, clearcoatRoughness: 0.45, envMapIntensity: 0.28 }));
   const side = warmFoot(new THREE.MeshPhysicalMaterial({ color: CREAM_SIDE.clone(), roughness: 0.62, envMapIntensity: 0.22 }));
   claim.front = front; claim.side = side;
+  // Was die Möwe trägt, leuchtet warm wie der Schriftzug unter dem Zeiger. So hebt sich das Wort vor „Summer“ ab.
+  claim.carry = [warmFoot(new THREE.MeshPhysicalMaterial({ color: CREAM.clone(), roughness: 0.5, clearcoat: 0.28, clearcoatRoughness: 0.45, envMapIntensity: 0.28 })), warmFoot(new THREE.MeshPhysicalMaterial({ color: CREAM_SIDE.clone(), roughness: 0.62, envMapIntensity: 0.22 }))];
   const group = new THREE.Group(); group.matrixAutoUpdate = false;
   for (const [key, text] of CLAIM_TOK) {
     const t = { text, items: [] };
@@ -838,18 +840,32 @@ function spinSwap(on) {
   g.delayedCall(0.21, () => setLower(on));
 }
 // Ganze Wörter springen als Kette, der Vorderste zuerst. Wer weit muss, springt hoch über die anderen hinweg, wer nur rückt, hüpft flach.
-function rearrange(slot, only = null) {
+function rearrange(slot, only = null, flat = false) {
   const go = claim.items.filter((l) => (!only || only(l)) && (Math.abs(l[slot] - l.x) > 0.5 || l.y > 0.5 || l.air));
   const front = (l) => (l[slot] < l.x ? l.x : -l.x);
   go.sort((a, b) => front(a) - front(b));
   let far = 0, near = 0;
   for (const l of go) {
-    const d = l[slot] - l.x, wide = Math.abs(d) > 150, T = wide ? 0.58 : 0.34;
+    const d = l[slot] - l.x, wide = Math.abs(d) > 150, T = flat ? (wide ? 0.3 : 0.26) : wide ? 0.58 : 0.34;
     if (l.air || l.y > 4) toss(l, l[slot], l.air ? l.vy : 90);
     else toss(l, l[slot], CLAIM_G * T / 2, wide ? far++ * 0.03 : 0.1 + near++ * 0.016, d / T * 0.85);
   }
 }
-// Das Wort hängt an den Füßen wie ein Seil: Es löst sich Buchstabe für Buchstabe und zieht hinterher wie ein Strandbanner.
+// Das getragene Wort glüht warm auf und kühlt nach dem Ablegen wieder zu Creme ab.
+function carryLook(on, now = false) {
+  if (!claim.carry || !claim.tok.work) return;
+  const g = window.gsap, work = claim.tok.work.items, A = work[0], [cf, cs] = claim.carry;
+  const tint = () => { cf.color.lerpColors(CREAM, WARM, claim.glow.v); cs.color.lerpColors(CREAM_SIDE, WARM_SIDE, claim.glow.v); };
+  const plain = () => { claim.glow.v = 0; tint(); for (const l of work) l.mesh.material = [claim.front, claim.side]; A.alt.material = [claim.front, claim.side]; };
+  g?.killTweensOf(claim.glow);
+  if (on) {
+    for (const l of work) l.mesh.material = claim.carry;
+    A.alt.material = claim.carry;
+    g.to(claim.glow, { v: 0.85, duration: 0.35, ease: 'sine.out', onUpdate: tint });
+  } else if (now || !g || claim.glow.v <= 0) plain();
+  else g.to(claim.glow, { v: 0, duration: 0.7, ease: 'sine.inOut', onUpdate: tint, onComplete: plain });
+}
+// Das Wort hängt am Schnabel wie ein Seil: Es löst sich Buchstabe für Buchstabe und zieht hinterher wie ein Strandbanner.
 function ropeStart() {
   const work = claim.tok.work.items, list = [...work].reverse();
   gag.nodes = list.map((l, i) => {
@@ -858,8 +874,13 @@ function ropeStart() {
   });
   const a = claimToStage(0, 0), b = claimToStage(claim.w, 0);
   gag.base = { y: a.y, k: (b.y - a.y) / (b.x - a.x), x: a.x };
-  gag.ax = gag.P.x - 8; gag.ay = gag.P.y + 32;
-  gag.rope = true; gag.print = false; gag.force = false; gag.printCool = 0;
+  // Sie hält das „n“ oben im Schnabel. Erst schnappt es vom Boden hoch an die Spitze, dann hängt es dort fest.
+  // Gegriffen wird die Oberkante des kleinen „n“, ein Stück vor der Spitze, damit der Buchstabe vor der Brust hängt und nicht dahinter.
+  const n0 = gag.nodes[0], top = claimToStage(n0.l.x, 34);
+  gag.from = { x: n0.x, y: n0.y }; gag.hold = n0.y - top.y - 3; gag.lead = 8; gag.grip = 0;
+  gag.ax = n0.x; gag.ay = n0.y;
+  gag.rope = true; gag.print = false; gag.force = false; gag.printCool = 0; gag.shifted = false;
+  carryLook(true);
 }
 function stepRope(h) {
   if (!gag.rope) return;
@@ -867,9 +888,10 @@ function stepRope(h) {
   for (let i = 1; i < ns.length; i++) {
     const n = ns[i];
     if (!n.free) continue;
-    const vx = (n.x - n.px) * 0.9955, vy = (n.y - n.py) * 0.9955;
+    // Die Luft bremst die Buchstaben: Fliegt sie, weht das Wort hinter ihr her wie ein Banner, statt senkrecht zu hängen.
+    const vx = (n.x - n.px) * 0.966, vy = (n.y - n.py) * 0.966;
     n.px = n.x; n.py = n.y;
-    n.x += vx; n.y += vy + 1500 * h * h;
+    n.x += vx; n.y += vy + 900 * h * h;
     n.firm = Math.min(1, n.firm + h * 6);
   }
   ns[0].x = gag.ax; ns[0].y = gag.ay;
@@ -897,7 +919,13 @@ function stepRope(h) {
       if (n.y > gy) { n.y = gy; n.px += (n.x - n.px) * 0.3; }
     }
   }
+  // Ist das ganze Wort vom Boden, schließt der Rest des Satzes die Lücke: flach über die anderen hinweg, nichts fliegt über den Titel.
+  if (!gag.shifted && ns.length > 1 && ns.every((n) => n.free)) {
+    const t = ns[ns.length - 1];
+    if (gag.base.y + (t.x - gag.base.x) * gag.base.k - t.y > 60) shiftRest();
+  }
 }
+function shiftRest() { if (gag.shifted) return; gag.shifted = true; rearrange('xB', (l) => l.key !== 'work', true); }
 function syncRope() {
   if (!gag.rope) return;
   const ns = gag.nodes;
@@ -986,33 +1014,41 @@ function startGag() {
     .to(p, { gesture: 0.5, duration: 0.1, ease: 'power2.out' }, T + 6.46)
     .to(p, { shades: 0, duration: 0.14, ease: 'power2.inOut' }, T + 6.5)
     .to(p, { gesture: 0, duration: 0.14, ease: 'power2.in' }, T + 6.58);
-  // Ein Picker ins Wort, dann packt sie es mit den Füßen. Es ist schwerer, als sie dachte: Augen zu, Brust raus, alles geben.
+  // Sie hüpft hoch, kippt nach vorn und schnappt sich das „n“ mit dem Schnabel, wie eine Möwe ihr Futter.
   const B0 = T + 7;
-  tl.to(p, { pitch: -0.72, stab: 0, stare: 0, headYaw: 0, headPitch: -0.25, mouth: 1, lid: 0.2, brow: -0.5, cock: 0.3, smile: 0.3, lookY: -0.4, duration: 0.24, ease: 'power2.inOut' }, B0)
-    .call(() => { n.jv = 170; n.wv += 2.5; ropeStart(); }, null, B0 + 0.26)
-    .to(p, { mouth: 0, duration: 0.08 }, B0 + 0.26)
-    .call(() => { gag.onClaim = false; }, null, B0 + 0.36)
-    .to(p, { fold: 0, flapAmp: 1.2, flapRate: 18, pitch: 0.34, stab: 0.8, roll: 0.2, tuck: 0.35, headPitch: -0.1, lookY: 0, yaw: -0.36, lid: 0.78, puff: 0.5, brow: 0.7, cock: 0, smile: 0, duration: 0.26, ease: 'power2.out' }, B0 + 0.36)
-    .to(P, { x: b.x + 34, y: b.y - 66, duration: 0.92, ease: 'sine.inOut' }, B0 + 0.4)
-    .to(P, { y: b.y - 48, duration: 0.18, ease: 'sine.inOut' }, B0 + 1.32);
-  // Mit dem Wort im Schlepp ans Satzende. Unter ihr springt „Urlaub machen“ nach vorn, dann schreibt sie „arbeiten“ von hinten auf den Boden.
-  const F0 = B0 + 1.5, D = 3, L = F0 + D, flightY = Math.min(c.y - 244, 400);
+  tl.call(() => { gag.onClaim = false; }, null, B0)
+    .to(p, { fold: 0, flapAmp: 0.9, flapRate: 14, tuck: 0.5, stare: 0, headYaw: 0, headRoll: 0, cock: 0.3, smile: 0.3, duration: 0.14 }, B0)
+    .to(P, { x: b.x + 22, y: b.y - 34, duration: 0.3, ease: 'power2.out' }, B0)
+    .to(p, { pitch: -0.55, headPitch: -0.55, mouth: 0.9, lid: 0.15, brow: -0.5, lookY: -0.6, lookX: 0, duration: 0.22, ease: 'power2.inOut' }, B0 + 0.12)
+    .to(P, { y: '+=12', duration: 0.08, ease: 'power2.in' }, B0 + 0.34)
+    .call(() => { n.jv = 120; n.wv += 1.5; ropeStart(); }, null, B0 + 0.4)
+    .to(gag, { grip: 1, duration: 0.12, ease: 'power2.out' }, B0 + 0.4)
+    .to(p, { mouth: 0.12, duration: 0.06 }, B0 + 0.44);
+  // Mit aller Kraft nach oben: Das Wort löst sich Buchstabe für Buchstabe vom Boden wie ein Reißverschluss. Es ist schwer, sie sackt einmal durch.
+  tl.to(p, { pitch: 0.14, headPitch: 0.05, flapAmp: 1.2, flapRate: 20, stab: 0.8, roll: 0.15, tuck: 0.35, lid: 0.78, puff: 0.5, brow: 0.7, lookY: 0, duration: 0.24, ease: 'power2.out' }, B0 + 0.52)
+    .to(P, { x: b.x + 40, y: b.y - 240, duration: 0.72, ease: 'power2.out' }, B0 + 0.52)
+    .to(P, { y: '+=12', duration: 0.15, ease: 'sine.inOut', yoyo: true, repeat: 1 }, B0 + 1.2)
+    // Oben angekommen: ein stolzer Blick zu dir, das Wort baumelt am Schnabel. Unter ihr rückt der Satz zusammen.
+    .to(p, { pitch: 0.1, flapAmp: 1, flapRate: 15, lid: 0.15, puff: 0.2, brow: -0.3, cock: 0.8, stare: 1, headYaw: -0.7, duration: 0.24, ease: 'power2.out' }, B0 + 1.3)
+    .call(shiftRest, null, B0 + 1.35);
+  // Sie hält kurz, unter ihr rückt der Satz zusammen. Dann das Wort als Banner im Schlepp ans Satzende, und sie legt „arbeiten“ von hinten auf den Boden.
+  const F0 = B0 + 1.8, D = 2.8, L = F0 + D, flightY = c.y - 150;
   tl.to(P, { x: c.x + 2, duration: D, ease: 'sine.inOut' }, F0)
-    .to(P, { y: flightY, duration: 1.15, ease: 'sine.inOut' }, F0 - 0.04)
-    .to(p, { pitch: 0.12, flapAmp: 0.95, flapRate: 13, roll: 0.26, lid: 0.2, puff: 0, brow: -0.1, cock: 0.7, smile: 1, stare: 1, headYaw: -0.72, duration: 0.5 }, F0 + 0.1)
-    .call(() => rearrange('xB', (l) => l.key !== 'work'), null, F0 + 0.42)
-    .call(() => { gag.print = true; }, null, F0 + 0.8)
+    .to(P, { y: flightY, duration: 1, ease: 'sine.inOut' }, F0)
+    .to(p, { pitch: 0.12, flapAmp: 0.95, flapRate: 13, roll: 0.26, lid: 0.2, puff: 0, brow: -0.1, cock: 0.7, smile: 1, stare: 1, headYaw: -0.72, headPitch: 0, duration: 0.5 }, F0 + 0.1)
+    .call(() => { gag.print = true; }, null, F0 + 0.9)
     .to(p, { stare: 0, headYaw: -0.1, headPitch: -0.55, lookY: -0.5, brow: 0, lid: 0.25, duration: 0.24 }, F0 + 1.6)
     .to(P, { y: c.y, duration: 1.3, ease: 'sine.inOut' }, L - 1.3)
     .call(() => { gag.force = true; }, null, L - 0.72)
     .call(lastLetter, null, L - 0.2)
-    .to(p, { pitch: 0.5, sweep: 0.5, tuck: 0, flapAmp: 1, roll: 0, duration: 0.22 }, L - 0.34);
+    .to(p, { pitch: 0.5, sweep: 0.5, tuck: 0, flapAmp: 1, roll: 0, mouth: 0, duration: 0.22 }, L - 0.34);
   // Fertig: „Urlaub machen, wo andere arbeiten.“ Sie setzt sich drauf, stolz, und klopft sich den Flügel ab. Dann macht sie selig die Augen zu.
   tl.call(() => { gag.onClaim = true; n.v += 5; n.sv += 4; impact(c.x, FLOOR - 30, 0.18); }, null, L)
     .to(p, { fold: 1, flapAmp: 0, pitch: 0.04, sweep: 0, yaw: -0.42, duration: 0.34, ease: 'power2.out' }, L)
     .fromTo(p, { squash: 0.2 }, { squash: 0, duration: 0.42, ease: 'back.out(3)', immediateRender: false }, L)
     .to(p, { headYaw: -0.78, headPitch: 0.12, stare: 1, lookY: 0, lid: 0.22, cock: 0.75, smile: 1, duration: 0.3, ease: 'power2.inOut' }, L + 0.24)
     .to(p, { puff: 1, duration: 0.42, ease: 'back.out(2)' }, L + 0.56)
+    .call(() => carryLook(false), null, L + 0.3)
     .call(() => say('Na also.', 2300), null, L + 0.74)
     // Jetzt macht sie Urlaub: Brille runter, Schnabel hoch, Augen zu.
     .to(p, { gesture: 0.5, duration: 0.1, ease: 'power2.out' }, L + 1.34)
@@ -1064,6 +1100,7 @@ function leaveGull() {
   gag.tl?.kill();
   gag.canHit = false; gag.onClaim = false;
   if (gag.rope) lastLetter();
+  carryLook(false);
   rearrange(homeSlot());
   spinSwap(false);
   Object.assign(gull.pose, { fold: 0, flapAmp: 1, flapRate: 12, tuck: 1, yaw: -0.5, pitch: 0.25, roll: 0.3, mouth: 0, wide: 0, lid: 0.2, brow: 0, cock: 0.55, smile: 0.7, shades: 1, puff: 0, crest: 0, gesture: 0, stare: 0, lookX: 0, headYaw: 0, headPitch: 0, blink: 1 });
@@ -1076,6 +1113,7 @@ function gullHit(nx = 0.4, ny = -0.9, wucht = 900) {
   gag.canHit = false; gag.onClaim = false; gag.rope = false; gag.print = false; gag.nodes = [];
   // Die Buchstaben springen zurück, der Satz stimmt wieder.
   rearrange(homeSlot());
+  carryLook(false);
   if (claim.tok.work.items[0].alt.visible) spinSwap(false);
   say('Kreisch!', 1300);
   feathers.fire(x0, y0 - gag.s * 0.6, nx, ny, comp.on ? 0.72 : 1);
@@ -1179,6 +1217,7 @@ function abortGag() {
   if (g) { g.killTweensOf(claim.items); if (gull) g.killTweensOf(gull.pose); g.killTweensOf(gag.P); }
   claim.items.forEach(resetLetter);
   setLower(false);
+  carryLook(false, true);
   gag.nodes = []; gag.bubble.hidden = true;
   gull?.hideFlyer();
   plop.on = false; if (plop.mesh) plop.mesh.visible = false;
@@ -1201,7 +1240,12 @@ function updateGag(dt) {
   const P = gag.P, u = plateMat.uniforms.uGullShadow.value;
   gull.update(still() ? 0 : dt);
   gull.place(P.x, P.y);
-  gag.ax = P.x - 8; gag.ay = P.y + 32 + gull.bobPx * -1;
+  if (gag.rope) {
+    gull.beak(gag.tip);
+    const g = gag.grip;
+    gag.ax = gag.from.x + (gag.tip.x + gag.lead - gag.from.x) * g;
+    gag.ay = gag.from.y + (gag.tip.y + gag.hold - gag.from.y) * g;
+  }
   printWord(dt);
   const low = smooth(560, 640, P.y), hi = clamp((680 - P.y) / 500, 0, 1);
   u.set(P.x + hi * 26, 676 + (P.y + 8 - 676) * low, 54 + hi * 42, 0.56 - 0.3 * hi);
@@ -1216,9 +1260,9 @@ function measureSticker() {
   stick.cy = view.y0 + (r.top + r.height / 2 - stick.y - c.top) / view.s;
   stick.R = (r.width / 2 / view.s) * 0.84;
 }
-function hitSticker(nx, ny) {
+function hitSticker(nx, ny, k = 1) {
   stick.active = true; stick.cool = 0.5;
-  stick.vx += nx * 460; stick.vy += ny * 460; stick.vr += (nx >= 0 ? 1 : -1) * 300;
+  stick.vx += nx * 460 * k; stick.vy += ny * 460 * k; stick.vr += (nx >= 0 ? 1 : -1) * 300 * k;
   setHit(true);
   bumpMenu(0.8);
   startle();
@@ -1395,10 +1439,11 @@ function applyLetters() {
     const sq = clamp(l.sq, -0.2, 0.5);
     l.pivot.visible = l.on;
     l.pivot.position.x = l.home + l.dx / l.pu;
-    l.pivot.position.y = l.drop - l.press * 6.2 - l.dy / l.pu;
-    l.pivot.position.z = -l.press * 3.5;
+    // Unter dem Zeiger gibt der Buchstabe deutlich nach: tiefer, weiter nach hinten, stärker gekippt (mehr Ausschlag, Ike 02.11.2026).
+    l.pivot.position.y = l.drop - l.press * 19 - l.dy / l.pu;
+    l.pivot.position.z = -l.press * 12;
     l.pivot.scale.set(1 / Math.sqrt(1 - sq), 1 - sq, 1);
-    l.pivot.rotation.x = l.press * 0.07;
+    l.pivot.rotation.x = l.press * 0.2;
     // Jeder Buchstabe neigt sich mit dem Hang der Welle und dreht sich ein wenig zum Zeiger.
     l.pivot.rotation.z = l.wob - l.dx * 0.0034 + ((l.prev ? l.prev.press : l.press) - (l.next ? l.next.press : l.press)) * 0.055;
     l.pivot.rotation.y = (pointer.px - l.sx) / W * 0.09 * S.sheen;
@@ -1421,8 +1466,10 @@ function letterGoals(dt) {
       const dx = pointer.x - l.sx, dy = pointer.y - l.sy;
       const e = Math.exp(-(dx * dx) / (2 * 62 * 62) - (dy * dy) / (2 * 76 * 76));
       g += gain * e;
-      if (!reduced.matches) l.wv -= pointer.vx * 0.0014 * e * dt;
-    }
+      // Die Buchstaben weichen dem Zeiger zur Seite aus und schwingen mit der Hand mit.
+      l.push = -dx / 62 * e * 28;
+      if (!reduced.matches) l.wv -= pointer.vx * 0.0045 * e * dt;
+    } else l.push = 0;
     // Das Gewicht des Balls drückt die Schrift nach hinten, die Nachbarn geben mit nach.
     if (l.on && mode !== 'intro' && fly.s < 0.01) g += 1.25 * clamp((B.r + 70 - Math.hypot(B.x - l.sx - l.dx, B.y - l.sy - l.dy)) / 80, 0, 1);
     l.goal = g;
@@ -1445,7 +1492,7 @@ function stepLetters(h) {
     return;
   }
   for (const l of letters) {
-    let f = 26 * (l.goal - l.press) - 6.6 * l.v, fx = -24 * l.dx * (1 + l.dx * l.dx / 5200) - 6.4 * l.dvx;
+    let f = 26 * (l.goal - l.press) - 5.4 * l.v, fx = -24 * (l.dx - (l.push || 0)) * (1 + l.dx * l.dx / 5200) - 6.4 * l.dvx;
     for (let i = 0; i < l.ln.length; i++) { f += 15 * l.lw[i] * (l.ln[i].press - l.press); fx += 9 * l.lw[i] * (l.ln[i].dx - l.dx); }
     // Buchstaben einer Zeile schieben einander, statt übereinanderzurutschen.
     if (l.prev && l.dx < l.prev.dx) fx += (l.prev.dx - l.dx) * 170;
@@ -1502,7 +1549,8 @@ function roll(dx) {
   if (Math.abs(dx) < 0.001) return;
   ballQ.premultiply(rollQ.setFromAxisAngle(rollAxis, -dx / B.r));
 }
-function launch(vx, vy) { Object.assign(phys, { vx, vy, scored: false, wasIn: inPoly(HOLE, B.x, B.y) }); mode = 'free'; }
+// Vor jedem Wurf wird das Ziel frisch vermessen: Der Aufkleber kann sich seit dem Laden verschoben oder seine Größe geändert haben.
+function launch(vx, vy) { measureSticker(); Object.assign(phys, { vx, vy, scored: false, wasIn: inPoly(HOLE, B.x, B.y) }); mode = 'free'; }
 // Die Physik läuft in festen, kleinen Schritten und ist damit auf jedem Bildschirm gleich.
 // Der Ball ist schwer und die Schrift nachgiebig: Er prallt nicht ab, sondern drückt die Buchstaben auseinander. Sie weichen zur Seite aus,
 // nehmen die Nachbarn mit und kommen weich zurück, sobald er durch ist. Das gilt im Flug, beim Tragen und beim Rollen.
@@ -1574,6 +1622,11 @@ function stepBall(h) {
 
   // Der Aufkleber: Das ist der eigentliche Treffer.
   const tdx = stick.cx - B.x, tdy = stick.cy - B.y, td = Math.hypot(tdx, tdy), reachS = B.r + stick.R + (comp.on ? 36 : 0);
+  // Knapp daneben zählt fast: Fliegt der Ball auf den Aufkleber zu, zieht der ihn in der Nähe ein wenig zu sich.
+  if (td > reachS && td < reachS + 70 && !stick.cool) {
+    const vn = (phys.vx * tdx + phys.vy * tdy) / td;
+    if (vn > 200) { const k = 1 - (td - reachS) / 70; phys.vx += tdx / td * 6000 * k * h; phys.vy += tdy / td * 6000 * k * h; }
+  }
   if (td < reachS && td > 0 && !stick.cool) {
     const nx = tdx / td, ny = tdy / td, vn = phys.vx * nx + phys.vy * ny;
     if (vn > 0) { phys.vx -= 1.6 * vn * nx; phys.vy -= 1.6 * vn * ny; }
@@ -1600,6 +1653,18 @@ function updateBall(dt) {
   if (mode === 'drag') {
     const e = 1 - Math.exp(-dt * 30);
     B.x += (phys.grab.x - B.x) * e; B.y += (phys.grab.y - B.y) * e;
+    // Wer den Ball in der Hand an den Aufkleber schlägt, trifft auch: Der Aufkleber schwingt, der Ball prallt ab und fliegt weiter.
+    const dx = stick.cx - B.x, dy = stick.cy - B.y, d = Math.hypot(dx, dy), reach = B.r + stick.R;
+    if (d < reach && d > 0 && !stick.cool) {
+      const nx = dx / d, ny = dy / d, hs = phys.hist, a = hs[0], z = hs[hs.length - 1], t = Math.max(16, z.t - a.t) / 1000;
+      let vx = clamp((z.x - a.x) / t, -2600, 2600), vy = clamp((z.y - a.y) / t, -2600, 2600);
+      const vn = vx * nx + vy * ny;
+      if (vn > 0) { vx -= 1.6 * vn * nx; vy -= 1.6 * vn * ny; }
+      B.x -= nx * (reach - d); B.y -= ny * (reach - d);
+      hitSticker(nx, ny, clamp(Math.hypot(vx, vy) / 1400, 0.6, 1.5));
+      canvas.style.cursor = '';
+      launch(vx - nx * 260, vy - ny * 260);
+    }
   }
   if (mode === 'rest' && !still() && fly.s < 0.01) {
     // Kommt der Zeiger, hüpft der Ball einmal kurz. Lässt man ihn in Ruhe, meldet er sich ab und zu von selbst.
@@ -1888,6 +1953,7 @@ function toStage(e) {
 }
 function nearBall(p) { return (mode === 'rest' || mode === 'free') && !reduced.matches && fly.s < 0.01 && Math.hypot(p.x - B.x, p.y - B.y) < B.r + 8; }
 function grabBall(e, p, el) {
+  measureSticker();
   mode = 'drag'; phys.hist = [{ x: p.x, y: p.y, t: performance.now() }]; phys.down = { x: p.x, y: p.y, t: performance.now() }; phys.grab.x = B.x; phys.grab.y = B.y;
   el.setPointerCapture(e.pointerId); el.style.cursor = 'grabbing'; e.preventDefault();
 }
@@ -1954,6 +2020,8 @@ function initPointer() {
 
   document.getElementById('pause').addEventListener('click', () => { paused = !paused; window.gsap?.globalTimeline.paused(paused); syncTools(); });
   document.getElementById('replay').addEventListener('click', () => { scrollTo({ top: 0, behavior: 'instant' }); playIntro(); });
+  // Die Zeile davor ist die Beschriftung des Nochmal-Knopfs, ein Klick darauf wirkt genauso.
+  document.getElementById('kicker').addEventListener('click', () => document.getElementById('replay').click());
   reduced.addEventListener('change', () => { if (reduced.matches) { intro?.progress(1); settle(); } layout(); syncTools(); });
   document.addEventListener('visibilitychange', () => { last = performance.now(); });
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; last = performance.now(); }).observe(hero);
@@ -2041,7 +2109,7 @@ async function start() {
   buildConfetti();
   ballMat.envMap = envTex;
   for (const l of letters) { l.front.envMap = envTex; l.side.envMap = envTex; }
-  claim.front.envMap = envTex; claim.side.envMap = envTex;
+  claim.front.envMap = envTex; claim.side.envMap = envTex; claim.carry.forEach((m) => { m.envMap = envTex; });
   await breathe();
   gull = buildGull(envTex, { depth: GULL_D, focal: F, cx: CX, cy: CY, size: GULL_S });
   await breathe();
