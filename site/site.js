@@ -259,7 +259,7 @@
         W = f.width; H = f.height; links = f.left + scrollX; oben = f.top + scrollY;
         B.r = ball.offsetWidth / 2; s = B.r / 52;
         unten = { x: b.left - f.left, y: b.top - f.top, w: b.width, h: b.height };
-        if (moewe) { const m = moewe.getBoundingClientRect(); moeweBox = { x: m.left - f.left + m.width * 0.18, y: m.top - f.top + m.height * 0.25, w: m.width * 0.64, h: m.height * 0.75 }; }
+        if (moewe && !fliegt) { const m = moewe.getBoundingClientRect(); moeweBox = { x: m.left - f.left + m.width * 0.18, y: m.top - f.top + m.height * 0.25, w: m.width * 0.64, h: m.height * 0.75 }; } else moeweBox = null;
       };
       // Höhe des Bodens unter einer Stelle: Stufen aus dem Szenenbild, in Bruchteilen des unteren Bildes.
       const boden = (x) => {
@@ -275,18 +275,61 @@
         schatten.style.opacity = Math.max(0.15, 1 - hoch / 500).toFixed(3);
       };
       const ruhen = () => { mass(); B.vx = 0; B.vy = 0; B.y = boden(B.x) - B.r; B.lage = 'ruhe'; zeigen(); };
-      // Die Möwe: cool mit Brille, frech mit Brille auf der Stirn, Schreck mit Flügeln. Sie schaut, wenn etwas passiert.
+      // Die Möwe: cool mit Brille, frech mit Brille auf der Stirn, Schreck mit Flügeln. Sie schaut, wenn etwas passiert,
+      // und fliegt ab und zu auf einen anderen Platz (Kübelkante, Boden, Stufen). Antippen oder ein Ballwurf scheucht sie auf.
       const moewe = feld.querySelector('.moewe');
-      let moeweZeit = 0, moeweBox = null;
+      const sitze = feld.dataset.sitze ? JSON.parse(feld.dataset.sitze) : [];
+      let moeweZeit = 0, moeweBox = null, platz = -1, fliegt = false, imBild = false, naechsterFlug = 0;
+      const M = { x: 0, y: 0 };
       const haltung = (l, ms) => {
         if (!moewe) return;
         moewe.dataset.lage = l; clearTimeout(moeweZeit);
         if (ms) moeweZeit = setTimeout(() => haltung(l === 'schreck' ? 'frech' : 'ruhe', l === 'schreck' ? 1600 : 0), ms);
       };
-      const huepfen = () => { if (moewe && !reduced.matches && moewe.animate) moewe.animate([{ translate: '0 0' }, { translate: '0 -16%' }, { translate: '0 0' }], { duration: 420, easing: 'cubic-bezier(.3,.7,.4,1)' }); };
+      const sitzPunkt = (i) => ({ x: unten.x + sitze[i][0] * unten.w, y: unten.y + sitze[i][1] * unten.h });
+      const sichtbar = (i) => { const q = sitzPunkt(i); return q.x > W * 0.08 && q.x < W * 0.92; };
+      // Die Füße stehen im Bild bei 55,7 % der Breite, ganz unten.
+      const stellen = () => { const w = moewe.offsetWidth, h = moewe.offsetHeight; moewe.style.transform = `translate(${(M.x - 0.557 * w).toFixed(1)}px, ${(M.y - 0.995 * h).toFixed(1)}px)`; };
+      const setzen = (i) => { platz = i; const q = sitzPunkt(i); M.x = q.x; M.y = q.y; moewe.classList.toggle('links', sitze[i][0] > 0.55); stellen(); };
+      const fliegen = (ziel) => {
+        if (!moewe || fliegt || ziel === platz || reduced.matches) return;
+        mass();
+        const a = { x: M.x, y: M.y }, b = sitzPunkt(ziel), k = moewe.offsetWidth / 150;
+        const c = { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - (140 + Math.random() * 90) * k }, dauer = 1.1 + Math.abs(b.x - a.x) / Math.max(W, 1) * 1.3;
+        fliegt = true; moeweBox = null; clearTimeout(moeweZeit); delete moewe.dataset.lage;
+        moewe.classList.add('fliegt'); moewe.classList.toggle('links', b.x < a.x);
+        let t = 0;
+        laufen((dt) => {
+          t = Math.min(1, t + dt / dauer);
+          // Weich los, weich landen: Bogen mit sanftem Anfang und Ende.
+          const u = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, v = 1 - u;
+          M.x = v * v * a.x + 2 * v * u * c.x + u * u * b.x; M.y = v * v * a.y + 2 * v * u * c.y + u * u * b.y;
+          stellen();
+          if (t < 1) return true;
+          fliegt = false; platz = ziel;
+          moewe.classList.remove('fliegt'); moewe.classList.toggle('links', sitze[ziel][0] > 0.55);
+          const stand = moewe.querySelector('.moewe-stand');
+          if (stand.animate) stand.animate([{ transform: 'scale(1.1, .86)' }, { transform: 'scale(1, 1)' }], { duration: 320, easing: 'cubic-bezier(.3, 1.6, .5, 1)' });
+          haltung('frech', 1600);
+          naechsterFlug = performance.now() + 9000 + Math.random() * 7000;
+          return false;
+        });
+      };
+      const wegfliegen = () => { const frei = sitze.map((_, i) => i).filter((i) => i !== platz && sichtbar(i)); if (frei.length) fliegen(frei[Math.floor(Math.random() * frei.length)]); };
       if (moewe) {
-        moewe.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') haltung('frech', 1500); });
-        moewe.addEventListener('pointerdown', () => { haltung('frech', 1800); huepfen(); });
+        moewe.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && !fliegt) haltung('frech', 1500); });
+        moewe.addEventListener('pointerdown', () => { if (reduced.matches || !sitze.length) { haltung('frech', 1800); return; } haltung('schreck', 260); setTimeout(wegfliegen, 180); });
+      }
+      // Mit Skript übernimmt sie ihren Platz selbst: der sichtbare Platz, der ihrer Startstelle am nächsten liegt.
+      if (moewe && sitze.length && !reduced.matches) {
+        mass();
+        const r = moewe.getBoundingClientRect(), f = feld.getBoundingClientRect(), fussX = r.left - f.left + 0.557 * r.width;
+        let best = -1, d = Infinity;
+        sitze.forEach((_, i) => { if (sichtbar(i)) { const q = sitzPunkt(i), e = Math.abs(q.x - fussX); if (e < d) { d = e; best = i; } } });
+        if (best >= 0) { moewe.classList.add('frei'); setzen(best); }
+        new IntersectionObserver((es) => { imBild = es[0].isIntersecting; if (imBild && !naechsterFlug) naechsterFlug = performance.now() + 6000 + Math.random() * 4000; }, { threshold: 0.2 }).observe(feld);
+        setInterval(() => { if (imBild && !fliegt && platz >= 0 && naechsterFlug && performance.now() > naechsterFlug && B.lage !== 'frei' && !document.hidden) wegfliegen(); }, 1000);
+        addEventListener('resize', () => { if (fliegt || platz < 0) return; mass(); if (!sichtbar(platz)) { const i = sitze.findIndex((_, j) => sichtbar(j)); if (i >= 0) platz = i; } setzen(platz); });
       }
       // Weniger Bewegung: Der Ball liegt still vor der Treppe, ohne Flug und ohne Physik.
       if (reduced.matches) {
@@ -341,7 +384,7 @@
               const weg = B.x < moeweBox.x + moeweBox.w / 2 ? -1 : 1;
               B.vy = -Math.abs(B.vy) * 0.4; B.vx = weg * Math.max(380 * s, Math.abs(B.vx) * 0.7);
               B.x = weg < 0 ? Math.min(B.x, moeweBox.x - B.r * 0.2) : Math.max(B.x, moeweBox.x + moeweBox.w + B.r * 0.2);
-              haltung('schreck', 700); huepfen();
+              haltung('schreck', 300); setTimeout(wegfliegen, 240);
             }
           }
           B.rot += (B.x - altX) / B.r;

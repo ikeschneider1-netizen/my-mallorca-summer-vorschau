@@ -1,5 +1,5 @@
 @font-face { font-family: Shrikhand; src: url('assets/fonts/shrikhand-latin.woff2') format('woff2'); font-display: swap; }
-@font-face { font-family: UI; src: url('assets/fonts/ui.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: UI; src: url('assets/fonts/ui.woff2') format('woff2'); font-weight: 400 900; font-display: swap; }
 
 :root {
   --sticker: clamp(108px, 9.8vw, 148px);
@@ -16,7 +16,7 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
 [hidden] { display: none !important; }
 .sr-only, .skip:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.skip:focus { position: fixed; z-index: 30; left: 24px; top: 16px; padding: 10px 4px; font-weight: 600; color: var(--cream); }
+.skip:focus { position: fixed; z-index: 30; left: 24px; top: 16px; padding: 10px 4px; font-weight: 800; color: var(--cream); }
 
 /* Ohne Flug ist alles normaler Seitenfluss; mit Flug steht die Bühne, während die Seite läuft. */
 .track { position: relative; }
@@ -55,7 +55,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 [data-nav="welle"] .links .f + .f { display: none; }
 
 /* Menü: nur Wörter, keine Fläche und kein Rahmen. */
-.links { position: relative; display: flex; align-items: center; gap: clamp(20px, 2.5vw, 38px); font-size: clamp(15px, 1.15vw, 18px); font-weight: 600; letter-spacing: .002em; transition: color 480ms ease; }
+.links { position: relative; display: flex; align-items: center; gap: clamp(20px, 2.5vw, 38px); font-size: clamp(15px, 1.15vw, 18px); font-weight: 800; letter-spacing: .002em; transition: color 480ms ease; }
 .hero.dusk .links { color: var(--cream); }
 .links a { position: relative; display: block; padding: 10px 0 14px; white-space: nowrap; }
 /* Eine kleine laufende Welle zieht sich unter das Wort. */
@@ -78,11 +78,11 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .apply-txt { position: relative; }
 .wa-i { width: 1.3em; height: 1.3em; fill: currentColor; }
 .apply-in .wa-i { margin-bottom: .14em; }
-.apply-top { font: 600 .64em/1.15 UI, system-ui, sans-serif; letter-spacing: .01em; white-space: nowrap; }
+.apply-top { font: 800 .64em/1.15 UI, system-ui, sans-serif; letter-spacing: .01em; white-space: nowrap; }
 .apply-mob { display: none; }
 .menu-btn, .menu-cta, .ball-grip { display: none; }
 /* Die Alternative zum WhatsApp-Weg steht klein unter dem Aufkleber. */
-.form-link { --flip: var(--sun); position: absolute; z-index: 2; right: clamp(14px, 2.2vw, 34px); top: calc(clamp(6px, 1vw, 14px) + var(--sticker) + 2px); width: var(--sticker); padding: 6px 0; text-align: center; font-size: clamp(12.5px, .92vw, 14px); font-weight: 600; color: var(--cream); text-shadow: 0 1px 8px rgba(70, 12, 0, .8), 0 0 2px rgba(70, 12, 0, .5); pointer-events: auto; }
+.form-link { --flip: var(--sun); position: absolute; z-index: 2; right: clamp(14px, 2.2vw, 34px); top: calc(clamp(6px, 1vw, 14px) + var(--sticker) + 2px); width: var(--sticker); padding: 6px 0; text-align: center; font-size: clamp(12.5px, .92vw, 14px); font-weight: 800; color: var(--cream); text-shadow: 0 1px 8px rgba(70, 12, 0, .8), 0 0 2px rgba(70, 12, 0, .5); pointer-events: auto; }
 .apply .wave { display: none; }
 [data-cta="wort"] { --sticker: clamp(120px, 11.5vw, 172px); }
 [data-cta="wort"] .burst { display: none; }
@@ -98,11 +98,11 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 /* Der Satz steht als echter Text im Dokument. Sichtbar liegt er auf der Terrasse in der 3D-Szene; ohne WebGL und auf dem Handy erscheint er hier. */
 .claim { display: grid; gap: 5px; min-width: 0; }
 .js:not(.fallback) .claim { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.role { font-size: clamp(11.5px, .86vw, 13px); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.role { font-size: clamp(11.5px, .86vw, 13px); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .line { font: 400 clamp(22px, 2.2vw, 32px)/1.15 Shrikhand, Georgia, serif; }
 /* Oben links steht in einem Satz, worum es geht, daneben die Bedienung der Bewegung. */
 .lead { position: absolute; left: clamp(20px, 3vw, 48px); top: clamp(14px, 1.7vw, 24px); display: flex; align-items: center; gap: 8px; color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); }
-.kicker { padding: 10px 0 14px; font-size: clamp(14px, 1.08vw, 17px); font-weight: 600; white-space: nowrap; }
+.kicker { padding: 10px 0 14px; font-size: clamp(14px, 1.08vw, 17px); font-weight: 800; white-space: nowrap; }
 .js.fallback .kicker { display: none; }
 /* Nach der Landung liegt die Terrasse hinter dem Kopf: dunkle Schrift mit hellem Lichtschein, damit sie auch über den Palmblättern lesbar bleibt. */
 .past .lead, .past .menu-btn { color: var(--ink); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); transition: color 300ms ease; }
@@ -117,7 +117,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .i-play { display: none; }
 .tool[aria-pressed="true"] .i-pause { display: none; }
 .tool[aria-pressed="true"] .i-play { display: block; }
-.probe { display: flex; align-items: center; gap: 2px; margin-inline: auto; font-size: 13px; font-weight: 600; }
+.probe { display: flex; align-items: center; gap: 2px; margin-inline: auto; font-size: 13px; font-weight: 800; }
 .probe span { margin: 0 4px 0 12px; opacity: .78; }
 .probe button { border: 0; padding: 6px 7px; font: inherit; color: inherit; background: transparent; text-shadow: inherit; cursor: pointer; transition: color 200ms ease; }
 .probe button.on { color: var(--sun); }
@@ -141,7 +141,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 @media (orientation: portrait), (max-height: 540px) {
   :root { --m: clamp(14px, 4.2vw, 28px); --safe: env(safe-area-inset-bottom, 0px); }
   .top { z-index: 5; }
-  .menu-btn { position: absolute; z-index: 22; right: var(--m); top: max(8px, env(safe-area-inset-top, 0px)); display: block; min-height: 44px; border: 0; padding: 10px 0; font: 600 clamp(16px, 4.1vw, 20px)/1.2 UI, system-ui, sans-serif; color: var(--cream); background: none; text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+  .menu-btn { position: absolute; z-index: 22; right: var(--m); top: max(8px, env(safe-area-inset-top, 0px)); display: block; min-height: 44px; border: 0; padding: 10px 0; font: 800 clamp(16px, 4.1vw, 20px)/1.2 UI, system-ui, sans-serif; color: var(--cream); background: none; text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
   .menu-btn:focus-visible { outline-color: currentColor; }
   .menu-x, .menu-open .menu-o { display: none; }
   .menu-open .menu-x { display: inline; }
@@ -156,7 +156,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   .menu-cta { display: grid; gap: 6px; margin-top: clamp(14px, 3vh, 30px); }
   .menu-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); }
   .menu-wa .wa-i { flex: none; width: 1.1em; height: 1.1em; }
-  .menu-form { min-height: 44px; padding: 10px 0 !important; font: 600 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--ink); }
+  .menu-form { min-height: 44px; padding: 10px 0 !important; font: 800 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--ink); }
 }
 /* Hochformat: eigener Bildaufbau. Oben die Kathedrale, darunter Schriftzug und Satz, unten Terrasse, Ball und der feste Aufkleber. */
 @media (orientation: portrait) {

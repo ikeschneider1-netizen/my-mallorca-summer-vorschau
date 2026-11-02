@@ -9,9 +9,9 @@
 .stufe { --stufe: clamp(0px, 4.6vw, 64px); display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 4px 22px; width: min(100%, 760px); margin: 0 0 18px calc(var(--n) * var(--stufe)); padding: 20px 24px 18px; background: var(--welt); border-radius: 4px; box-shadow: 0 12px 0 color-mix(in srgb, var(--welt) 72%, #3b1400), 0 22px 30px -18px rgba(60, 20, 0, .45); }
 .stufe h3 { margin: 0 0 .2em; font: 400 1.35rem/1.15 Shrikhand, Georgia, serif; }
 .stufe p { margin: 0; font-size: 1rem; line-height: 1.5; }
-.stufe .stufe-ball { margin-top: .45em; font-weight: 600; font-size: .9375rem; }
+.stufe .stufe-ball { margin-top: .45em; font-weight: 800; font-size: .9375rem; }
 .stufe-nr { font: 400 2.4rem/1 Shrikhand, Georgia, serif; min-width: 1.1em; }
-.stufe code { font: 600 .8125rem/1.4 UI, system-ui, sans-serif; opacity: .75; white-space: nowrap; }
+.stufe code { font: 800 .8125rem/1.4 UI, system-ui, sans-serif; opacity: .75; white-space: nowrap; }
 
 /* Logo-Tafeln */
 .bk-logos { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin: clamp(28px, 4vw, 48px) 0 18px; }
@@ -30,12 +30,12 @@
 .bk-probe::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(rgba(90, 45, 10, .16) 50%, rgba(255, 255, 255, .55) 50%); }
 .bk-probe p { margin-bottom: .2em; }
 .bk-probe .titel, .bk-probe .zwischen { margin: 0; }
-.bk-etikett { display: block; margin-bottom: .5em; font-size: .8125rem; font-weight: 600; letter-spacing: .03em; opacity: .6; }
+.bk-etikett { display: block; margin-bottom: .5em; font-size: .8125rem; font-weight: 800; letter-spacing: .03em; opacity: .6; }
 
 /* Knöpfe */
 .bk-knopfreihe { display: flex; flex-wrap: wrap; align-items: center; gap: clamp(28px, 6vw, 96px); margin: clamp(28px, 4vw, 48px) 0; }
 .bk-knopfreihe figure { display: grid; justify-items: start; gap: 14px; margin: 0; }
-.bk-knopfreihe figcaption { font-size: .875rem; font-weight: 600; opacity: .7; }
+.bk-knopfreihe figcaption { font-size: .875rem; font-weight: 800; opacity: .7; }
 .bk-knoepfe .nebenweg { --flip: var(--cream); }
 .bk-knoepfe .wave { background: var(--ink); }
 .bk-knoepfe .weiter { --flip: var(--cream); }
@@ -44,12 +44,12 @@
 
 .bk-unter { margin-top: clamp(48px, 6vw, 88px); margin-bottom: clamp(20px, 2.6vw, 32px); }
 .bk-regeln { display: grid; gap: 20px; max-width: 70ch; margin: clamp(24px, 3vw, 40px) 0 0; padding-left: 1.2em; }
-.bk-regeln strong { font-weight: 700; }
+.bk-regeln strong { font-weight: 800; }
 
 .fuss { padding-block: clamp(48px, 6vw, 80px); }
 .fuss-in { display: flex; flex-wrap: wrap; align-items: center; gap: 24px 48px; }
 .fuss-in img { width: clamp(200px, 20vw, 280px); }
-.fuss-nav { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-left: auto; font-weight: 600; }
+.fuss-nav { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-left: auto; font-weight: 800; }
 .fuss-nav a { text-decoration: none; padding: 6px 0; }
 .fuss-credit { flex-basis: 100%; margin: 12px 0 0; opacity: .8; }
 .fuss .offen { color: var(--cream); background: rgba(255, 255, 255, .12); }

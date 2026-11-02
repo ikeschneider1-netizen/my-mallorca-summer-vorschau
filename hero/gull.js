@@ -61,7 +61,7 @@ function slab(points, thick) {
 }
 
 const ARM = 0.42, FORE = 0.4, FOLD_IN = 0.76;
-const DEFAULTS = { yaw: -0.4, pitch: 0, roll: 0, sweep: 0, fold: 1, flapAmp: 0, flapRate: 10, tuck: 0, walk: 0, headYaw: 0, headPitch: 0, headRoll: 0, lid: 0.2, mouth: 0, squash: 0, stare: 0, lookX: 0, lookY: 0, brow: 0, cock: 0.55, smile: 0.5, tongue: 0, shades: 0, shadeTilt: 0, wide: 0, puff: 0, crest: 0, gesture: 0, tailUp: 0, stab: 0.6, blink: 1 };
+const DEFAULTS = { yaw: -0.4, pitch: 0, roll: 0, sweep: 0, fold: 1, flapAmp: 0, flapRate: 10, tuck: 0, walk: 0, headYaw: 0, headPitch: 0, headRoll: 0, lid: 0.3, mouth: 0, squash: 0, stare: 0, lookX: 0, lookY: 0, brow: 0, cock: 0.7, smile: 0.62, tongue: 0, shades: 0, shadeTilt: 0, wide: 0, puff: 0, crest: 0, gesture: 0, tailUp: 0, stab: 0.6, blink: 1 };
 
 export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
   let size = startSize;
@@ -101,6 +101,8 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
   head.position.set(0.6, 0.4, 0);
   head.rotation.order = 'YZX';
   tilt.add(head);
+  // Ein Stück größer als natürlich: Großer Kopf, große Augen, das macht sie frech statt brav.
+  head.scale.setScalar(1.1);
   mesh(paint(shaped(new THREE.SphereGeometry(0.3, 36, 26), (v) => { const brow = v.y > 0 ? 1 - 0.2 * smooth(0, 0.3, v.x) : 1; v.set(v.x * 1.06, v.y * (v.y > 0 ? 0.96 : 1) * brow, v.z * (v.y < 0 ? 1.03 : 0.92)); }), (v, c) => { c.copy(CREAM).lerp(SHADE, smooth(-0.04, -0.28, v.y) * 0.8); }), skin, head);
 
   const toneBeak = (L) => (v, c) => { c.copy(BEAK).lerp(BEAK_TIP, smooth(0.6, 1, v.x / L) * 0.6); };
@@ -126,29 +128,29 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
   // Die Mundwinkel laufen in die Wange und gehen nach oben: Daher kommt das freche Grinsen.
   const corners = [1, -1].map((side) => {
     const m = mesh(new THREE.SphereGeometry(1, 14, 10), beakMat, head, 0.17, -0.048, side * 0.122);
-    m.scale.set(0.082, 0.028, 0.03);
+    m.scale.set(0.09, 0.031, 0.032);
     m.geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(m.geometry.attributes.position.count * 3).map((_, i) => [BEAK_TIP.r, BEAK_TIP.g, BEAK_TIP.b][i % 3]), 3));
     return { m, side };
   });
 
-  const hemi = new THREE.SphereGeometry(0.1, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2);
-  const lashGeo = new THREE.TorusGeometry(0.1, 0.0125, 6, 20, Math.PI);
+  const hemi = new THREE.SphereGeometry(0.113, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2);
+  const lashGeo = new THREE.TorusGeometry(0.113, 0.014, 6, 20, Math.PI);
   lashGeo.rotateX(Math.PI / 2); lashGeo.rotateY(Math.PI / 2);
   const eyes = [1, -1].map((side) => {
     // Die Augen sitzen nah beieinander und nah am Schnabel. +x ist die Blickrichtung des Auges.
     const g = new THREE.Group();
-    g.position.set(0.165, 0.112, side * 0.168);
+    g.position.set(0.163, 0.118, side * 0.174);
     const dir = new THREE.Vector3(0.66, 0.1, side * 0.74).normalize();
     const zz = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize();
     const yy = new THREE.Vector3().crossVectors(zz, dir);
     g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(dir, yy, zz));
     head.add(g);
-    const ball = mesh(new THREE.SphereGeometry(0.094, 24, 18), eyeMat, g);
+    const ball = mesh(new THREE.SphereGeometry(0.106, 24, 18), eyeMat, g);
     const gaze = new THREE.Group();
     g.add(gaze);
-    mesh(new THREE.SphereGeometry(0.068, 18, 14), irisMat, gaze, 0.038, 0, 0);
-    const pupil = mesh(new THREE.SphereGeometry(0.046, 16, 12), pupilMat, gaze, 0.066, 0, 0);
-    const spark = mesh(new THREE.SphereGeometry(0.017, 8, 6), sparkMat, gaze, 0.109, 0.026, 0.014);
+    mesh(new THREE.SphereGeometry(0.077, 18, 14), irisMat, gaze, 0.043, 0, 0);
+    const pupil = mesh(new THREE.SphereGeometry(0.052, 16, 12), pupilMat, gaze, 0.075, 0, 0);
+    const spark = mesh(new THREE.SphereGeometry(0.019, 8, 6), sparkMat, gaze, 0.123, 0.03, 0.016);
     const lids = new THREE.Group();
     g.add(lids);
     const upper = new THREE.Group();
@@ -159,8 +161,8 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
     lids.add(low);
     mesh(hemi, lidMat, low).rotation.x = Math.PI;
     // Die Braue ist außen dick und läuft zum Schnabel hin spitz zu.
-    const browGeo = shaped(new THREE.SphereGeometry(1, 16, 10), (v) => { const k = 0.62 + 0.38 * v.z * side; v.set(v.x * 0.05 * k, v.y * 0.036 * k, v.z * 0.135); });
-    const brow = mesh(browGeo, browMat, lids, 0.015, 0.112, 0);
+    const browGeo = shaped(new THREE.SphereGeometry(1, 16, 10), (v) => { const k = 0.62 + 0.38 * v.z * side; v.set(v.x * 0.056 * k, v.y * 0.042 * k, v.z * 0.15); });
+    const brow = mesh(browGeo, browMat, lids, 0.015, 0.127, 0);
     return { g, gaze, ball, pupil, spark, lids, upper, low, brow, side, inv: g.quaternion.clone().invert() };
   });
   // Die Sonnenbrille: oben auf der Stirn, auf den Augen oder vorn auf dem Schnabel, zum Drüberwegschauen.
@@ -275,7 +277,7 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
     // Vögel halten den Kopf ruhig, auch wenn der Körper kippt, und bewegen ihn dann in kleinen Rucken.
     if (dt > 0 && fold > 0.9 && p.walk < 0.1) { snapIn -= dt; if (snapIn <= 0) { snapIn = 0.6 + Math.random() * 1.7; snapGoal = (Math.random() - 0.5) * 0.2; } } else snapGoal = 0;
     snap += (snapGoal - snap) * (1 - Math.exp(-dt * 26));
-    head.position.set(0.6 + Math.sin(stride * 2) * 0.042 * p.walk, 0.4 + p.puff * 0.05, 0);
+    head.position.set(0.61 + Math.sin(stride * 2) * 0.042 * p.walk, 0.42 + p.puff * 0.05, 0);
     head.rotation.set(p.headRoll, p.headYaw + snap, p.headPitch - Math.max(-1, Math.min(1, p.pitch)) * p.stab + Math.sin(stride * 2) * 0.06 * p.walk);
     jaw.rotation.z = -Math.max(p.mouth, p.tongue * 0.42) * 0.78;
     // Zunge raus: Sie schiebt sich über die Schnabelspitze und wackelt.
@@ -295,8 +297,8 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
     const nearEye = Math.abs(p.yaw) < Math.PI / 2 ? 1 : -1;
     for (const c of corners) {
       const up = p.smile + (c.side === nearEye ? p.cock * 0.5 : -p.cock * 0.25);
-      c.m.rotation.z = -0.3 - up * 0.72;
-      c.m.position.y = -0.052 + up * 0.016;
+      c.m.rotation.z = -0.3 - up * 0.86;
+      c.m.position.y = -0.052 + up * 0.021;
     }
     for (const e of eyes) {
       want.copy(toCam).applyQuaternion(e.inv);
@@ -310,7 +312,7 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
       const small = 1 - p.wide * 0.4;
       e.gaze.scale.setScalar(big);
       e.pupil.scale.setScalar(small);
-      e.pupil.position.x = 0.112 - 0.046 * small;
+      e.pupil.position.x = 0.127 - 0.052 * small;
       e.spark.visible = lid < 0.9;
       // Die Braue kippt das Lid: hoch und schräg heißt „hä?“, tief zum Schnabel heißt „na warte“.
       // Asymmetrie macht das Gesicht frech: Eine Braue steht höher, das andere Auge ist etwas zugekniffen.
@@ -319,7 +321,7 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
       e.lids.scale.setScalar(big);
       e.upper.rotation.z = mix(0.72, -0.3, l);
       e.low.rotation.z = mix(-0.92, -0.26, smooth(0.5, 1, l));
-      e.brow.position.y = 0.112 + Math.max(0, b) * 0.042 - l * 0.016;
+      e.brow.position.y = 0.127 + Math.max(0, b) * 0.05 - l * 0.018;
       e.brow.position.x = 0.015 + l * 0.05;
       e.brow.rotation.x = e.side * b * 0.3;
     }

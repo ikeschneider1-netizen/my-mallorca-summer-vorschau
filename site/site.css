@@ -1,7 +1,7 @@
 /* My Mallorca Summer · gemeinsamer Baukasten für alle Seiten nach dem Hero.
    Farben, Schrift und Bewegung kommen aus dem Hero (hero/hero.css) und dem Gesamtentwurf vom 30.10.2026. */
 @font-face { font-family: Shrikhand; src: url('../hero/assets/fonts/shrikhand-latin.woff2') format('woff2'); font-display: swap; }
-@font-face { font-family: UI; src: url('../hero/assets/fonts/ui.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: UI; src: url('../hero/assets/fonts/ui.woff2') format('woff2'); font-weight: 400 900; font-display: swap; }
 
 :root {
   /* Marke, wie im Hero */
@@ -51,12 +51,12 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 @keyframes wiegen { from { rotate: -1.4deg; translate: 0 0; } to { rotate: 1.2deg; translate: -14px 6px; } }
 
 /* Schrift */
-.dach { display: flex; align-items: center; gap: .55em; margin: 0 0 .9rem; font-size: var(--t-klein); font-weight: 600; letter-spacing: .02em; }
+.dach { display: flex; align-items: center; gap: .55em; margin: 0 0 .9rem; font-size: var(--t-klein); font-weight: 800; letter-spacing: .02em; }
 .dach::before { content: ''; width: 1.05em; height: 1.05em; background: url('../hero/assets/ball-96.png') center / contain no-repeat; }
 .titel { margin: 0 0 .35em; font: 400 var(--t-titel)/.98 Shrikhand, Georgia, serif; letter-spacing: -.005em; text-wrap: balance; }
 .titel em { font-style: normal; color: var(--betont, var(--meer)); }
 .zwischen { margin: 0 0 .4em; font: 400 var(--t-zwischen)/1.12 Shrikhand, Georgia, serif; text-wrap: balance; }
-.vorspann { font-size: var(--t-lead); font-weight: 500; line-height: 1.45; max-width: 40ch; text-wrap: pretty; }
+.vorspann { font-size: var(--t-lead); font-weight: 600; line-height: 1.45; max-width: 40ch; text-wrap: pretty; }
 .klein { font-size: var(--t-klein); }
 
 /* Kapiteltitel im Hero-Look: cremefarbene Buchstaben mit Tiefe. Das Licht kommt wie in der Szene von rechts oben,
@@ -75,16 +75,32 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 .kapitel > .szene-licht::after { content: ''; position: absolute; right: -6%; top: 22%; width: min(1100px, 95%); aspect-ratio: 5 / 4; background: url('palme-schatten.svg') no-repeat right top / contain; opacity: .1; mix-blend-mode: multiply; transform-origin: 100% 0; animation: wiegen 11s ease-in-out infinite alternate; }
 .szene::before { display: none; }
 .kapitel > .spielball, .kapitel > .spielball-schatten { max-width: none; margin: 0; }
-.szene-vanille { --moewe-b: clamp(104px, 11.5cqw, 176px); --mx: .072; --my: .44; }
+.szene-vanille { --moewe-b: clamp(104px, 11.5cqw, 176px); --mx: .16; --my: .747; }
 .kapitel > .szene-oben, .kapitel > .szene-unten { position: absolute; z-index: -1; max-width: none; height: auto; margin: 0; pointer-events: none; user-select: none; }
 .szene-oben { top: 0; left: calc(var(--ol, 0) * 100%); width: calc(var(--ow, 1) * 100%); -webkit-mask: linear-gradient(#000 66%, transparent); mask: linear-gradient(#000 66%, transparent); }
 .szene-unten { bottom: 0; left: calc(var(--ul, 0) * 100%); width: calc(var(--uw, 1) * 100%); -webkit-mask: linear-gradient(transparent, #000 24%); mask: linear-gradient(transparent, #000 24%); }
-/* Die Möwe aus dem Hero, freigestellt in drei Haltungen. Sie steht mit den Füßen auf einer Stelle des unteren Szenenbilds (--mx, --my). */
-.kapitel > .moewe { position: absolute; z-index: 2; max-width: none; margin: 0; width: var(--moewe-b, 150px); aspect-ratio: 420 / 291; left: calc((var(--ul, 0) + var(--mx, .1) * var(--uw, 1)) * 100% - .61 * var(--moewe-b, 150px)); bottom: calc(var(--uw, 1) * (100cqw + 2 * var(--rand)) * 750 / 1740 * (1 - var(--my, .5)) - .02 * var(--moewe-b, 150px)); transform-origin: 61% 100%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.moewe img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; filter: drop-shadow(0 6px 5px rgba(80, 30, 0, .28)); }
-.moewe img:first-child, .moewe[data-lage='frech'] img:nth-child(2), .moewe[data-lage='schreck'] img:nth-child(3) { opacity: 1; }
-.moewe[data-lage='frech'] img:first-child, .moewe[data-lage='schreck'] img:first-child { opacity: 0; }
-.moewe-atem { position: absolute; inset: 0; transform-origin: 61% 100%; animation: atmen 3.4s ease-in-out infinite alternate; }
+/* Die Möwe aus dem Hero, freigestellt: drei Haltungen im Stand, drei Flügelstellungen im Flug.
+   Ohne Skript steht sie mit den Füßen auf einer Stelle des unteren Szenenbilds (--mx, --my); mit Skript fliegt sie zwischen ihren Plätzen. */
+.kapitel > .moewe { position: absolute; z-index: 2; max-width: none; margin: 0; width: var(--moewe-b, 150px); aspect-ratio: 849 / 616; left: calc((var(--ul, 0) + var(--mx, .1) * var(--uw, 1)) * 100% - .557 * var(--moewe-b, 150px)); bottom: calc(var(--uw, 1) * (100cqw + 2 * var(--rand)) * 750 / 1740 * (1 - var(--my, .5)) - .005 * var(--moewe-b, 150px)); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.kapitel > .moewe.frei { left: 0; top: 0; bottom: auto; }
+.moewe-dreh { position: absolute; inset: 0; transform-origin: 55.7% 100%; transition: scale 200ms var(--out); }
+.moewe.links .moewe-dreh { scale: -1 1; }
+.moewe img { position: absolute; opacity: 0; filter: drop-shadow(0 6px 5px rgba(80, 30, 0, .28)); }
+.moewe-stand img { inset: 0; width: 100%; height: 100%; }
+.moewe-stand img:first-child, .moewe[data-lage='frech'] .moewe-stand img:nth-child(2), .moewe[data-lage='schreck'] .moewe-stand img:nth-child(3) { opacity: 1; }
+.moewe[data-lage='frech'] .moewe-stand img:first-child, .moewe[data-lage='schreck'] .moewe-stand img:first-child { opacity: 0; }
+.moewe-stand { position: absolute; inset: 0; transform-origin: 55.7% 100%; animation: atmen 3.4s ease-in-out infinite alternate; }
+.moewe-flug { position: absolute; left: 50%; top: 52%; width: 91.4%; aspect-ratio: 776 / 1144; translate: -50% -50%; visibility: hidden; }
+.moewe-flug img { inset: 0; width: 100%; height: 100%; }
+/* Im Flug: Standbilder weg, Flügelschlag oben, Mitte, unten, Mitte. */
+.moewe.fliegt .moewe-stand { visibility: hidden; }
+.moewe.fliegt .moewe-flug { visibility: visible; }
+.moewe.fliegt .moewe-flug img:nth-child(1) { animation: schlag-oben 300ms steps(1) infinite; }
+.moewe.fliegt .moewe-flug img:nth-child(2) { animation: schlag-mitte 300ms steps(1) infinite; }
+.moewe.fliegt .moewe-flug img:nth-child(3) { animation: schlag-unten 300ms steps(1) infinite; }
+@keyframes schlag-oben { 0% { opacity: 1; } 25%, 100% { opacity: 0; } }
+@keyframes schlag-mitte { 0% { opacity: 0; } 25% { opacity: 1; } 50% { opacity: 0; } 75% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes schlag-unten { 0%, 50% { opacity: 0; } 50.01% { opacity: 1; } 75%, 100% { opacity: 0; } }
 @keyframes atmen { to { scale: 1 1.018; } }
 .szene-vanille { --welt: #fcead1; --band: url('szene/vanille-band.webp'); }
 
@@ -120,7 +136,7 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 html:not(.site-js) .spielball-schatten { display: none; }
 
 /* Markierung für offene Kundenfragen: sichtbar, aber ohne die Gestaltung zu sprengen. */
-.offen { position: relative; display: inline-block; margin: .35em 0 0 .2em; padding: .15em .55em .2em; font-size: .78em; font-weight: 600; line-height: 1.4; color: var(--ink); background: #fffdf6; box-shadow: -2px 3px 6px rgba(90, 40, 0, .16); rotate: -1.4deg; white-space: nowrap; vertical-align: .08em; }
+.offen { position: relative; display: inline-block; margin: .35em 0 0 .2em; padding: .15em .55em .2em; font-size: .78em; font-weight: 800; line-height: 1.4; color: var(--ink); background: #fffdf6; box-shadow: -2px 3px 6px rgba(90, 40, 0, .16); rotate: -1.4deg; white-space: nowrap; vertical-align: .08em; }
 .offen::before { content: ''; position: absolute; left: 50%; top: -.45em; width: 2.4em; height: .8em; translate: -50% 0; rotate: 3deg; background: rgba(255, 214, 80, .55); }
 
 /* Links: keine Rahmen, keine Pillen. Wörter, die umklappen, und eine Welle darunter. */
@@ -134,7 +150,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 @keyframes flow { to { -webkit-mask-position: -22px 0; mask-position: -22px 0; } }
 
 /* „Lieber per Formular“ und andere Nebenwege: Wort mit Welle, die beim Überfahren hereinläuft. */
-.nebenweg { --flip: var(--meer); position: relative; display: inline-block; padding: 6px 0; font-weight: 600; text-decoration: none; }
+.nebenweg { --flip: var(--meer); position: relative; display: inline-block; padding: 6px 0; font-weight: 800; text-decoration: none; }
 .nebenweg .wave { background: var(--meer); bottom: 2px; height: 2px; -webkit-mask: none; mask: none; clip-path: inset(0 0 0 0); opacity: .35; animation: none; transition: opacity 300ms ease; }
 .nebenweg:focus-visible .wave { opacity: 1; animation-play-state: running; }
 
@@ -156,7 +172,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .aufkleber .sonne path { fill: var(--coral); transition: fill 320ms ease; }
 .aufkleber-in { position: relative; display: grid; justify-items: center; rotate: -9deg; transition: rotate 460ms var(--boing); }
 .aufkleber-in svg { width: 1.3em; height: 1.3em; margin-bottom: .14em; fill: currentColor; }
-.aufkleber-oben { font: 600 .64em/1.15 UI, system-ui, sans-serif; letter-spacing: .01em; white-space: nowrap; }
+.aufkleber-oben { font: 800 .64em/1.15 UI, system-ui, sans-serif; letter-spacing: .01em; white-space: nowrap; }
 .aufkleber:active { scale: .94; transition-duration: 130ms; }
 .aufkleber:focus-visible .sonne path { fill: var(--sun); }
 .aufkleber:focus-visible { outline: none; }
@@ -188,7 +204,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .frage::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(rgba(90, 45, 10, .16) 50%, rgba(255, 255, 255, .55) 50%); }
 .frage summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 0 20px; list-style: none; cursor: pointer; }
 .frage summary::-webkit-details-marker { display: none; }
-.frage h3 { margin: 0; font: 600 clamp(1.1rem, 1rem + .4vw, 1.3rem)/1.3 UI, system-ui, sans-serif; }
+.frage h3 { margin: 0; font: 800 clamp(1.1rem, 1rem + .4vw, 1.3rem)/1.3 UI, system-ui, sans-serif; }
 .frage summary img { flex: none; width: 30px; height: 30px; transition: transform 640ms var(--boing); }
 .frage[open] summary img { transform: rotate(-200deg) scale(.86); }
 .frage .antwort { padding: 0 0 22px; max-width: 64ch; }
@@ -229,7 +245,7 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .kapitel::before, .moewe-atem, .kapitel > .szene-licht::after { animation: none; }
+  .kapitel::before, .moewe-stand, .kapitel > .szene-licht::after { animation: none; }
   .fakt-ding { transition: none; }
   .site-js [data-zeigen], .site-js .titel[data-zeigen] .w, .site-js .foto[data-zeigen] { opacity: 1; translate: none; transition: none; }
   .site-js .foto[data-zeigen] { rotate: var(--kipp); }
@@ -254,7 +270,7 @@ html.im-hero .seitenkopf { translate: 0 -120%; opacity: 0; visibility: hidden; t
 .seitenkopf-logo .hell, html[data-kopf='dunkel'] .seitenkopf-logo .dunkel { display: none; }
 html[data-kopf='dunkel'] .seitenkopf-logo .hell { display: block; filter: drop-shadow(0 1px 8px rgba(0, 34, 44, .6)); }
 html[data-kopf='dunkel'] .seitenkopf { color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .5); }
-.seitenmenue { --flip: var(--plum); display: flex; align-items: center; gap: clamp(18px, 2.4vw, 38px); margin-left: auto; font: 600 clamp(15px, 1.15vw, 18px)/1.2 UI, system-ui, sans-serif; }
+.seitenmenue { --flip: var(--plum); display: flex; align-items: center; gap: clamp(18px, 2.4vw, 38px); margin-left: auto; font: 800 clamp(15px, 1.15vw, 18px)/1.2 UI, system-ui, sans-serif; }
 .seitenmenue > a { padding: 8px 0; text-decoration: none; }
 html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }
 .menue-knopf, .menue-wege { display: none; }
@@ -265,7 +281,7 @@ html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }
 @media (max-width: 760px), (orientation: landscape) and (max-height: 540px) {
   .seitenkopf { padding: max(8px, env(safe-area-inset-top, 0px)) var(--rand) 8px; }
   .seitenkopf-logo img { width: 132px; }
-  .menue-knopf { position: relative; z-index: 22; display: block; min-height: 44px; margin-left: auto; border: 0; padding: 10px 0; font: 600 clamp(16px, 4.1vw, 20px)/1.2 UI, system-ui, sans-serif; color: inherit; background: none; text-shadow: inherit; cursor: pointer; }
+  .menue-knopf { position: relative; z-index: 22; display: block; min-height: 44px; margin-left: auto; border: 0; padding: 10px 0; font: 800 clamp(16px, 4.1vw, 20px)/1.2 UI, system-ui, sans-serif; color: inherit; background: none; text-shadow: inherit; cursor: pointer; }
   .menue-zu, .menue-offen .menue-auf { display: none; }
   .menue-offen .menue-zu { display: inline; }
   .menue-offen .menue-knopf { color: var(--ink); text-shadow: none; }
@@ -279,7 +295,7 @@ html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }
   .menue-wege { display: grid; gap: 6px; margin-top: clamp(14px, 3vh, 30px); }
   .menue-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); text-decoration: none; }
   .menue-wa svg { flex: none; width: 1.1em; height: 1.1em; fill: currentColor; }
-  .menue-form { min-height: 44px; padding: 10px 0; font: 600 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--ink); }
+  .menue-form { min-height: 44px; padding: 10px 0; font: 800 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--ink); }
   .der-aufkleber { --d: clamp(100px, 27vw, 150px); top: auto; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
   .der-aufkleber .nur-gross { display: none; }
   .der-aufkleber .nur-klein { display: block; }
