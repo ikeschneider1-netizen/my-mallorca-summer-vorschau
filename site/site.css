@@ -1,7 +1,7 @@
 /* My Mallorca Summer · gemeinsamer Baukasten für alle Seiten nach dem Hero.
    Farben, Schrift und Bewegung kommen aus dem Hero (hero/hero.css) und dem Gesamtentwurf vom 30.10.2026. */
 @font-face { font-family: Shrikhand; src: url('../hero/assets/fonts/shrikhand-latin.woff2') format('woff2'); font-display: swap; }
-@font-face { font-family: UI; src: url('../hero/assets/fonts/ui.woff2') format('woff2'); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: UI; src: url('../hero/assets/fonts/nunito.woff2') format('woff2'); font-weight: 400 900; font-display: swap; }
 
 :root {
   /* Marke, wie im Hero */

@@ -1,5 +1,4 @@
-@font-face { font-family: Shrikhand; src: url('assets/fonts/shrikhand-latin.woff2') format('woff2'); font-display: swap; }
-@font-face { font-family: UI; src: url('assets/fonts/ui.woff2') format('woff2'); font-weight: 400 900; font-display: swap; }
+/* Die Schriften (Shrikhand, Nunito als UI) meldet ../site/site.css an, die diese Seite vor hero.css lädt. Doppelt angemeldet würde der Browser sie doppelt laden. */
 
 :root {
   --sticker: clamp(108px, 9.8vw, 148px);
