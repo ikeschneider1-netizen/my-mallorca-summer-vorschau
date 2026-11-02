@@ -67,10 +67,20 @@
 
       seitenkopf();
       faecher();
+      // Fakten: Beim Überfahren oder Antippen spielt der Gegenstand seine kleine Szene einmal ganz durch.
+      if (!reduced.matches) for (const f of document.querySelectorAll('.fakt')) {
+        const ding = f.querySelector('.fakt-ding');
+        if (!ding) continue;
+        const los = () => f.classList.add('spielt');
+        f.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') los(); });
+        f.addEventListener('click', los);
+        ding.addEventListener('animationend', () => f.classList.remove('spielt'));
+      }
       const titel = raumTitel();
       spielbaelle(titel);
       wind();
       aufkleberPlatz();
+      mauerMoewe();
 
       // Einblenden, sobald ein Teil ins Bild kommt. Einmal, nicht bei jedem Scrollen.
       const io = new IntersectionObserver((entries) => {
@@ -100,6 +110,34 @@
       if (takt.size) requestAnimationFrame(schritt); else tickt = false;
     });
   };
+
+  // Die Möwe auf der Mauerkante der Landung: Sie sitzt da, wenn man durch den Ring ankommt, und schaut auf den Titel.
+  // Landet der Titel, guckt sie frech. Antippen erschreckt sie, sie hüpft und schimpft stumm. Scrollt man weiter ins Kapitel,
+  // fliegt sie hinunter, dort sitzt sie dann. Scrollt man zurück, sitzt sie wieder oben.
+  function mauerMoewe() {
+    const m = document.querySelector('.moewe-mauer'), kapitel = document.querySelector('.job-rest');
+    if (!m || reduced.matches || !m.animate) return;
+    let zeit = 0, weg = false, flug = null;
+    const lage = (l, ms) => { m.dataset.lage = l; clearTimeout(zeit); if (ms) zeit = setTimeout(() => lage(l === 'schreck' ? 'frech' : 'ruhe', l === 'schreck' ? 1400 : 0), ms); };
+    const titel = document.getElementById('job-t');
+    if (titel) new MutationObserver(() => { if (titel.classList.contains('da') && !weg) setTimeout(() => lage('frech', 2000), 700); }).observe(titel, { attributes: true, attributeFilter: ['class'] });
+    m.addEventListener('click', () => {
+      if (weg) return;
+      lage('schreck', 420);
+      m.querySelector('.moewe-stand').animate([{ transform: 'none' }, { transform: 'translateY(-32%) scale(.95, 1.06)' }, { transform: 'scale(1.1, .88)' }, { transform: 'none' }], { duration: 560, easing: 'cubic-bezier(.3, 1.4, .5, 1)' });
+    });
+    if (!kapitel) return;
+    // Sobald das Kapitel von unten ins Bild kommt, verlässt die Bühne mit der Landung den Bildschirm: Jetzt hebt sie ab.
+    new IntersectionObserver(([e]) => {
+      const unterhalb = e.boundingClientRect.top > innerHeight * 0.5;
+      if (e.isIntersecting && !unterhalb && !weg) {
+        weg = true; m.classList.add('fliegt');
+        flug = m.animate([{ transform: 'none', opacity: 1 }, { transform: 'translate(-120%, 60%) scale(1.25)', opacity: 1, offset: 0.55 }, { transform: 'translate(-240%, 260%) scale(1.6)', opacity: 0 }], { duration: 1300, easing: 'cubic-bezier(.45, 0, .7, 1)', fill: 'forwards' });
+      } else if (!e.isIntersecting && unterhalb && weg) {
+        weg = false; flug?.cancel(); m.classList.remove('fliegt'); lage('ruhe');
+      }
+    }, { threshold: [0, 0.02] }).observe(kapitel);
+  }
 
   // Der eine Aufkleber macht Platz, wenn Text unter ihm liegt: Er schrumpft in seiner Ecke zur kleinen WhatsApp-Sonne (.platz)
   // und springt groß zurück, sobald darunter wieder Szene ist. Geprüft wird an neun Punkten innerhalb der Sonne.
@@ -457,12 +495,23 @@ void main() {
         if (ms) moeweZeit = setTimeout(() => haltung(l === 'schreck' ? 'frech' : 'ruhe', l === 'schreck' ? 1600 : 0), ms);
       };
       const sitzPunkt = (i) => ({ x: unten.x + sitze[i][0] * unten.w, y: unten.y + sitze[i][1] * unten.h });
-      // Ein Platz zählt, wenn er im Bild ist und nicht dort, wo der Ball gerade liegt.
-      const sichtbar = (i) => { const q = sitzPunkt(i); return q.x > W * 0.08 && q.x < W * 0.92 && (B.lage !== 'ruhe' || Math.abs(q.x - B.x) > B.r * 3.2); };
+      // Ein Platz zählt, wenn er im Bild ist, nicht dort, wo der Ball gerade liegt, und wenn die Möwe dort keinen Text verdeckt
+      // (je nach Breite rücken Wörter an Kübel oder Stufen heran).
+      const textFrei = (i) => {
+        if (!moewe) return true;
+        const q = sitzPunkt(i), f = feld.getBoundingClientRect(), mw = moewe.offsetWidth, mh = moewe.offsetHeight;
+        const l = q.x - 0.547 * mw + mw * 0.18, r = q.x - 0.547 * mw + mw * 0.82, t = q.y - mh * 0.95, b = q.y;
+        for (const el of feld.querySelectorAll('.fakt dt, .fakt dd, .offen, .job-los a')) {
+          const e = el.getBoundingClientRect(), x = e.left - f.left, y = e.top - f.top;
+          if (x + e.width > l && x < r && y + e.height > t && y < b) return false;
+        }
+        return true;
+      };
+      const sichtbar = (i) => { const q = sitzPunkt(i); return q.x > W * 0.08 && q.x < W * 0.92 && (B.lage !== 'ruhe' || Math.abs(q.x - B.x) > B.r * 3.2) && textFrei(i); };
       // Die Füße stehen im Bild bei 54,7 % der Breite, ganz unten.
       const stellen = () => { const w = moewe.offsetWidth, h = moewe.offsetHeight; moewe.style.transform = `translate(${(M.x - 0.547 * w).toFixed(1)}px, ${(M.y - 0.995 * h).toFixed(1)}px)`; };
       const setzen = (i) => { platz = i; const q = sitzPunkt(i); M.x = q.x; M.y = q.y; moewe.classList.toggle('links', sitze[i][0] > 0.55); stellen(); };
-      const fliegen = (ziel) => {
+      const fliegen = (ziel, getroffenVomBall = false) => {
         if (!moewe || fliegt || ziel === platz || reduced.matches) return;
         mass();
         const a = { x: M.x, y: M.y }, b = sitzPunkt(ziel), k = moewe.offsetWidth / 150;
@@ -481,12 +530,89 @@ void main() {
           moewe.classList.remove('fliegt'); moewe.classList.toggle('links', sitze[ziel][0] > 0.55);
           const stand = moewe.querySelector('.moewe-stand');
           if (stand.animate) stand.animate([{ transform: 'scale(1.1, .86)' }, { transform: 'scale(1, 1)' }], { duration: 320, easing: 'cubic-bezier(.3, 1.6, .5, 1)' });
-          haltung('frech', 1600);
+          if (getroffenVomBall) {
+            // Nach dem Treffer: Sie schüttelt sich, dreht sich zum Ball und schaut ihn lange frech an.
+            moewe.classList.toggle('links', B.x < M.x);
+            if (stand.animate) stand.animate([{ rotate: '0deg' }, { rotate: '-10deg' }, { rotate: '8deg' }, { rotate: '-5deg' }, { rotate: '2deg' }, { rotate: '0deg' }], { duration: 700, delay: 300, easing: 'ease-in-out' });
+            haltung('frech', 3200);
+          } else haltung('frech', 1600);
           naechsterFlug = performance.now() + 9000 + Math.random() * 7000;
           return false;
         });
       };
       const wegfliegen = () => { const frei = sitze.map((_, i) => i).filter((i) => i !== platz && sichtbar(i)); if (frei.length) fliegen(frei[Math.floor(Math.random() * frei.length)]); };
+      // Federn beim Treffer: Sie stieben in Schussrichtung auseinander und segeln pendelnd zu Boden.
+      const federn = (x, y, nx, ny, k) => {
+        for (let i = 0; i < 8; i++) {
+          const f = document.createElement('i'); f.className = 'feder'; f.style.setProperty('--k', k.toFixed(2)); feld.append(f);
+          const w = (Math.random() - 0.5) * 2.2, v = (160 + Math.random() * 260) * k;
+          const vx = (nx * 0.6 + Math.cos(w) * 0.5 * (Math.random() < 0.5 ? -1 : 1)) * v, vy = (Math.min(ny, -0.3) * 0.7 - Math.random() * 0.5) * v;
+          const dauer = 1600 + Math.random() * 1100, schritte = [], pend = (12 + Math.random() * 16) * k, dreh = Math.random() * 360;
+          for (let j = 0; j <= 12; j++) {
+            const t = (j / 12) * dauer / 1000, auf = 1 - Math.exp(-3 * t);
+            const px = x + vx * auf / 3 + Math.sin(t * 5.5 + i) * pend * Math.min(1, t * 2), py = y + vy * auf / 3 + 70 * k * t * t + 40 * k * t;
+            schritte.push({ transform: `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) rotate(${(dreh + Math.sin(t * 5.5 + i) * 50).toFixed(1)}deg)`, opacity: j < 9 ? 1 : 1 - (j - 8) / 4 });
+          }
+          if (!f.animate) { f.remove(); continue; }
+          f.animate(schritte, { duration: dauer, easing: 'linear', fill: 'forwards' }).onfinish = () => f.remove();
+        }
+      };
+      // Volltreffer mit dem Ball: Die Möwe fliegt wie aus der Kanone geschossen. Einen Wimpernschlag platt, Federn, dann eine Wurfbahn
+      // mit Schwerkraft und Luftwiderstand, dabei überschlägt sie sich mit wild schlagenden Flügeln. Am Scheitel fängt sie sich und
+      // fliegt zu dem Platz, der am weitesten vom Ball weg ist. Fliegt sie aus dem Bild, kommt sie kurz danach von der Seite zurück.
+      const abschuss = (nx, ny, wucht) => {
+        if (!moewe || fliegt || reduced.matches || !moewe.animate) return;
+        mass();
+        const k = moewe.offsetWidth / 150, w = moewe.offsetWidth, h = moewe.offsetHeight, flug = moewe.querySelector('.moewe-flug'), stand = moewe.querySelector('.moewe-stand');
+        fliegt = true; moeweBox = null; clearTimeout(moeweZeit); platz = -1;
+        haltung('schreck');
+        federn(M.x - w * 0.05, M.y - h * 0.55, nx, ny, k);
+        stand.animate([{ transform: `scale(${1 + 0.32 * Math.abs(nx)}, ${1 - 0.3 * Math.max(0.4, Math.abs(ny))})` }, { transform: 'scale(1, 1)' }], { duration: 110, easing: 'ease-out' });
+        // Immer schräg nach oben, mit genug Wucht für einen echten Abflug.
+        const ry = Math.min(ny, -0.55), rl = Math.hypot(nx, ry) || 1, V = Math.min(1500, 900 + wucht * 0.35) * k;
+        let vx = nx / rl * V, vy = ry / rl * V, t = 0, dreh = 0, spin = (vx >= 0 ? 1 : -1) * (900 + Math.random() * 300), gefangen = 0;
+        const G = 1900 * k, links = vx < 0;
+        const ziel = () => {
+          const frei = sitze.map((_, i) => i).filter((i) => sichtbar(i));
+          frei.sort((a, b) => Math.abs(sitzPunkt(b).x - B.x) - Math.abs(sitzPunkt(a).x - B.x));
+          return frei.length ? frei[0] : -1;
+        };
+        const ankommen = (i) => { fliegt = false; flug.style.rotate = ''; moewe.classList.remove('trudelt'); if (i >= 0) fliegen(i, true); else { moewe.classList.remove('fliegt'); naechsterFlug = performance.now() + 4000; } };
+        setTimeout(() => {
+          moewe.classList.add('fliegt', 'trudelt'); moewe.classList.toggle('links', links);
+          laufen((dt) => {
+            t += dt;
+            if (!gefangen) {
+              vx *= Math.exp(-1.1 * dt); vy = vy * Math.exp(-1.1 * dt) + G * dt;
+              spin *= Math.exp(-1.9 * dt); dreh += spin * dt;
+              // Am Scheitel fängt sie sich: Die Flügel greifen wieder Luft, der Überschlag läuft aus.
+              if (t > 0.5 && vy > -120 * k) { gefangen = t; moewe.classList.remove('trudelt'); }
+            } else {
+              vx *= Math.exp(-3.5 * dt); vy = vy * Math.exp(-5 * dt) + G * 0.12 * dt;
+              const aufrecht = Math.round(dreh / 360) * 360; dreh += (aufrecht - dreh) * (1 - Math.exp(-9 * dt));
+            }
+            M.x += vx * dt; M.y += vy * dt;
+            stellen(); flug.style.rotate = `${dreh.toFixed(1)}deg`;
+            const sichtOben = scrollY - oben;
+            const draussen = M.x < -w * 0.7 || M.x > W + w * 0.7 || M.y < sichtOben - h * 0.4 || M.y < -h * 0.4;
+            if (draussen) {
+              // Aus dem Bild geschossen: Kurz Ruhe, dann kommt sie von der Seite zurück, mit Wut im Bauch.
+              moewe.style.visibility = 'hidden'; fliegt = true;
+              setTimeout(() => {
+                mass();
+                const i = ziel();
+                if (i < 0) { moewe.style.visibility = ''; ankommen(-1); return; }
+                const q = sitzPunkt(i), vonLinks = q.x > W / 2 ? false : true;
+                M.x = vonLinks ? -w * 0.6 : W + w * 0.6; M.y = Math.max(scrollY - oben + innerHeight * 0.25, q.y - innerHeight * 0.45);
+                moewe.style.visibility = ''; stellen(); ankommen(i);
+              }, 1500 + Math.random() * 700);
+              return false;
+            }
+            if (gefangen && t - gefangen > 0.38) { ankommen(ziel()); return false; }
+            return true;
+          });
+        }, 110);
+      };
       if (moewe) {
         moewe.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && !fliegt) haltung('frech', 1500); });
         moewe.addEventListener('pointerdown', () => { if (reduced.matches || !sitze.length) { haltung('frech', 1800); return; } haltung('schreck', 260); setTimeout(wegfliegen, 180); });
@@ -553,9 +679,12 @@ void main() {
               getroffen.set(moewe, performance.now());
               // Kein Schwung nach oben dazu: Der Ball rutscht seitlich von ihr ab, sonst hüpft er endlos auf ihrem Kopf.
               const weg = B.x < moeweBox.x + moeweBox.w / 2 ? -1 : 1;
+              // Wie hart der Ball trifft, entscheidet: ein Stups scheucht sie auf, ein echter Schuss schießt sie weg.
+              const wucht = Math.hypot(B.vx, B.vy) / s, mx = moeweBox.x + moeweBox.w / 2 - B.x, my = moeweBox.y + moeweBox.h * 0.45 - B.y, ml = Math.hypot(mx, my) || 1;
               B.vy = -Math.abs(B.vy) * 0.4; B.vx = weg * Math.max(380 * s, Math.abs(B.vx) * 0.7);
               B.x = weg < 0 ? Math.min(B.x, moeweBox.x - B.r * 0.2) : Math.max(B.x, moeweBox.x + moeweBox.w + B.r * 0.2);
-              haltung('schreck', 300); setTimeout(wegfliegen, 240);
+              if (wucht > 420) abschuss(mx / ml, my / ml, wucht);
+              else { haltung('schreck', 300); setTimeout(wegfliegen, 240); }
             }
           }
           B.rot += (B.x - altX) / B.r;
@@ -596,6 +725,8 @@ void main() {
         laufen(physik);
       };
       ball.addEventListener('click', schuss);
+      // Für die Prüfskripte (nur mit ?debug): den Abschuss der Möwe direkt auslösen.
+      if (/[?&]debug\b/.test(location.search)) feld.__abschuss = abschuss;
       ball.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); schuss(); } });
       // Das untere Bild ist am Handy breiter als der Bildschirm, darum eine niedrige Schwelle.
       new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { io.disconnect(); herein(); } }, { threshold: 0.12 }).observe(bild);

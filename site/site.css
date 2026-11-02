@@ -112,6 +112,15 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 .moewe.fliegt .moewe-flug img:nth-child(1) { animation: schlag-oben 300ms steps(1) infinite; }
 .moewe.fliegt .moewe-flug img:nth-child(2) { animation: schlag-mitte 300ms steps(1) infinite; }
 .moewe.fliegt .moewe-flug img:nth-child(3) { animation: schlag-unten 300ms steps(1) infinite; }
+/* Auf der Mauerkante der Landung sitzt die Möwe und schaut auf den Titel (Kante bei 80 % Breite, 28,7 % Höhe des Bildes).
+   Scrollt man ins Kapitel, fliegt sie hinunter. Nur am Rechner: Am Handy liegt diese Stelle außerhalb des Bildes. */
+.szene-oben .moewe-mauer { position: absolute; left: 80%; top: 29%; width: 8.4%; aspect-ratio: 864 / 640; translate: -54.7% -99.5%; pointer-events: auto; cursor: pointer; }
+.szene-oben .moewe-mauer img { max-width: none; height: 100%; }
+.szene-oben .moewe-mauer .moewe-stand::before { display: none; }
+@media (max-width: 760px), (orientation: landscape) and (max-height: 540px) { .szene-oben .moewe-mauer { display: none; } }
+/* Abgeschossen: Die Flügel schlagen hektisch, während sie sich überschlägt. Federn stieben dabei auseinander. */
+.moewe.trudelt .moewe-flug img { animation-duration: 130ms !important; }
+.kapitel > .feder { position: absolute; z-index: 3; left: 0; top: 0; max-width: none; margin: 0; width: calc(20px * var(--k, 1)); aspect-ratio: 5 / 2; background: url('feder.svg') center / contain no-repeat; filter: drop-shadow(0 2px 2px rgba(80, 30, 0, .22)); pointer-events: none; }
 @keyframes schlag-oben { 0% { opacity: 1; } 25%, 100% { opacity: 0; } }
 @keyframes schlag-mitte { 0% { opacity: 0; } 25% { opacity: 1; } 50% { opacity: 0; } 75% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes schlag-unten { 0%, 50% { opacity: 0; } 50.01% { opacity: 1; } 75%, 100% { opacity: 0; } }
@@ -127,7 +136,14 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 .job-kopf .vorspann { max-width: 44ch; }
 .job .fakten { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(28px, 4cqw, 60px); }
 .job .fakt dd { font-size: 1.0625rem; line-height: 1.55; }
-.job-los { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 36px; margin-top: clamp(24px, 3cqw, 44px); margin-left: clamp(0px, 13cqw, 220px); }
+@media (min-width: 1101px) {
+  .job .fakt:nth-child(even) { margin-top: clamp(28px, 4cqw, 72px); }
+  .job .fakt:nth-child(4n + 1) .fakt-ding { rotate: -4deg; }
+  .job .fakt:nth-child(4n + 3) .fakt-ding { rotate: 3deg; }
+  .site-js .job .fakt:nth-child(4n + 1)[data-zeigen].da .fakt-ding { rotate: -4deg; }
+  .site-js .job .fakt:nth-child(4n + 3)[data-zeigen].da .fakt-ding { rotate: 3deg; }
+}
+.job-los { display: flex; flex-wrap: wrap; align-items: center; gap: 10px clamp(20px, 2.2vw, 30px); margin-top: clamp(24px, 3cqw, 44px); margin-left: clamp(0px, 13cqw, 220px); }
 /* Titel und Einleitung stehen unten in der Landung: Oben bleiben Himmel und Palme frei, darunter schließen die Fakten ohne Lücke an. */
 .landung { display: flex; flex-direction: column; justify-content: flex-end; min-height: 100vh; min-height: 100svh; padding-bottom: clamp(16px, 3.5vh, 44px); }
 .landung > .job-kopf { width: 100%; }
@@ -154,7 +170,7 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 html:not(.site-js) .spielball-schatten { display: none; }
 
 /* Markierung für offene Kundenfragen: sichtbar, aber ohne die Gestaltung zu sprengen. */
-.offen { position: relative; display: inline-block; margin: .35em 0 0 .2em; padding: .15em .55em .2em; font-size: max(.78em, 14px); font-weight: 800; line-height: 1.4; color: var(--ink); background: #fffdf6; box-shadow: -2px 3px 6px rgba(90, 40, 0, .16); rotate: -1.4deg; white-space: nowrap; vertical-align: .08em; }
+.offen { position: relative; display: inline-block; margin: .35em 0 0 .2em; padding: .15em .55em .2em; font-size: max(.78em, 14px); font-weight: 800; line-height: 1.4; color: var(--ink); background: #fffdf6; box-shadow: -2px 3px 6px rgba(90, 40, 0, .16); rotate: -1.4deg; max-width: calc(100% - .2em); vertical-align: .08em; }
 .offen::before { content: ''; position: absolute; left: 50%; top: -.45em; width: 2.4em; height: .8em; translate: -50% 0; rotate: 3deg; background: rgba(255, 214, 80, .55); }
 
 /* Links: keine Rahmen, keine Pillen. Wörter, die umklappen, und eine Welle darunter. */
@@ -203,9 +219,33 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 /* Fakten-Tafel: Begriff und Antwort, getrennt durch Wellenlinien statt Kästen. */
 .fakten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(28px, 4vw, 64px); margin: 0; }
 .fakt { position: relative; padding: 18px 0 22px; }
-.fakt dt { display: flex; flex-direction: column; align-items: flex-start; gap: .3em; margin-bottom: .45em; font: 400 1.32rem/1.12 Shrikhand, Georgia, serif; color: var(--terra); text-shadow: -.015em .015em 0 #a8411f, -.03em .03em 0 #963819, -.045em .045em 0 #842f14, -.09em .13em .12em rgba(110, 50, 0, .28); }
-.fakt-ding { flex: none; width: clamp(58px, 5.4cqw, 82px); height: auto; margin-bottom: -.12em; filter: drop-shadow(-6px 9px 7px rgba(110, 50, 0, .3)); transform-origin: 50% 80%; transition: rotate 700ms var(--boing), scale 700ms var(--boing); }
+.fakt dt { display: flex; flex-direction: column; align-items: flex-start; gap: .3em; margin-bottom: .45em; font: 400 clamp(1.32rem, .95rem + .75vw, 1.75rem)/1.12 Shrikhand, Georgia, serif; color: var(--terra); text-shadow: -.015em .015em 0 #a8411f, -.03em .03em 0 #963819, -.045em .045em 0 #842f14, -.09em .13em .12em rgba(110, 50, 0, .28); }
+.fakt-ding { flex: none; width: clamp(64px, 7.4cqw, 128px); height: auto; margin-bottom: -.12em; filter: drop-shadow(-6px 9px 7px rgba(110, 50, 0, .3)); transform-origin: 50% 80%; transition: rotate 700ms var(--boing), scale 700ms var(--boing); }
 .fakt dd { margin: 0; }
+/* Jeder Gegenstand hat seine eigene kleine Szene, beim Überfahren oder Antippen (site.js setzt .spielt, bis sie zu Ende ist). */
+.fakt { cursor: default; }
+.fakt.spielt .fakt-ding[src*="ticket"] { animation: d-ticket 900ms var(--boing); }
+.fakt.spielt .fakt-ding[src*="pin"] { animation: d-pin 900ms cubic-bezier(.3, 1.4, .5, 1); }
+.fakt.spielt .fakt-ding[src*="sonne"] { animation: d-sonne 1100ms var(--boing); }
+.fakt.spielt .fakt-ding[src*="disko"] { transform-origin: 50% 0; animation: d-disko 1400ms ease-in-out; }
+.fakt.spielt .fakt-ding[src*="muenzen"] { animation: d-muenzen 800ms ease-out; }
+.fakt.spielt .fakt-ding[src*="vertrag"] { animation: d-vertrag 700ms cubic-bezier(.3, 1.6, .5, 1); }
+.fakt.spielt .fakt-ding[src*="schluessel"] { transform-origin: 22% 28%; animation: d-schluessel 1100ms ease-out; }
+.fakt.spielt .fakt-ding[src*="blase"] { animation: d-blase 900ms var(--boing); }
+/* Das Ticket wird angeschnippt, die Ortsmarke fällt und federt, die Sonne dreht eine Runde. */
+@keyframes d-ticket { 0% { transform: none; } 25% { transform: translateY(-14px) rotate(-16deg); } 55% { transform: translateY(-4px) rotate(11deg); } 80% { transform: rotate(-4deg); } 100% { transform: none; } }
+@keyframes d-pin { 0% { transform: none; } 30% { transform: translateY(-34px) scale(.94, 1.08); } 60% { transform: translateY(0) scale(1.14, .82); } 78% { transform: translateY(-6px) scale(.97, 1.04); } 100% { transform: none; } }
+@keyframes d-sonne { 0% { transform: none; } 70% { transform: rotate(380deg) scale(1.12); } 100% { transform: rotate(360deg); } }
+/* Die Discokugel hängt an ihrer Schnur und pendelt, die Münzen hüpfen zweimal, der Vertrag bekommt seinen Stempel. */
+@keyframes d-disko { 0% { transform: none; filter: drop-shadow(-6px 9px 7px rgba(110, 50, 0, .3)); } 20% { transform: rotate(-14deg); filter: drop-shadow(-6px 9px 7px rgba(110, 50, 0, .3)) brightness(1.35); } 45% { transform: rotate(11deg); } 70% { transform: rotate(-6deg); filter: drop-shadow(-6px 9px 7px rgba(110, 50, 0, .3)) brightness(1.2); } 100% { transform: none; } }
+@keyframes d-muenzen { 0%, 100% { transform: none; } 22% { transform: translateY(-18px) rotate(-5deg); } 44% { transform: translateY(0) scale(1.06, .92); } 64% { transform: translateY(-8px) rotate(3deg); } 82% { transform: translateY(0) scale(1.03, .96); } }
+@keyframes d-vertrag { 0% { transform: none; } 30% { transform: scale(1.14) rotate(-5deg); } 55% { transform: scale(.92, .9) rotate(2deg); } 100% { transform: none; } }
+/* Der Schlüssel klimpert am Ring, die Sprechblase plustert sich auf, als hätte sie etwas zu sagen. */
+@keyframes d-schluessel { 0% { transform: none; } 15% { transform: rotate(-20deg); } 35% { transform: rotate(15deg); } 55% { transform: rotate(-9deg); } 75% { transform: rotate(5deg); } 100% { transform: none; } }
+@keyframes d-blase { 0% { transform: none; } 35% { transform: translateY(-10px) scale(1.16); } 60% { transform: translateY(-2px) scale(.95); } 100% { transform: none; } }
+/* Beim Hereinscrollen hüpfen die Gegenstände an ihren Platz, nacheinander. */
+.site-js .fakt[data-zeigen] .fakt-ding { scale: .5; rotate: -14deg; opacity: 0; transition: scale 800ms var(--boing) 120ms, rotate 800ms var(--boing) 120ms, opacity 300ms ease 120ms; }
+.site-js .fakt[data-zeigen].da .fakt-ding { scale: 1; rotate: 0deg; opacity: 1; }
 
 /* Fotos: ohne Rahmen, leicht schräg wie hingelegt, mit warmem Schatten. Beim Überfahren richten sie sich auf. */
 .foto { --kipp: -2deg; margin: 0; rotate: var(--kipp); transition: rotate 600ms var(--boing), translate 600ms var(--boing); }
@@ -252,13 +292,12 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   .aufkleber:hover .aufkleber-in { rotate: 0deg; color: var(--ink); }
   .foto:hover { rotate: 0deg; translate: 0 -6px; }
   .frage summary:hover h3 { color: var(--meer); }
-  .fakt:hover .fakt-ding { rotate: -9deg; scale: 1.1; }
 }
 
 @media (max-width: 760px) {
   .fakten { grid-template-columns: 1fr; }
   .fakt dt { flex-direction: row; align-items: center; gap: .55em; }
-  .fakt-ding { width: 60px; }
+  .fakt-ding { width: 74px; }
   .schritte { grid-template-columns: 1fr; }
   .schritte li { padding-top: 0; padding-left: calc(var(--n) * 14px); }
   .kapitel::before { width: 150vw; right: -40vw; }
@@ -268,6 +307,8 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   html { scroll-behavior: auto; }
   .kapitel::before, .moewe-stand, .kapitel > .szene-licht::after { animation: none; }
   .fakt-ding { transition: none; }
+  .site-js .fakt[data-zeigen] .fakt-ding { scale: 1; rotate: 0deg; opacity: 1; transition: none; }
+  .fakt.spielt .fakt-ding { animation: none !important; }
   .site-js [data-zeigen], .site-js .titel[data-zeigen] .w, .site-js .foto[data-zeigen] { opacity: 1; translate: none; transition: none; }
   .site-js .foto[data-zeigen] { rotate: var(--kipp); }
   .f, .f + .f, .wave, .weiter img, .aufkleber, .aufkleber-in, .foto, .frage summary img { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }

@@ -1069,7 +1069,7 @@ function leaveGull() {
   Object.assign(gull.pose, { fold: 0, flapAmp: 1, flapRate: 12, tuck: 1, yaw: -0.5, pitch: 0.25, roll: 0.3, mouth: 0, wide: 0, lid: 0.2, brow: 0, cock: 0.55, smile: 0.7, shades: 1, puff: 0, crest: 0, gesture: 0, stare: 0, lookX: 0, headYaw: 0, headPitch: 0, blink: 1 });
   gag.tl = g.timeline({ onComplete: endGag }).to(P, { x: view.x0 + view.vw + 240, y: -120, duration: 1.8, ease: 'power1.in' }, 0);
 }
-function gullHit(nx = 0.4, ny = -0.9) {
+function gullHit(nx = 0.4, ny = -0.9, wucht = 900) {
   if (!gag.canHit) return;
   const g = window.gsap, p = gull.pose, P = gag.P, x0 = P.x, y0 = P.y;
   gag.tl?.kill();
@@ -1084,19 +1084,40 @@ function gullHit(nx = 0.4, ny = -0.9) {
   gull.fling(x0 + gag.s * 0.7, y0 - gag.s * 1.05, nx * 340 + (Math.random() - 0.5) * 120, Math.min(ny, -0.5) * 860);
   // Volltreffer: Sie bleibt einen winzigen Moment platt in der Luft stehen, Schnabel auf, Augen rund.
   Object.assign(p, { fold: 0.25, flapAmp: 0, tuck: 1, mouth: 1, lid: 0, wide: 1, brow: 1, cock: 0, smile: 0, crest: 1, puff: 0, stare: 0, lookX: 0, lookY: 0, headYaw: -0.6, headPitch: 0.3, headRoll: 0, walk: 0, squash: 0.36, gesture: 0, stab: 0, blink: 0, sweep: 0, roll: 0 });
-  // Sie fliegt vom Ball weg und überschlägt sich. Dann hängt sie kurz in der Luft und begreift. Erst dann nichts wie weg.
-  const dir = x0 >= B.x ? 1 : -1, HOLD = 0.08;
+  // Wie aus der Kanone geschossen: eine Wurfbahn mit Schwerkraft und Luftwiderstand, je härter der Ball, desto weiter.
+  // Dabei zwei Überschläge, die auslaufen, sodass sie am Ende wieder aufrecht ist. Am Scheitel fängt sie sich,
+  // sackt kurz durch, schüttelt benommen den Kopf, begreift. Erst dann nichts wie weg, in Schussrichtung.
+  const HOLD = 0.08, C = 1.3, GY = 1500, p0 = p.pitch;
+  const ry = Math.min(ny, -0.5), rl = Math.hypot(nx, ry) || 1, V = clamp(1150 + wucht * 0.5, 1250, 1900);
+  let vx = nx / rl * V, vy = ry / rl * V;
+  const dir = vx >= 0 ? 1 : -1, shot = { t: 0 };
+  // Die Bahn bleibt im Bild: nur so hoch, wie über ihr Platz ist, und nur so weit, wie es zur Seite noch geht.
+  // Flach wie eine Kanonenkugel: viel Zug zur Seite, der Bogen steigt höchstens gut halb so hoch, wie über ihr Platz ist.
+  if (Math.abs(vx) < V * 0.75) vx = dir * V * 0.75;
+  vy = Math.max(vy, -Math.sqrt(2 * GY * Math.min(380, Math.max(40, (y0 - (view.y0 + gag.s * 1.3)) * 0.6))));
+  // Sie fängt sich kurz nach dem Scheitel der Bahn: dort, wo es gerade wieder abwärts geht.
+  const T1 = clamp(Math.log((GY / C - vy) / (GY / C)) / C + 0.16, 0.5, 0.95), norm = 1 - Math.exp(-3.4 * T1), reach = (1 - Math.exp(-C * T1)) / C;
+  const seite = dir > 0 ? view.x0 + view.vw - gag.s - x0 : x0 - (view.x0 + gag.s);
+  if (Math.abs(vx) * reach > seite) vx = dir * Math.max(0, seite) / reach;
   gag.tl = g.timeline()
     .to(p, { squash: 0, duration: 0.3, ease: 'back.out(3)' }, HOLD)
     .to(p, { fold: 0, flapAmp: 1.4, flapRate: 26, duration: 0.1 }, HOLD)
-    .to(p, { pitch: p.pitch - dir * Math.PI * 2, duration: 0.64, ease: 'power2.out' }, HOLD)
-    .to(P, { x: x0 + dir * 170, y: y0 - 104, duration: 0.62, ease: 'power3.out' }, HOLD)
-    .to(p, { flapAmp: 0.6, flapRate: 10, mouth: 0.1, wide: 0.6, stare: 1, headYaw: dir > 0 ? -0.7 : 0.7, headPitch: 0, stab: 0.8, duration: 0.22, ease: 'sine.out' }, 0.62)
-    .to(P, { y: y0 - 92, duration: 0.3, ease: 'sine.inOut' }, 0.7)
-    .to(p, { flapAmp: 1.35, flapRate: 27, wide: 1, mouth: 0.8, stare: 0, headYaw: 0, yaw: dir > 0 ? -0.42 : Math.PI + 0.42, pitch: p.pitch - dir * Math.PI * 2 + 0.2, roll: dir > 0 ? 0.3 : -0.3, duration: 0.16, ease: 'power2.out' }, 1.02)
-    .to(P, { x: x0 + dir * 1300, y: -180, duration: 0.9, ease: 'power2.in' }, 1.06)
-    .call(() => { gull.root.visible = false; }, null, 1.98)
-    .call(revenge, [24], 3.1);
+    .to(shot, { t: T1, duration: T1, ease: 'none', onUpdate: () => {
+      const t = shot.t, e = (1 - Math.exp(-C * t)) / C;
+      // Luftwiderstand linear: v(t) = g/C + (v0 - g/C)·e^(-Ct). y zeigt nach unten, die Schwerkraft zieht nach unten.
+      P.x = x0 + vx * e; P.y = y0 + (vy - GY / C) * e + GY * t / C;
+      p.pitch = p0 - dir * Math.PI * 4 * (1 - Math.exp(-3.4 * t)) / norm;
+    } }, HOLD)
+    .to(p, { flapAmp: 0.7, flapRate: 11, mouth: 0.15, wide: 0.8, stab: 0.8, duration: 0.2, ease: 'sine.out' }, HOLD + T1 - 0.12)
+    .to(P, { y: '+=18', duration: 0.32, ease: 'sine.inOut' }, HOLD + T1)
+    .to(p, { headYaw: 0.55, duration: 0.07, ease: 'sine.inOut' }, HOLD + T1 + 0.05)
+    .to(p, { headYaw: -0.55, duration: 0.09, ease: 'sine.inOut' }, HOLD + T1 + 0.12)
+    .to(p, { headYaw: 0.35, duration: 0.09, ease: 'sine.inOut' }, HOLD + T1 + 0.21)
+    .to(p, { headYaw: dir > 0 ? -0.7 : 0.7, stare: 1, wide: 0.6, mouth: 0.1, duration: 0.18, ease: 'sine.out' }, HOLD + T1 + 0.3)
+    .to(p, { flapAmp: 1.35, flapRate: 27, wide: 1, mouth: 0.8, stare: 0, headYaw: 0, yaw: dir > 0 ? -0.42 : Math.PI + 0.42, roll: dir > 0 ? 0.3 : -0.3, duration: 0.16, ease: 'power2.out' }, HOLD + T1 + 0.62)
+    .to(P, { x: '+=' + dir * 1300, y: -180, duration: 0.9, ease: 'power2.in' }, HOLD + T1 + 0.66)
+    .call(() => { gull.root.visible = false; }, null, HOLD + T1 + 1.58)
+    .call(revenge, [24], HOLD + T1 + 2.7);
 }
 // Sie kommt zurück, ganz ruhig. Sie zielt genau. Und sie schaut nicht einmal hin.
 function revenge(tries = 0) {
@@ -1562,9 +1583,9 @@ function stepBall(h) {
   if (gag.canHit && gull?.root.visible) {
     const gdx = gag.P.x - B.x, gdy = gag.P.y - gag.s * 0.6 - B.y, gd = Math.hypot(gdx, gdy);
     if (gd < B.r + gag.s * 0.5 && gd > 0) {
-      const nx = gdx / gd, ny = gdy / gd, vn = phys.vx * nx + phys.vy * ny;
+      const nx = gdx / gd, ny = gdy / gd, vn = phys.vx * nx + phys.vy * ny, wucht = Math.hypot(phys.vx, phys.vy);
       if (vn > 0) { phys.vx -= 1.5 * vn * nx; phys.vy -= 1.5 * vn * ny; }
-      gullHit(nx, Math.min(ny, -0.2));
+      gullHit(nx, Math.min(ny, -0.2), wucht);
     }
   }
 
