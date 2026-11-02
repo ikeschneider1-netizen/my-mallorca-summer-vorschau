@@ -51,8 +51,7 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 @keyframes wiegen { from { rotate: -1.4deg; translate: 0 0; } to { rotate: 1.2deg; translate: -14px 6px; } }
 
 /* Schrift */
-.dach { display: flex; align-items: center; gap: .55em; margin: 0 0 .9rem; font-size: var(--t-klein); font-weight: 800; letter-spacing: .02em; }
-.dach::before { content: ''; width: 1.05em; height: 1.05em; background: url('../hero/assets/ball-96.png') center / contain no-repeat; }
+.dach { margin: 0 0 .9rem; font-size: var(--t-klein); font-weight: 800; letter-spacing: .04em; }
 .titel { margin: 0 0 .35em; font: 400 var(--t-titel)/.98 Shrikhand, Georgia, serif; letter-spacing: -.005em; text-wrap: balance; }
 .titel em { font-style: normal; color: var(--betont, var(--meer)); }
 .zwischen { margin: 0 0 .4em; font: 400 var(--t-zwischen)/1.12 Shrikhand, Georgia, serif; text-wrap: balance; }
@@ -61,7 +60,9 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 
 /* Kapiteltitel im Hero-Look: cremefarbene Buchstaben mit Tiefe. Das Licht kommt wie in der Szene von rechts oben,
    die Tiefe zeigt nach links unten, der Schatten fällt weich auf die Wand. Die Buchstaben federn wie im Hero. */
-.raum { --wurf: 110, 50, 0; color: #fff7e8; text-shadow: -.01em .01em 0 #f6e3c6, -.02em .02em 0 #f0d9b8, -.03em .03em 0 #ebcfaa, -.04em .04em 0 #e5c59c, -.05em .05em 0 #dfbb8f, -.06em .06em 0 #d8b083, -.07em .07em 0 #d1a678, -.13em .17em .15em rgba(var(--wurf), .38), -.24em .32em .38em rgba(var(--wurf), .22); }
+/* Kräftigere Kante und stärkerer Wurfschatten: Creme auf heller Wand braucht Tiefe, um so plastisch zu stehen wie die Schrift im Hero.
+   Auf großen Bildschirmen darf der Titel bis 120 px wachsen, sonst geht er auf der großen Wand unter. */
+.raum { --wurf: 110, 50, 0; font-size: clamp(2.8rem, 1.2rem + 5.9vw, 7.5rem); color: #fff7e8; text-shadow: -.01em .01em 0 #f2dcbc, -.02em .02em 0 #e9cda6, -.03em .03em 0 #e0bf92, -.04em .04em 0 #d6b07f, -.05em .05em 0 #cba06d, -.06em .06em 0 #bf905e, -.07em .07em 0 #b38253, -.075em .085em .02em rgba(var(--wurf), .35), -.14em .18em .16em rgba(var(--wurf), .42), -.26em .34em .4em rgba(var(--wurf), .24); }
 .raum em { color: #fff7e8; }
 .welt-lagune .raum { --wurf: 0, 60, 70; }
 .raum .w { white-space: nowrap; }
@@ -90,6 +91,8 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 .moewe-stand img:first-child, .moewe[data-lage='frech'] .moewe-stand img:nth-child(2), .moewe[data-lage='schreck'] .moewe-stand img:nth-child(3) { opacity: 1; }
 .moewe[data-lage='frech'] .moewe-stand img:first-child, .moewe[data-lage='schreck'] .moewe-stand img:first-child { opacity: 0; }
 .moewe-stand { position: absolute; inset: 0; transform-origin: 54.7% 100%; animation: atmen 3.4s ease-in-out infinite alternate; }
+/* Kontaktschatten unter den Füßen: Erst damit steht sie wirklich auf Kübel, Boden oder Stufe. */
+.moewe-stand::before { content: ''; position: absolute; left: 32%; bottom: -4%; width: 46%; height: 10%; border-radius: 50%; background: radial-gradient(closest-side, rgba(80, 30, 0, .45), rgba(80, 30, 0, .18) 60%, transparent); }
 .moewe-flug { position: absolute; left: 50%; top: 52%; width: 91.3%; aspect-ratio: 789 / 1144; translate: -50% -50%; visibility: hidden; }
 .moewe-flug img { inset: 0; width: 100%; height: 100%; }
 /* Im Flug: Standbilder weg, Flügelschlag oben, Mitte, unten, Mitte. */
@@ -121,7 +124,7 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 .szene.job-rest { padding-top: clamp(8px, 2cqw, 32px); }
 @media (max-width: 1100px) { .job .fakten { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) {
-  .szene-vanille { --ow: 2.3; --ol: -.45; --uw: 2.6; --ul: -1.17; --mx: .704; --my: .54; padding-top: 150px; padding-bottom: 300px; }
+  .szene-vanille { --ow: 2.3; --ol: -.45; --uw: 2.6; --ul: -1.17; --mx: .75; --my: .573; padding-top: 150px; padding-bottom: 300px; }
   /* Unten rechts sitzt am Handy der Aufkleber: Die Einleitung endet über ihm. */
   .landung { padding-bottom: calc(clamp(100px, 27vw, 150px) + 14px); }
   .job .fakten { grid-template-columns: 1fr; }
