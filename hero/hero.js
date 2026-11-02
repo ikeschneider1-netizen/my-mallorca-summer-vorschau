@@ -1350,10 +1350,12 @@ function applyLetters() {
     const gain = 1 + (fly.k - 1) * (1.7 + li * 0.45);
     const w = g.userData.w, dz = w * (1 - 1 / gain);
     // Die Zeilen weichen beim Näherkommen zur Seite aus und verlassen das Bild.
-    const away = (fly.k - 1) * (li === 0 ? -130 : li === 1 ? -190 : 120), drop = (fly.k - 1) * (li === 0 ? -110 : li === 1 ? 90 : 170);
+    // Sobald sich hinter dem Ring die Blende öffnet, fliegen sie schneller hinaus, damit keine Bruchstücke über der Terrasse hängen.
+    const flee = 1 + 5 * smooth(0.4, 0.6, fly.s);
+    const away = (fly.k - 1) * (li === 0 ? -130 : li === 1 ? -190 : 120) * flee, drop = (fly.k - 1) * (li === 0 ? -110 : li === 1 ? 90 : 170) * flee;
     const ka = comp.a, ftx = (fly.tx - comp.qx) / ka + comp.px, fty = (fly.ty - comp.qy) / ka + comp.py, rcx = (RING_C.x - comp.qx) / ka + comp.px, rcy = (RING_C.y - comp.qy) / ka + comp.py;
     const dx = ((ftx - CX) / gain + CX - rcx + away / (gain * ka)) * w / F, dy = -((fty - CY) / gain + CY - rcy + drop / (gain * ka)) * w / F;
-    g.visible = gain < 9 && (li < 3 || claim.on);
+    g.visible = gain < 9 && fly.s < 0.7 && (li < 3 || claim.on);
     tmpD.makeTranslation(fly.k > 1.0001 ? dx : 0, fly.k > 1.0001 ? dy : 0, dz);
     const par = li === 3 ? 1.5 : 2 + li * 1.2;
     g.matrix.copy(tmpD).multiply(tilt).multiply(tmpF.makeTranslation(pointer.sx * par, -pointer.sy * (1 + Math.min(li, 2) * 0.6), 0)).multiply(g.userData.basis);

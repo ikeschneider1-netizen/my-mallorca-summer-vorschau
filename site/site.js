@@ -571,6 +571,14 @@ void main() {
       };
       const herein = () => {
         mass();
+        // Ist die Oberkante des Kapitels noch im Bild, fiele der Ball sichtbar aus der Kante zur Landung.
+        // Dann wartet er, bis sie aus dem Bild ist, oder bis man unten angekommen ist.
+        const amEnde = () => scrollY + innerHeight >= document.documentElement.scrollHeight - 2;
+        if (scrollY < oben && !amEnde()) {
+          const nochmal = () => { if (scrollY >= oben || amEnde()) { removeEventListener('scroll', nochmal); herein(); } };
+          addEventListener('scroll', nochmal, { passive: true });
+          return;
+        }
         const sichtOben = scrollY - oben;
         B.x = Math.min(W - B.r, Math.max(B.r, unten.x + 0.82 * unten.w));
         B.y = Math.max(-B.r * 2, sichtOben - B.r * 2); B.vx = -110 * s; B.vy = 200 * s; B.lage = 'frei';
