@@ -49,11 +49,11 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
    herein und blendet ein. So steht nie ein Buchstabe hochkant als Strich unter dem Wort, und die zweite Farbe ist erst da, wenn sie kommt.
    Die Welle läuft von der Seite los, von der die Maus kommt (--i). */
 .f { display: inline-block; backface-visibility: hidden; transform-origin: 50% 30%; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
-.f + .f { position: absolute; left: 0; top: 0; color: var(--flip, var(--plum)); transform-origin: 50% 90%; transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
+.ch::after { content: attr(data-c); position: absolute; left: 0; top: 0; backface-visibility: hidden; color: var(--flip, var(--plum)); transform-origin: 50% 90%; transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
 a:focus-visible .f { transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
-a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
+a:focus-visible .ch::after { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
 [data-nav="welle"] .links .f { transform: none; transition: none; }
-[data-nav="welle"] .links .f + .f { display: none; }
+[data-nav="welle"] .links .ch::after { display: none; }
 
 /* Menü: nur Wörter, keine Fläche und kein Rahmen. */
 /* Das Menü steht in Shrikhand wie der Schriftzug, „bewerben“ und „Job entdecken“: Es gehört zur Szene, nicht zu einer normalen Webseite.
@@ -72,7 +72,7 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
 
 /* Bewerben: eine Sonne als Aufkleber statt eines Knopfs. */
 /* Der eine Aufkleber: Er hängt fest am Bildschirm und wandert über die ganze Seite mit. */
-.apply { --flip: var(--ink); position: fixed; display: grid; place-items: center; right: clamp(14px, 2.2vw, 34px); top: clamp(6px, 1vw, 14px); width: var(--sticker); height: var(--sticker); font: 400 clamp(15px, 1.28vw, 19px)/1 Shrikhand, Georgia, serif; color: var(--cream); transition: scale 460ms cubic-bezier(.34, 1.56, .64, 1), translate 260ms var(--out); }
+.apply { --flip: var(--ink); position: fixed; display: grid; place-items: center; right: clamp(14px, 2.2vw, 34px); top: clamp(6px, 1vw, 14px); width: var(--sticker); height: var(--sticker); font: 400 clamp(15px, 1.28vw, 19px)/1 Shrikhand, Georgia, serif; color: var(--cream); transition: scale 460ms cubic-bezier(.34, 1.56, .64, 1), translate 260ms var(--out), opacity 240ms ease, visibility 0s; }
 .apply:active { scale: .94; transition-duration: 130ms; }
 .burst { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 10px 16px rgba(130, 10, 60, .42)); }
 .burst path { fill: var(--coral); transition: fill 320ms ease; }
@@ -102,14 +102,10 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
 .js:not(.fallback) .claim { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .role { font-size: clamp(11.5px, .86vw, 13px); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .line { font: 400 clamp(22px, 2.2vw, 32px)/1.15 Shrikhand, Georgia, serif; }
-/* Oben links die Bedienung der Bewegung: „Animation wiederholen“, daneben Pause und Nochmal (Ike, 02.11.2026).
+/* Oben links die Bedienung der Bewegung: „Animation wiederholen“ mit dem Nochmal-Kreis ist ein Knopf, daneben Pause (Ike, 02.11.2026).
    Die Zeile steht nur da, wo es die Knöpfe gibt, also nicht ohne JavaScript, ohne WebGL oder bei weniger Bewegung. */
 .lead { position: absolute; left: clamp(20px, 3vw, 48px); top: clamp(14px, 1.7vw, 24px); display: flex; align-items: center; gap: 8px; color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); }
-.kicker { padding: 10px 0 14px; font-size: clamp(14px, 1.08vw, 17px); font-weight: 800; white-space: nowrap; }
-.js.fallback .kicker { display: none; }
-.lead:has(.tools[hidden]) .kicker { display: none; }
-/* Die Zeile ist die Beschriftung des Nochmal-Knopfs und lässt sich genauso anklicken. */
-.kicker { pointer-events: auto; cursor: pointer; }
+.kicker { font-size: clamp(14px, 1.08vw, 17px); font-weight: 800; white-space: nowrap; }
 /* Nach der Landung liegt die Terrasse hinter dem Kopf: dunkle Schrift mit hellem Lichtschein, damit sie auch über den Palmblättern lesbar bleibt.
    Weiches Petrol statt des vollen, das in Shrikhand zu schwer wirkt. */
 .past .lead, .past .menu-btn { color: var(--petrol-weich); text-shadow: 0 0 14px rgb(255, 246, 230), 0 0 6px rgba(255, 246, 230, .95), 0 0 2px rgb(255, 246, 230); transition: color 300ms ease; }
@@ -119,10 +115,13 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
 .discover img { width: 1.35em; height: 1.35em; filter: drop-shadow(0 3px 4px rgba(60, 0, 0, .45)); animation: nudge 3.4s var(--key) infinite; }
 @keyframes nudge { 0%, 68%, 100% { transform: translateY(0) scale(1); } 76% { transform: translateY(-9px) scale(.96, 1.04); } 84% { transform: translateY(0) scale(1.1, .9); } 90% { transform: translateY(-3px); } 95% { transform: translateY(0); } }
 .tools { display: flex; align-items: center; gap: 2px; }
-.tool { width: 38px; height: 38px; display: grid; place-items: center; border: 0; padding: 0; border-radius: 50%; color: var(--cream); background: transparent; cursor: pointer; opacity: .72; transition: opacity 220ms ease, transform 220ms var(--out); }
+.tool { width: 38px; height: 38px; display: grid; place-items: center; border: 0; padding: 0; border-radius: 50%; color: inherit; background: transparent; cursor: pointer; opacity: .72; transition: opacity 220ms ease, transform 220ms var(--out); }
+/* Der Wiederholen-Knopf trägt seine Beschriftung selbst: Wort und Kreis in einer Zeile, wie zuvor. */
+.tool.wiederholen { width: auto; display: inline-flex; gap: 6px; padding: 0 9px 0 0; border-radius: 0; font: inherit; text-shadow: inherit; opacity: 1; }
+.tool.wiederholen svg { opacity: .72; transition: opacity 220ms ease; }
 .tool svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 3px rgba(60, 10, 0, .6)); }
 .tool:active { transform: scale(.92); }
-.tool:focus-visible, .discover:focus-visible, .probe button:focus-visible { outline-color: var(--cream); }
+.tool:focus-visible, .discover:focus-visible, .probe button:focus-visible { outline-color: currentColor; }
 .i-play { display: none; }
 .tool[aria-pressed="true"] .i-pause { display: none; }
 .tool[aria-pressed="true"] .i-play { display: block; }
@@ -133,7 +132,7 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
 
 @media (hover: hover) and (pointer: fine) {
   a:hover .f { transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
-  a:hover .f + .f { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
+  a:hover .ch::after { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
   [data-nav="welle"] .links a:hover .f { transform: none; }
   .links a:hover .wave, .apply:hover .wave { clip-path: inset(0); animation-play-state: running; }
   .apply:hover { scale: 1.1; }
@@ -142,6 +141,8 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
   [data-cta="wort"] .apply:hover { scale: 1.04; }
   .discover:hover img { animation-duration: 1.05s; }
   .tool:hover { opacity: 1; transform: scale(1.08); }
+  .tool.wiederholen:hover { transform: none; }
+  .tool.wiederholen:hover svg { opacity: 1; }
 }
 .apply:focus-visible .burst path { fill: var(--sun); }
 
@@ -177,9 +178,19 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
   .ready .poster { opacity: 0; pointer-events: none; }
   .top { padding: 0; height: 0; }
   .lead { left: var(--m); top: max(8px, env(safe-area-inset-top, 0px)); gap: 0; }
-  .kicker { padding: 10px 0; font-size: clamp(14px, 3.7vw, 19px); }
-  #replay { display: none; }
+  .kicker { font-size: clamp(14px, 3.7vw, 19px); }
+  .tool.wiederholen { padding-right: 4px; }
+  .tool.wiederholen svg { display: none; }
   .apply { position: fixed; z-index: 20; top: auto; right: 8px; bottom: calc(8px + var(--safe)); font-size: clamp(17px, 4.7vw, 26px); }
+  /* Nach der Landung liegt Fließtext im Bild: Der Aufkleber springt kleiner nach oben rechts in den Kopf, neben „Menü“.
+     So liegt er nie über Text und bleibt trotzdem immer erreichbar (Ike, 03.11.2026). */
+  .past .apply { top: max(6px, env(safe-area-inset-top, 0px)); bottom: auto; scale: .74; transform-origin: 100% 0; animation: andocken 560ms cubic-bezier(.34, 1.56, .64, 1); }
+  .past .apply:active { scale: .7; }
+  /* Angedockt liegt er auf einem weichen Lichtfleck in der Farbe der Wand: Läuft Text unter ihm durch, verblasst der dort. */
+  .past .apply::before { content: ''; position: absolute; z-index: -1; inset: -20%; border-radius: 50%; background: radial-gradient(closest-side, rgba(252, 234, 209, .96) 58%, rgba(252, 234, 209, 0)); pointer-events: none; }
+  .past .menu-btn { right: calc(.74 * var(--sticker) + 18px); }
+  .past .links { clip-path: circle(0 at calc(100% - .74 * var(--sticker) - 44px) 34px); }
+  .past.menu-open .links { clip-path: circle(150vmax at calc(100% - .74 * var(--sticker) - 44px) 34px); }
   .apply-desk { display: none; }
   .apply-mob { display: block; font: inherit; font-size: .86em; line-height: 1.05; }
   .apply-in .wa-i { width: 1.05em; height: 1.05em; }
@@ -202,7 +213,6 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
 @media (orientation: landscape) and (max-height: 540px) {
   .hero { min-height: 0; }
   .lead { top: 2px; }
-  .kicker { padding-block: 8px; }
   .menu-btn { top: 2px; right: calc(var(--sticker) + 24px); }
   .links { flex-flow: column wrap; align-content: flex-start; justify-content: flex-start; column-gap: 56px; padding: 50px var(--m) 10px; font-size: clamp(24px, 8.4vh, 34px); clip-path: circle(0 at calc(100% - var(--sticker) - 60px) 26px); }
   .menu-open .links { clip-path: circle(150vmax at calc(100% - var(--sticker) - 60px) 26px); }
@@ -213,6 +223,20 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
   .discover img { width: 18px; height: 18px; }
 }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes andocken { from { scale: .3; opacity: 0; } }
+/* Der Kopf der Kapitel (site.css) rückt am Handy neben den angedockten Aufkleber, sein Menü geht vom verschobenen Knopf aus auf. */
+@media (orientation: portrait) and (max-width: 760px) {
+  /* Ab der Landung geht der Aufkleber beim Lesen nach unten mit dem Kopf nach oben weg und kommt beim Hochscrollen mit ihm zurück. So liegt er nie über Fließtext. */
+  html.kopf-weg.past:not(.menue-offen):not(.menu-open) .apply { opacity: 0; visibility: hidden; pointer-events: none; translate: 0 -28px; transition: translate 460ms var(--out), opacity 320ms ease, visibility 0s 460ms; }
+  .seitenkopf { padding-right: calc(.74 * var(--sticker) + 18px); }
+  /* Der Schleier hinter dem Kopf spart den angedockten Aufkleber aus wie am Desktop, sonst läge er blass dahinter. */
+  html:not(.los-da) .seitenkopf::before { --a-d: calc(.74 * var(--sticker)); --loch: radial-gradient(circle at calc(100% - 8px - var(--a-d) / 2) calc(max(6px, env(safe-area-inset-top, 0px)) + var(--a-d) / 2), transparent calc(var(--a-d) / 2 + 5px), #000 calc(var(--a-d) / 2 + 30px)); -webkit-mask-image: var(--loch); mask-image: var(--loch); }
+  .seitenmenue { clip-path: circle(0 at calc(100% - .74 * var(--sticker) - 44px) 34px); }
+  .menue-offen .seitenmenue { clip-path: circle(150vmax at calc(100% - .74 * var(--sticker) - 44px) 34px); }
+}
+/* Unten im Kapitel steht der grüne WhatsApp-Satz. Solange er im Bild ist, tritt der Aufkleber ab (site.js setzt html.los-da):
+   zwei WhatsApp-Knöpfe auf einmal wären doppelt. */
+html.los-da .apply { opacity: 0; scale: .5; visibility: hidden; pointer-events: none; transition: scale 300ms var(--out), opacity 240ms ease, visibility 0s 300ms; }
 /* Liegt Text unter dem Aufkleber, macht er Platz (site.js setzt .platz): Er schrumpft in seiner Ecke zur kleinen WhatsApp-Sonne.
    Sobald darunter wieder Szene ist, springt er groß zurück. */
 .apply { transform-origin: 100% 0; }
@@ -230,6 +254,6 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
 }
 @media (prefers-reduced-motion: reduce) {
   html.fly { scroll-behavior: auto; }
-  .wave, .apply, .apply-in, .links, .hop, .f, .poster { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }
+  .wave, .apply, .apply-in, .links, .hop, .f, .ch::after, .poster { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }
   .hit, .discover img, .links > a { animation: none !important; }
 }

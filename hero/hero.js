@@ -95,9 +95,10 @@ function initUi() {
     el.parentElement.setAttribute('aria-label', el.parentElement.getAttribute('aria-label') || word);
     el.textContent = '';
     // Jeder Buchstabe hat zwei Seiten: Beim Überfahren klappt die farbige nach vorn.
+    // Die farbige Seite zeichnet CSS aus data-c, so steht jeder Buchstabe nur einmal im Text (sauberes Kopieren).
     [...word].forEach((c, i) => {
       const s = document.createElement('span'); s.className = 'ch'; s.style.setProperty('--i', i);
-      for (let n = 0; n < 2; n++) { const f = document.createElement('span'); f.className = 'f'; f.textContent = c; s.append(f); }
+      const f = document.createElement('span'); f.className = 'f'; f.textContent = c; s.dataset.c = c; s.append(f);
       el.append(s);
     });
   }
@@ -1353,6 +1354,12 @@ function claimLayout(portrait) {
     const p = claimToStage(l[homeSlot()], 26 + l.ly); l.sx = p.x; l.sy = p.y;
   }
 }
+// Unterkante des Satzes im Hochformat, in Bühnenpunkten (wie die Satzfläche in claimLayout).
+function claimFloor() {
+  if (!claim.wP) return 0;
+  const v = view, T = comp.qy + 511 * comp.a / 2 + 18;
+  return T + v.vw * 0.88 * claim.hP / claim.wP;
+}
 function compose(portrait) {
   const v = view;
   if (comp.on !== portrait && gag.tl) abortGag();
@@ -1365,8 +1372,8 @@ function compose(portrait) {
   camL.setViewOffset(W, H, comp.px - (comp.qx - v.x0) / comp.a, comp.py - (comp.qy - v.y0) / comp.a, v.vw / comp.a, v.vh / comp.a);
   camL.updateProjectionMatrix();
   if (portrait) cam.layers.disable(1); else cam.layers.enable(1);
-  // Der Ball wird kleiner und liegt links vom festen Aufkleber.
-  ballR = portrait ? clamp(v.vw * 0.125, 40, 58) : BALL_R;
+  // Der Ball wird kleiner und liegt links vom festen Aufkleber. Auf kurzen Bildschirmen höchstens so groß, dass er unter dem Satz Platz hat.
+  ballR = portrait ? clamp(Math.min(v.vw * 0.125, (FLOOR - claimFloor() - 14) / 2), 40, 58) : BALL_R;
   REST.x = portrait ? v.x0 + v.vw * 0.42 : 1128;
   REST.y = FLOOR - ballR;
   if (mode !== 'intro' && mode !== 'free') { B.r = ballR; B.y = Math.min(B.y, REST.y); if (mode === 'rest') B.y = REST.y; }
@@ -1620,8 +1627,9 @@ function stepBall(h) {
     if (hit > 200) { phys.sv += Math.min(hit, 2200) * 0.0068; impact(B.x, FLOOR, clamp(hit / 1900, 0.12, 1)); }
     if (hit > 110) { phys.vy = -hit * BOUNCE; phys.vx *= 0.93; } else phys.vy = 0;
   }
-  if (B.x < wallL() + B.r) { B.x = wallL() + B.r; phys.vx = Math.abs(phys.vx) * 0.7; }
-  if (B.x > wallR() - B.r) { B.x = wallR() - B.r; phys.vx = -Math.abs(phys.vx) * 0.7; }
+  // Die Wände halten ihn nur auf, wenn er hinaus will. Von außen rollt er ungehindert herein.
+  if (B.x < wallL() + B.r && phys.vx <= 0) { B.x = wallL() + B.r; phys.vx = Math.abs(phys.vx) * 0.7; }
+  if (B.x > wallR() - B.r && phys.vx >= 0) { B.x = wallR() - B.r; phys.vx = -Math.abs(phys.vx) * 0.7; }
   if (B.y < -320) { B.y = -320; phys.vy = Math.abs(phys.vy) * 0.3; }
 
   if (B.x < 460 && B.y < 340) S.gust = Math.min(1, S.gust + h * 3);
@@ -1926,11 +1934,15 @@ function settle() {
   mode = 'rest'; intro = null; syncTools();
 }
 function playIntro() {
-  // Im Hochformat steht das Bild sofort. Der Auftakt ist nur der Ball, der von oben durch den Schriftzug fällt.
+  // Im Hochformat steht das Bild sofort. Der Auftakt ist nur der Ball: Er hüpft von links über die Terrasse herein, unter dem Satz durch.
+  // So bleiben Schriftzug und Satz im ersten Eindruck ganz (vorher fiel er von oben durch beide hindurch).
   if (comp.on) {
     settle();
     if (!reduced.matches && window.gsap && scrollY < 5) {
-      Object.assign(B, { x: REST.x - view.vw * 0.08, y: -140 }); lastBx = B.x; phys.idle = 9; gag.next = 1.2; launch(view.vw * 0.05, 0);
+      // Sprunghöhe nach dem Platz unter dem Satz; das Tempo so, dass er nach den Hüpfern knapp vor seinem Platz ausrollt.
+      const hop = clamp(FLOOR - 2 * B.r - claimFloor() - 10, 14, 56), hops = 2 * Math.sqrt(2 * hop / GRAV) / (1 - BOUNCE);
+      Object.assign(B, { x: view.x0 - B.r - 6, y: REST.y }); lastBx = B.x; phys.idle = 9; gag.next = 1.2;
+      launch((REST.x - B.x) / hops * 0.9, -Math.sqrt(2 * GRAV * hop));
       // Die Sonne blitzt im Ring auf, und ein Lichtstreif läuft über die Buchstaben.
       window.gsap.fromTo(S, { flare: 1.05 }, { flare: 0.2, duration: 1.7, delay: 0.3, ease: 'power2.out' });
       window.gsap.fromTo(S, { glint: -0.2 }, { glint: 1.4, duration: 1.5, delay: 0.75, ease: 'sine.inOut' });
@@ -2034,8 +2046,6 @@ function initPointer() {
 
   document.getElementById('pause').addEventListener('click', () => { paused = !paused; window.gsap?.globalTimeline.paused(paused); syncTools(); });
   document.getElementById('replay').addEventListener('click', () => { scrollTo({ top: 0, behavior: 'instant' }); playIntro(); });
-  // Die Zeile davor ist die Beschriftung des Nochmal-Knopfs, ein Klick darauf wirkt genauso.
-  document.getElementById('kicker').addEventListener('click', () => document.getElementById('replay').click());
   reduced.addEventListener('change', () => { if (reduced.matches) { intro?.progress(1); settle(); } layout(); syncTools(); });
   document.addEventListener('visibilitychange', () => { last = performance.now(); });
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; last = performance.now(); }).observe(hero);

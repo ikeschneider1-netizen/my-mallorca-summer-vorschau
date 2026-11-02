@@ -210,9 +210,9 @@ html:not(.site-js) .spielball-schatten { display: none; }
    herein und blendet ein. So steht nie ein Buchstabe hochkant als Strich unter dem Wort, und die zweite Farbe ist erst da, wenn sie kommt.
    Die Welle läuft von der Seite los, von der die Maus kommt (--i). */
 .f { display: inline-block; backface-visibility: hidden; transform-origin: 50% 30%; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
-.f + .f { position: absolute; left: 0; top: 0; color: var(--flip, var(--plum)); transform-origin: 50% 90%; transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
+.ch::after { content: attr(data-c); position: absolute; left: 0; top: 0; backface-visibility: hidden; color: var(--flip, var(--plum)); transform-origin: 50% 90%; transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
 a:focus-visible .f { transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
-a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
+a:focus-visible .ch::after { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
 .wave { position: absolute; left: 0; right: 0; bottom: -2px; height: 7px; background: var(--meer); -webkit-mask: var(--wave) repeat-x 0 0 / 22px 7px; mask: var(--wave) repeat-x 0 0 / 22px 7px; clip-path: inset(0 100% 0 0); transition: clip-path 520ms var(--key); animation: flow 1.5s linear infinite; animation-play-state: paused; }
 @keyframes flow { to { -webkit-mask-position: -22px 0; mask-position: -22px 0; } }
 
@@ -235,7 +235,7 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
 /* „Jetzt per WhatsApp bewerben“ im Original-Grün von WhatsApp (#25D366), mit Kanten in den dunklen WhatsApp-Tönen. */
 .szene-vanille .weiter.wa { --flip: #075e54; color: #25d366; letter-spacing: .015em; text-shadow: var(--wa-kontur), -.015em .015em 0 #0b6f60, -.03em .03em 0 #0a6458, -.045em .045em 0 #085a50, -.06em .06em 0 #075047, -.09em .13em .12em rgba(0, 60, 40, .3); }
 /* Beim Überfahren dreht sich die Schrift ins dunkle WhatsApp-Grün, dann tragen hellgrüne Kanten das Plastische. */
-.szene-vanille .weiter.wa .f + .f { text-shadow: 0 -.012em 0 #7ef0a6, -.015em .015em 0 #1fb455, -.03em .03em 0 #169a52, -.045em .045em 0 #128c7e, -.06em .06em 0 #0b6f60, -.09em .13em .12em rgba(0, 60, 40, .3); }
+.szene-vanille .weiter.wa .ch::after { text-shadow: 0 -.012em 0 #7ef0a6, -.015em .015em 0 #1fb455, -.03em .03em 0 #169a52, -.045em .045em 0 #128c7e, -.06em .06em 0 #0b6f60, -.09em .13em .12em rgba(0, 60, 40, .3); }
 .szene-vanille .weiter.wa svg { filter: drop-shadow(-.03em .03em 0 #128c7e) drop-shadow(-.05em .08em .06em rgba(0, 60, 40, .3)); }
 
 /* Fließtext-Link */
@@ -344,7 +344,7 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
 
 @media (hover: hover) and (pointer: fine) {
   a:hover .f { transform: rotateX(75deg); opacity: 0; transition: transform 640ms var(--flap) calc(var(--i) * 34ms), opacity 230ms ease calc(var(--i) * 34ms + 30ms); }
-  a:hover .f + .f { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
+  a:hover .ch::after { transform: rotateX(0); opacity: 1; transition: transform 640ms var(--flap) calc(var(--i) * 34ms + 90ms), opacity 260ms ease calc(var(--i) * 34ms + 115ms); }
   .weiter:hover img { transform: translateX(.5em) rotate(200deg); }
   .weiter.wa:hover svg { transform: rotate(-14deg) scale(1.12); }
   .text a:hover { color: var(--meer); text-decoration-color: var(--meer); }
@@ -375,7 +375,7 @@ a:focus-visible .f + .f { transform: rotateX(0); opacity: 1; transition: transfo
   .szene-vanille > .szene-licht::before, .szene-vanille .job::before { animation: none; }
   .site-js [data-zeigen], .site-js .titel[data-zeigen] .w, .site-js .foto[data-zeigen] { opacity: 1; translate: none; transition: none; }
   .site-js .foto[data-zeigen] { rotate: var(--kipp); }
-  .f, .f + .f, .wave, .weiter img, .aufkleber, .aufkleber-in, .foto, .frage summary img { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }
+  .f, .ch::after, .wave, .weiter img, .aufkleber, .aufkleber-in, .foto, .frage summary img { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }
 }
 
 /* Kopf wie im Hero: kein Balken, keine Fläche. Logo und Wörter schweben über der Szene, der eine Aufkleber hängt oben rechts.

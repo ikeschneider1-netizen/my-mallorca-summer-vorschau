@@ -15,6 +15,7 @@
 
       // Jeder Buchstabe hat zwei Seiten: Beim Überfahren klappt die farbige nach vorn (wie im Menü des Heros).
       // Die Klapp-Wörter im Hero baut hero.js selbst.
+      // Die farbige Seite zeichnet CSS aus data-c, so steht jeder Buchstabe nur einmal im Text (sauberes Kopieren).
       for (const el of document.querySelectorAll('[data-key]')) {
         if (el.closest('.hero')) continue;
         const word = el.textContent;
@@ -24,7 +25,7 @@
         el.textContent = '';
         [...word].forEach((c, i) => {
           const s = document.createElement('span'); s.className = 'ch'; s.style.setProperty('--i', i);
-          for (let n = 0; n < 2; n++) { const f = document.createElement('span'); f.className = 'f'; f.textContent = c; s.append(f); }
+          const f = document.createElement('span'); f.className = 'f'; f.textContent = c; s.dataset.c = c; s.append(f);
           el.append(s);
         });
       }
@@ -155,12 +156,18 @@
     if (!a || !document.elementsFromPoint) return;
     const TEXT = 'p, dd, dt, h1, h2, h3, li, figcaption, summary, .job-los, .offen';
     const PUNKTE = [[0, 0], [-0.3, -0.3], [0.3, -0.3], [-0.3, 0.3], [0.3, 0.3], [0, -0.38], [0, 0.38], [-0.38, 0], [0.38, 0]];
+    const hochkant = matchMedia('(orientation: portrait)');
     let geplant = false, frei = 0, spaet = 0;
+    // Unten im Kapitel steht der grüne WhatsApp-Satz. Solange er im Bild ist, tritt der Aufkleber ab (html.los-da).
+    const los = document.querySelector('.job-los');
+    if (los) new IntersectionObserver((es) => root.classList.toggle('los-da', es[0].isIntersecting), { rootMargin: '0px 0px -10% 0px' }).observe(los);
     const pruefen = () => {
       geplant = false;
       // Die Ecke, in der er hängt, bleibt beim Schrumpfen fest. Daraus und aus der vollen Größe ergibt sich sein voller Platz.
       const r = a.getBoundingClientRect(), w = a.offsetWidth, h = a.offsetHeight;
       if (!w) return;
+      // Am Handy hochkant hängt der Aufkleber des Heros nach der Landung oben rechts im Kopf. Dort liegt kein Text unter ihm.
+      if (hochkant.matches && a.matches('.apply')) { a.classList.remove('platz'); return; }
       const unten = getComputedStyle(a).transformOrigin.split(' ')[1] !== '0px';
       const imFlugVerdeckt = root.classList.contains('fly') && !root.classList.contains('past');
       const x = r.right - w, y = unten ? r.bottom - h : r.top;
