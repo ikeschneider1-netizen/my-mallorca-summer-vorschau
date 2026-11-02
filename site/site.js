@@ -361,8 +361,9 @@ void main() {
     }
   }
 
-  // Kapiteltitel im Hero-Look: Jeder Buchstabe ist eine Klaviertaste an einer Feder (Werte wie im Hero).
-  // Die Maus drückt die Tasten unter sich, Nachbarn gehen ein wenig mit, ein Ballaufprall läuft als Welle durch.
+  // Kapiteltitel im Hero-Look: Jeder Buchstabe sitzt an einer Feder (Werte wie im Hero).
+  // Unter der Maus hebt er sich, die Nachbarn gehen als Welle mit und neigen sich mit ihr. Zieht die Maus weiter,
+  // sinkt er federnd einmal unter seine Ruhelage (hoch und runter statt Klaviertaste, Ike 02.11.2026). Ein Ballaufprall läuft als Welle durch.
   function raumTitel() {
     const alle = [];
     for (const t of document.querySelectorAll('.titel.raum')) {
@@ -429,15 +430,16 @@ void main() {
         }
         for (const k of ks) {
           k.ziel = 0;
-          if (zeiger) { const dx = (zeiger.x - k.x) / (k.H * 0.5), dy = (zeiger.y - k.y) / (k.H * 0.75); k.ziel = Math.exp(-(dx * dx + dy * dy)); }
+          if (zeiger) { const dx = (zeiger.x - k.x) / (k.H * 0.62), dy = (zeiger.y - k.y) / (k.H * 0.8); k.ziel = Math.exp(-(dx * dx + dy * dy)); }
         }
         for (const k of ks) {
-          k.f = 26 * (k.ziel - k.p) - 6.6 * k.v + (k.links ? 7.5 * (k.links.p - k.p) : 0) + (k.rechts ? 7.5 * (k.rechts.p - k.p) : 0);
+          k.f = 34 * (k.ziel - k.p) - 4.6 * k.v + (k.links ? 9 * (k.links.p - k.p) : 0) + (k.rechts ? 9 * (k.rechts.p - k.p) : 0);
         }
         for (const k of ks) {
           k.v += k.f * dt; k.p = Math.max(-0.7, Math.min(1.35, k.p + k.v * dt));
           k.rv += (-70 * k.r - 5.5 * k.rv) * dt; k.r += k.rv * dt;
-          k.el.style.transform = `translateY(${(k.p * 0.085).toFixed(4)}em) rotate(${(k.r * 4).toFixed(2)}deg)`;
+          const neig = ((k.rechts ? k.rechts.p : k.p) - (k.links ? k.links.p : k.p)) * -6;
+          k.el.style.transform = `translateY(${(-k.p * 0.18).toFixed(4)}em) rotate(${(k.r * 4 + neig).toFixed(2)}deg)`;
           if (Math.abs(k.v) > 0.004 || Math.abs(k.p - k.ziel) > 0.004 || Math.abs(k.r) > 0.004 || Math.abs(k.rv) > 0.01) ruhig = false;
         }
       }

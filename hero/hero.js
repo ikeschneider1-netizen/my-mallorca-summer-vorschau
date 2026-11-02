@@ -536,7 +536,7 @@ const ballQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.55, -0.5, 0.
 const fly = { on: false, p: 0, s: 0, v: 0, k: 1, tx: RING_C.x, ty: RING_C.y };
 let mode = 'intro', intro = null, paused = false, visible = true, time = 0, last = 0, tempo = 1, lastBx = B.x, acc = 0, skipping = false, dprCap = 2, paceSum = 0, paceN = 0, confettiLive = 0;
 const pointer = { touch: false, x: -999, y: -999, over: false, mx: 0, my: 0, sx: 0, sy: 0, px: W / 2, py: H / 2, vx: 0, lx: -999 };
-const phys = { vx: 0, vy: 0, scored: false, wasIn: false, hist: [], down: null, hopCool: 0, sq: 0, sv: 0, idle: 7, grab: { x: 0, y: 0 }, homeV: 0 };
+const phys = { vx: 0, vy: 0, scored: false, wasIn: false, hist: [], down: null, hopCool: 0, sq: 0, sv: 0, idle: 7, grab: { x: 0, y: 0 }, homeV: 0, aim: null };
 let ripple = { x: 0, y: 0, t: 9 };
 const pulses = [], bits = [], tmpO = new THREE.Object3D();
 let lastPulse = { x: 0, y: 0, age: 9, amp: 0 };
@@ -612,7 +612,7 @@ function buildLetters(font) {
       const mesh = new THREE.Mesh(geo, [front, side]);
       const pivot = new THREE.Group(); pivot.position.set(x + cx, 0, 0); pivot.add(mesh); pivot.visible = false;
       group.add(pivot);
-      const item = { pivot, front, side, home: x + cx, on: false, drop: 0, sq: 0, sv: 0, pu: 2, press: 0, v: 0, f: 0, goal: 0, wob: 0, wv: 0, dx: 0, dy: 0, dvx: 0, dvy: 0, fx: 0, sx: 0, sy: 0, mid: (geo.boundingBox.max.y + geo.boundingBox.min.y) / 2, line: groups.length, prev: null, next: null, ln: [], lw: [] };
+      const item = { pivot, front, side, home: x + cx, on: false, drop: 0, sq: 0, sv: 0, pu: 2, press: 0, v: 0, f: 0, goal: 0, lift: 0, lv: 0, lgoal: 0, lf: 0, wob: 0, wv: 0, dx: 0, dy: 0, dvx: 0, dvy: 0, fx: 0, sx: 0, sy: 0, mid: (geo.boundingBox.max.y + geo.boundingBox.min.y) / 2, line: groups.length, prev: null, next: null, ln: [], lw: [] };
       if (own.length) { item.prev = own[own.length - 1]; item.prev.next = item; }
       own.push(item); letters.push(item);
       x += glyph.ha * k + (KERN[ch + (all[i + 1] || '')] || 0) + (line.track || 0);
@@ -840,13 +840,15 @@ function spinSwap(on) {
   g.delayedCall(0.21, () => setLower(on));
 }
 // Ganze Wörter springen als Kette, der Vorderste zuerst. Wer weit muss, springt hoch über die anderen hinweg, wer nur rückt, hüpft flach.
-function rearrange(slot, only = null, flat = false) {
+// Art „flach“: alle hüpfen flach. Art „tausch“: Das Wort der Möwe hüpft mittelhoch, der Rest flach darunter durch. Nie über den Titel.
+function rearrange(slot, only = null, art = '') {
   const go = claim.items.filter((l) => (!only || only(l)) && (Math.abs(l[slot] - l.x) > 0.5 || l.y > 0.5 || l.air));
   const front = (l) => (l[slot] < l.x ? l.x : -l.x);
   go.sort((a, b) => front(a) - front(b));
   let far = 0, near = 0;
   for (const l of go) {
-    const d = l[slot] - l.x, wide = Math.abs(d) > 150, T = flat ? (wide ? 0.3 : 0.26) : wide ? 0.58 : 0.34;
+    const d = l[slot] - l.x, wide = Math.abs(d) > 150, low = art === 'flach' || (art === 'tausch' && l.key !== 'work');
+    const T = low ? (wide ? 0.3 : 0.26) : art === 'tausch' ? (wide ? 0.42 : 0.3) : wide ? 0.58 : 0.34;
     if (l.air || l.y > 4) toss(l, l[slot], l.air ? l.vy : 90);
     else toss(l, l[slot], CLAIM_G * T / 2, wide ? far++ * 0.03 : 0.1 + near++ * 0.016, d / T * 0.85);
   }
@@ -925,7 +927,7 @@ function stepRope(h) {
     if (gag.base.y + (t.x - gag.base.x) * gag.base.k - t.y > 60) shiftRest();
   }
 }
-function shiftRest() { if (gag.shifted) return; gag.shifted = true; rearrange('xB', (l) => l.key !== 'work', true); }
+function shiftRest() { if (gag.shifted) return; gag.shifted = true; rearrange('xB', (l) => l.key !== 'work', 'flach'); }
 function syncRope() {
   if (!gag.rope) return;
   const ns = gag.nodes;
@@ -1055,10 +1057,13 @@ function startGag() {
     .to(p, { shades: 1, duration: 0.13, ease: 'power2.in' }, L + 1.4)
     .to(p, { gesture: 0, duration: 0.13, ease: 'power2.in' }, L + 1.46)
     .to(p, { lid: 1, blink: 0, headYaw: -0.5, headPitch: 0.34, stare: 0, duration: 0.36, ease: 'sine.inOut' }, L + 1.95)
-    .call(shootGull, null, L + 2.8)
+    // Der Ball hat genug gesehen: Er rollt zum Ausholen zurück, duckt sich und schießt flach und hart.
+    .call(windUp, null, L + 1.9)
+    .call(crouch, null, L + 2.82)
+    .call(shootGull, null, L + 3)
     // Im letzten Moment rutscht die Brille runter, und die Augen gehen auf.
-    .to(p, { lid: 0, wide: 1, brow: 0.9, cock: 0.2, smile: 0, shades: 2, lookX: 0.9, crest: 0.5, duration: 0.08, ease: 'power3.out' }, L + 2.8 + 0.28)
-    .call(leaveGull, null, L + 4.5);
+    .to(p, { lid: 0, wide: 1, brow: 0.9, cock: 0.2, smile: 0, shades: 2, lookX: 0.9, crest: 0.5, duration: 0.08, ease: 'power3.out' }, L + 3 + 0.12)
+    .call(leaveGull, null, L + 4.6);
   return true;
 }
 // Im Hochformat die kurze Fassung: anfliegen, landen, frech schauen, und dann kommt schon der Ball.
@@ -1090,18 +1095,22 @@ function startGagHoch() {
   return true;
 }
 // Der Ball verteidigt den Satz.
-function aimAtGull() {
-  const t = 0.62, ty = gag.P.y - gag.s * 0.6;
+function aimAtGull(t = 0.62) {
+  const ty = gag.P.y - gag.s * 0.6;
   launch((gag.P.x - B.x) / t, (ty - B.y - GRAV * t * t / 2) / t);
 }
-function shootGull() { if (mode === 'rest') aimAtGull(); }
+// Der Ball holt aus: Er rollt ein Stück zurück, damit der Schuss Anlauf hat, und duckt sich kurz vor dem Abschuss.
+function windUp() { if (mode === 'rest' && !comp.on) phys.aim = Math.min(REST.x + 190, wallR() - B.r - 8); }
+function crouch() { if (mode === 'rest') phys.sv += 7; }
+function shootGull(t = 0.62) { if (mode === 'rest') aimAtGull(phys.aim != null ? 0.3 : t); }
 function leaveGull() {
   const g = window.gsap, P = gag.P;
+  phys.aim = null;
   gag.tl?.kill();
   gag.canHit = false; gag.onClaim = false;
   if (gag.rope) lastLetter();
   carryLook(false);
-  rearrange(homeSlot());
+  rearrange(homeSlot(), null, 'tausch');
   spinSwap(false);
   Object.assign(gull.pose, { fold: 0, flapAmp: 1, flapRate: 12, tuck: 1, yaw: -0.5, pitch: 0.25, roll: 0.3, mouth: 0, wide: 0, lid: 0.2, brow: 0, cock: 0.55, smile: 0.7, shades: 1, puff: 0, crest: 0, gesture: 0, stare: 0, lookX: 0, headYaw: 0, headPitch: 0, blink: 1 });
   gag.tl = g.timeline({ onComplete: endGag }).to(P, { x: view.x0 + view.vw + 240, y: -120, duration: 1.8, ease: 'power1.in' }, 0);
@@ -1112,7 +1121,7 @@ function gullHit(nx = 0.4, ny = -0.9, wucht = 900) {
   gag.tl?.kill();
   gag.canHit = false; gag.onClaim = false; gag.rope = false; gag.print = false; gag.nodes = [];
   // Die Buchstaben springen zurück, der Satz stimmt wieder.
-  rearrange(homeSlot());
+  rearrange(homeSlot(), null, 'tausch');
   carryLook(false);
   if (claim.tok.work.items[0].alt.visible) spinSwap(false);
   say('Kreisch!', 1300);
@@ -1203,7 +1212,7 @@ function splatBall() {
   say('Quitt.', 1900);
 }
 function endGag() {
-  gag.tl = null; gag.canHit = false; gag.onClaim = false; gag.rope = false; gag.print = false;
+  gag.tl = null; gag.canHit = false; gag.onClaim = false; gag.rope = false; gag.print = false; phys.aim = null;
   gag.next = 75 + Math.random() * 30;
   if (gull) gull.root.visible = false;
   plateMat.uniforms.uGullShadow.value.w = 0;
@@ -1439,15 +1448,15 @@ function applyLetters() {
     const sq = clamp(l.sq, -0.2, 0.5);
     l.pivot.visible = l.on;
     l.pivot.position.x = l.home + l.dx / l.pu;
-    // Unter dem Zeiger gibt der Buchstabe deutlich nach: tiefer, weiter nach hinten, stärker gekippt (mehr Ausschlag, Ike 02.11.2026).
-    l.pivot.position.y = l.drop - l.press * 19 - l.dy / l.pu;
-    l.pivot.position.z = -l.press * 12;
+    // Gewicht drückt nach hinten (Ball, Aufprall), der Zeiger hebt nach oben und ein Stück nach vorn.
+    l.pivot.position.y = l.drop - l.press * 6.2 + l.lift * 24 - l.dy / l.pu;
+    l.pivot.position.z = -l.press * 3.5 + l.lift * 4;
     l.pivot.scale.set(1 / Math.sqrt(1 - sq), 1 - sq, 1);
-    l.pivot.rotation.x = l.press * 0.2;
+    l.pivot.rotation.x = l.press * 0.07;
     // Jeder Buchstabe neigt sich mit dem Hang der Welle und dreht sich ein wenig zum Zeiger.
-    l.pivot.rotation.z = l.wob - l.dx * 0.0034 + ((l.prev ? l.prev.press : l.press) - (l.next ? l.next.press : l.press)) * 0.055;
+    l.pivot.rotation.z = l.wob - l.dx * 0.0034 + ((l.prev ? l.prev.press : l.press) - (l.next ? l.next.press : l.press)) * 0.055 + ((l.next ? l.next.lift : l.lift) - (l.prev ? l.prev.lift : l.lift)) * 0.09;
     l.pivot.rotation.y = (pointer.px - l.sx) / W * 0.09 * S.sheen;
-    const warm = clamp((l.press - 0.1) * 1.05, 0, 1);
+    const warm = clamp((Math.max(l.press, l.lift) - 0.1) * 1.05, 0, 1);
     l.front.color.lerpColors(CREAM, WARM, warm);
     l.side.color.lerpColors(CREAM_SIDE, WARM_SIDE, warm);
   }
@@ -1462,14 +1471,14 @@ function letterGoals(dt) {
   for (const l of letters) {
     // Auch ohne Zeiger atmet der Schriftzug: eine ganz flache Welle läuft durch.
     let g = breathe * Math.sin(time * 0.9 - l.sx * 0.008 - l.sy * 0.005);
+    // Unter dem Zeiger hebt sich der Buchstabe, die Nachbarn gehen als Welle mit (hoch und runter statt Klaviertaste, Ike 02.11.2026).
+    l.lgoal = 0;
     if (active && l.on) {
       const dx = pointer.x - l.sx, dy = pointer.y - l.sy;
-      const e = Math.exp(-(dx * dx) / (2 * 62 * 62) - (dy * dy) / (2 * 76 * 76));
-      g += gain * e;
-      // Die Buchstaben weichen dem Zeiger zur Seite aus und schwingen mit der Hand mit.
-      l.push = -dx / 62 * e * 28;
-      if (!reduced.matches) l.wv -= pointer.vx * 0.0045 * e * dt;
-    } else l.push = 0;
+      const e = Math.exp(-(dx * dx) / (2 * 78 * 78) - (dy * dy) / (2 * 90 * 90));
+      l.lgoal = gain * e;
+      if (!reduced.matches) l.wv -= pointer.vx * 0.0025 * e * dt;
+    }
     // Das Gewicht des Balls drückt die Schrift nach hinten, die Nachbarn geben mit nach.
     if (l.on && mode !== 'intro' && fly.s < 0.01) g += 1.25 * clamp((B.r + 70 - Math.hypot(B.x - l.sx - l.dx, B.y - l.sy - l.dy)) / 80, 0, 1);
     l.goal = g;
@@ -1488,12 +1497,15 @@ function letterGoals(dt) {
 }
 function stepLetters(h) {
   if (reduced.matches) {
-    for (const l of letters) { l.press += (clamp(l.goal, 0, 1) - l.press) * Math.min(1, h * 8); l.v = 0; l.wob = 0; l.wv = 0; l.dx = 0; l.dy = 0; l.dvx = 0; l.dvy = 0; }
+    for (const l of letters) { l.press += (clamp(Math.max(l.goal, l.lgoal), 0, 1) - l.press) * Math.min(1, h * 8); l.v = 0; l.lift = 0; l.lv = 0; l.wob = 0; l.wv = 0; l.dx = 0; l.dy = 0; l.dvx = 0; l.dvy = 0; }
     return;
   }
   for (const l of letters) {
-    let f = 26 * (l.goal - l.press) - 5.4 * l.v, fx = -24 * (l.dx - (l.push || 0)) * (1 + l.dx * l.dx / 5200) - 6.4 * l.dvx;
-    for (let i = 0; i < l.ln.length; i++) { f += 15 * l.lw[i] * (l.ln[i].press - l.press); fx += 9 * l.lw[i] * (l.ln[i].dx - l.dx); }
+    let f = 26 * (l.goal - l.press) - 6.6 * l.v, fx = -24 * l.dx * (1 + l.dx * l.dx / 5200) - 6.4 * l.dvx;
+    // Das Heben federt weich: Zieht der Zeiger weiter, sinkt der Buchstabe einmal unter seine Ruhelage und kommt zurück.
+    let lf = 34 * (l.lgoal - l.lift) - 4.6 * l.lv;
+    for (let i = 0; i < l.ln.length; i++) { f += 15 * l.lw[i] * (l.ln[i].press - l.press); lf += 14 * l.lw[i] * (l.ln[i].lift - l.lift); fx += 9 * l.lw[i] * (l.ln[i].dx - l.dx); }
+    l.lf = lf;
     // Buchstaben einer Zeile schieben einander, statt übereinanderzurutschen.
     if (l.prev && l.dx < l.prev.dx) fx += (l.prev.dx - l.dx) * 170;
     if (l.next && l.next.dx < l.dx) fx -= (l.dx - l.next.dx) * 170;
@@ -1501,6 +1513,7 @@ function stepLetters(h) {
   }
   for (const l of letters) {
     l.v += l.f * h; l.press = clamp(l.press + l.v * h, -0.7, 1.35);
+    l.lv += l.lf * h; l.lift = clamp(l.lift + l.lv * h, -0.6, 1.7);
     l.dvx += l.fx * h; l.dx += l.dvx * h;
     l.dvy += (-34 * l.dy - 7.5 * l.dvy) * h; l.dy += l.dvy * h;
     l.wv += (-70 * l.wob - 5.5 * l.wv) * h; l.wob += l.wv * h;
@@ -1550,7 +1563,7 @@ function roll(dx) {
   ballQ.premultiply(rollQ.setFromAxisAngle(rollAxis, -dx / B.r));
 }
 // Vor jedem Wurf wird das Ziel frisch vermessen: Der Aufkleber kann sich seit dem Laden verschoben oder seine Größe geändert haben.
-function launch(vx, vy) { measureSticker(); Object.assign(phys, { vx, vy, scored: false, wasIn: inPoly(HOLE, B.x, B.y) }); mode = 'free'; }
+function launch(vx, vy) { measureSticker(); Object.assign(phys, { vx, vy, scored: false, wasIn: inPoly(HOLE, B.x, B.y), aim: null }); mode = 'free'; }
 // Die Physik läuft in festen, kleinen Schritten und ist damit auf jedem Bildschirm gleich.
 // Der Ball ist schwer und die Schrift nachgiebig: Er prallt nicht ab, sondern drückt die Buchstaben auseinander. Sie weichen zur Seite aus,
 // nehmen die Nachbarn mit und kommen weich zurück, sobald er durch ist. Das gilt im Flug, beim Tragen und beim Rollen.
@@ -1590,11 +1603,12 @@ function stepBall(h) {
   phys.sv += (-760 * phys.sq - 30 * phys.sv) * h; phys.sq += phys.sv * h;
   // Egal wo der Ball aufkommt: Er läuft aus, kehrt weich um und rollt ohne Pause zu seinem Platz zurück.
   if (mode === 'rest') {
-    const dx = REST.x - B.x, want = still() ? 0 : clamp(dx * 1.1, -135, 135);
-    const rate = want * phys.homeV < 0 || Math.abs(want) < Math.abs(phys.homeV) ? 520 : 200;
+    const home = phys.aim ?? REST.x, top = phys.aim != null ? 260 : 135;
+    const dx = home - B.x, want = still() ? 0 : clamp(dx * 1.1 * (phys.aim != null ? 3 : 1), -top, top);
+    const rate = want * phys.homeV < 0 || Math.abs(want) < Math.abs(phys.homeV) ? 520 : phys.aim != null ? 640 : 200;
     phys.homeV += clamp(want - phys.homeV, -rate * h, rate * h);
     B.x = clamp(B.x + phys.homeV * h, wallL() + B.r, wallR() - B.r);
-    if (Math.abs(dx) < 0.3 && Math.abs(phys.homeV) < 1) { B.x = REST.x; phys.homeV = 0; }
+    if (Math.abs(dx) < 0.3 && Math.abs(phys.homeV) < 1) { B.x = home; phys.homeV = 0; }
     return;
   }
   if (mode !== 'free') return;
