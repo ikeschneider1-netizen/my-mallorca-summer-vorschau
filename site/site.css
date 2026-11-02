@@ -81,16 +81,16 @@ body { margin: 0; background: var(--creme); overflow-x: clip; }
 .szene-unten { bottom: 0; left: calc(var(--ul, 0) * 100%); width: calc(var(--uw, 1) * 100%); -webkit-mask: linear-gradient(transparent, #000 24%); mask: linear-gradient(transparent, #000 24%); }
 /* Die Möwe aus dem Hero, freigestellt: drei Haltungen im Stand, drei Flügelstellungen im Flug.
    Ohne Skript steht sie mit den Füßen auf einer Stelle des unteren Szenenbilds (--mx, --my); mit Skript fliegt sie zwischen ihren Plätzen. */
-.kapitel > .moewe { position: absolute; z-index: 2; max-width: none; margin: 0; width: var(--moewe-b, 150px); aspect-ratio: 849 / 616; left: calc((var(--ul, 0) + var(--mx, .1) * var(--uw, 1)) * 100% - .557 * var(--moewe-b, 150px)); bottom: calc(var(--uw, 1) * (100cqw + 2 * var(--rand)) * 750 / 1740 * (1 - var(--my, .5)) - .005 * var(--moewe-b, 150px)); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.kapitel > .moewe { position: absolute; z-index: 2; max-width: none; margin: 0; width: var(--moewe-b, 150px); aspect-ratio: 864 / 640; left: calc((var(--ul, 0) + var(--mx, .1) * var(--uw, 1)) * 100% - .547 * var(--moewe-b, 150px)); bottom: calc(var(--uw, 1) * (100cqw + 2 * var(--rand)) * 750 / 1740 * (1 - var(--my, .5)) - .005 * var(--moewe-b, 150px)); cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .kapitel > .moewe.frei { left: 0; top: 0; bottom: auto; }
-.moewe-dreh { position: absolute; inset: 0; transform-origin: 55.7% 100%; transition: scale 200ms var(--out); }
+.moewe-dreh { position: absolute; inset: 0; transform-origin: 54.7% 100%; transition: scale 200ms var(--out); }
 .moewe.links .moewe-dreh { scale: -1 1; }
 .moewe img { position: absolute; opacity: 0; filter: drop-shadow(0 6px 5px rgba(80, 30, 0, .28)); }
 .moewe-stand img { inset: 0; width: 100%; height: 100%; }
 .moewe-stand img:first-child, .moewe[data-lage='frech'] .moewe-stand img:nth-child(2), .moewe[data-lage='schreck'] .moewe-stand img:nth-child(3) { opacity: 1; }
 .moewe[data-lage='frech'] .moewe-stand img:first-child, .moewe[data-lage='schreck'] .moewe-stand img:first-child { opacity: 0; }
-.moewe-stand { position: absolute; inset: 0; transform-origin: 55.7% 100%; animation: atmen 3.4s ease-in-out infinite alternate; }
-.moewe-flug { position: absolute; left: 50%; top: 52%; width: 91.4%; aspect-ratio: 776 / 1144; translate: -50% -50%; visibility: hidden; }
+.moewe-stand { position: absolute; inset: 0; transform-origin: 54.7% 100%; animation: atmen 3.4s ease-in-out infinite alternate; }
+.moewe-flug { position: absolute; left: 50%; top: 52%; width: 91.3%; aspect-ratio: 789 / 1144; translate: -50% -50%; visibility: hidden; }
 .moewe-flug img { inset: 0; width: 100%; height: 100%; }
 /* Im Flug: Standbilder weg, Flügelschlag oben, Mitte, unten, Mitte. */
 .moewe.fliegt .moewe-stand { visibility: hidden; }

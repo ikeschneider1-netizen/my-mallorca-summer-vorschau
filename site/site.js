@@ -288,8 +288,8 @@
       };
       const sitzPunkt = (i) => ({ x: unten.x + sitze[i][0] * unten.w, y: unten.y + sitze[i][1] * unten.h });
       const sichtbar = (i) => { const q = sitzPunkt(i); return q.x > W * 0.08 && q.x < W * 0.92; };
-      // Die Füße stehen im Bild bei 55,7 % der Breite, ganz unten.
-      const stellen = () => { const w = moewe.offsetWidth, h = moewe.offsetHeight; moewe.style.transform = `translate(${(M.x - 0.557 * w).toFixed(1)}px, ${(M.y - 0.995 * h).toFixed(1)}px)`; };
+      // Die Füße stehen im Bild bei 54,7 % der Breite, ganz unten.
+      const stellen = () => { const w = moewe.offsetWidth, h = moewe.offsetHeight; moewe.style.transform = `translate(${(M.x - 0.547 * w).toFixed(1)}px, ${(M.y - 0.995 * h).toFixed(1)}px)`; };
       const setzen = (i) => { platz = i; const q = sitzPunkt(i); M.x = q.x; M.y = q.y; moewe.classList.toggle('links', sitze[i][0] > 0.55); stellen(); };
       const fliegen = (ziel) => {
         if (!moewe || fliegt || ziel === platz || reduced.matches) return;
@@ -323,7 +323,7 @@
       // Mit Skript übernimmt sie ihren Platz selbst: der sichtbare Platz, der ihrer Startstelle am nächsten liegt.
       if (moewe && sitze.length && !reduced.matches) {
         mass();
-        const r = moewe.getBoundingClientRect(), f = feld.getBoundingClientRect(), fussX = r.left - f.left + 0.557 * r.width;
+        const r = moewe.getBoundingClientRect(), f = feld.getBoundingClientRect(), fussX = r.left - f.left + 0.547 * r.width;
         let best = -1, d = Infinity;
         sitze.forEach((_, i) => { if (sichtbar(i)) { const q = sitzPunkt(i), e = Math.abs(q.x - fussX); if (e < d) { d = e; best = i; } } });
         if (best >= 0) { moewe.classList.add('frei'); setzen(best); }

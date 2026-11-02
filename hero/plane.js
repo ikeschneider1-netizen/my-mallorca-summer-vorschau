@@ -1,4 +1,4 @@
-// Der Werbeflieger: ein kleiner Doppeldecker, unsere Möwe sitzt mit Brille und Schal am Steuer.
+// Der Werbeflieger: ein kleiner Doppeldecker, unsere Möwe sitzt mit Lederhaube, Fliegerbrille und Schal am Steuer.
 // Alles wird beim Laden im Browser gezeichnet. Oben im Bild liegt das Banner, darunter zwei Phasen des Flugzeugs: Propeller und Schal bewegen sich.
 const INK = '#00343a', CREAM = '#fff4df', PINK = '#e8437f', PLUM = '#b5235f', SUN = '#ffc91f', SEA = '#0a7fa8', DARK = '#1d2229';
 
@@ -88,22 +88,34 @@ function plane(x, frame) {
   scarf(0, 3); x.fillStyle = CREAM; x.fill();
   x.restore();
 
-  // Die Pilotin: dieselbe Möwe wie auf der Terrasse. Kopf, Tolle, großer Schnabel, pinke Brille.
+  // Der Pilot: dieselbe Möwe wie auf der Terrasse. Lederhaube mit Ohrenklappe, Fliegerbrille auf der Stirn, Hakenschnabel, kerniger Blick.
   const face = x.createRadialGradient(278, 44, 4, 288, 56, 34); face.addColorStop(0, '#ffffff'); face.addColorStop(1, '#e6dccb');
   x.fillStyle = '#efe7d6'; x.beginPath(); x.ellipse(298, 80, 26, 16, 0, 0, Math.PI * 2); x.fill();
   x.fillStyle = face; x.beginPath(); x.arc(288, 54, 30, 0, Math.PI * 2); x.fill();
-  x.fillStyle = '#f3ecdd';
-  for (const [tx, ty, a] of [[300, 24, 0.5], [290, 20, 0.12], [278, 21, -0.28]]) { x.save(); x.translate(tx, ty); x.rotate(a); x.beginPath(); x.ellipse(5, -10, 6, 15, 0.1, 0, Math.PI * 2); x.fill(); x.restore(); }
-  x.fillStyle = '#ffbf1a'; x.beginPath(); x.moveTo(266, 44); x.bezierCurveTo(240, 42, 214, 52, 212, 66); x.bezierCurveTo(226, 64, 252, 68, 268, 68); x.closePath(); x.fill();
-  x.fillStyle = '#f0861c'; x.beginPath(); x.moveTo(268, 66); x.bezierCurveTo(250, 68, 232, 68, 222, 70); x.bezierCurveTo(234, 80, 258, 80, 270, 74); x.closePath(); x.fill();
-  x.fillStyle = '#e03024'; x.beginPath(); x.arc(238, 72, 4, 0, Math.PI * 2); x.fill();
-  // Frech grinsender Mundwinkel
-  x.strokeStyle = '#b5661a'; x.lineWidth = 2.4; x.lineCap = 'round'; x.beginPath(); x.moveTo(216, 67); x.quadraticCurveTo(250, 68, 276, 60); x.stroke();
-  x.strokeStyle = PINK; x.lineWidth = 5; x.beginPath(); x.moveTo(284, 40); x.lineTo(316, 36); x.stroke();
-  x.fillStyle = PINK; x.beginPath(); x.ellipse(270, 42, 17, 13.5, -0.1, 0, Math.PI * 2); x.fill();
-  x.fillStyle = '#14171d'; x.beginPath(); x.ellipse(270, 42, 13.5, 10.5, -0.1, 0, Math.PI * 2); x.fill();
-  x.fillStyle = 'rgba(255, 255, 255, .85)'; x.beginPath(); x.ellipse(265, 38, 4.2, 2.4, -0.5, 0, Math.PI * 2); x.fill();
-  x.strokeStyle = '#3a4a5e'; x.lineWidth = 5.5; x.beginPath(); x.moveTo(256, 25); x.quadraticCurveTo(272, 15, 288, 22); x.stroke();
+  // Hakenschnabel in Orange, der rote Fleck vorn am Unterschnabel
+  x.fillStyle = '#ff9f1c'; x.beginPath(); x.moveTo(266, 44); x.bezierCurveTo(240, 42, 212, 50, 208, 68); x.bezierCurveTo(214, 64, 250, 68, 268, 68); x.closePath(); x.fill();
+  x.fillStyle = '#e8701a'; x.beginPath(); x.moveTo(268, 66); x.bezierCurveTo(250, 68, 232, 68, 222, 70); x.bezierCurveTo(234, 80, 258, 80, 270, 74); x.closePath(); x.fill();
+  x.fillStyle = '#e03024'; x.beginPath(); x.arc(228, 71, 3, 0, Math.PI * 2); x.fill();
+  // Schiefer Mundwinkel
+  x.strokeStyle = '#a95a16'; x.lineWidth = 2.4; x.lineCap = 'round'; x.beginPath(); x.moveTo(216, 67); x.quadraticCurveTo(250, 68, 276, 60); x.stroke();
+  // Auge mit schwerem Lid, darüber die Braue schräg zum Schnabel
+  x.fillStyle = '#fffdf5'; x.beginPath(); x.ellipse(271, 46, 9.5, 8.5, 0, 0, Math.PI * 2); x.fill();
+  x.fillStyle = '#ffc62e'; x.beginPath(); x.arc(267, 47, 5, 0, Math.PI * 2); x.fill();
+  x.fillStyle = '#101215'; x.beginPath(); x.arc(266, 47, 2.6, 0, Math.PI * 2); x.fill();
+  x.fillStyle = '#ece5d6'; x.beginPath(); x.ellipse(271, 42, 10.5, 6.5, 0, Math.PI, Math.PI * 2); x.fill();
+  x.strokeStyle = '#262f3b'; x.lineWidth = 5.5; x.beginPath(); x.moveTo(284, 34); x.lineTo(259, 40); x.stroke();
+  // Lederhaube über Kopf und Nacken, Ohrenklappe, Fellrand an der Stirn
+  x.fillStyle = '#7b4a2b'; x.beginPath(); x.moveTo(262, 36); x.bezierCurveTo(266, 12, 312, 8, 320, 42); x.lineTo(320, 72); x.bezierCurveTo(316, 86, 300, 86, 296, 76); x.lineTo(294, 52); x.bezierCurveTo(286, 34, 272, 32, 262, 36); x.closePath(); x.fill();
+  x.fillStyle = '#6a3e23'; x.beginPath(); x.ellipse(303, 66, 9, 13, 0.15, 0, Math.PI * 2); x.fill();
+  x.strokeStyle = '#f1e3c8'; x.lineWidth = 5; x.beginPath(); x.moveTo(262, 37); x.bezierCurveTo(272, 31, 286, 33, 295, 48); x.stroke();
+  x.strokeStyle = '#5a341d'; x.lineWidth = 1.6; x.beginPath(); x.moveTo(288, 13); x.bezierCurveTo(304, 16, 316, 28, 319, 46); x.stroke();
+  // Fliegerbrille auf der Stirn: zwei Messingringe mit Glas, Riemen nach hinten
+  x.strokeStyle = '#5a341d'; x.lineWidth = 5; x.beginPath(); x.moveTo(296, 24); x.lineTo(320, 34); x.stroke();
+  for (const [gx, gy] of [[270, 26], [290, 21]]) {
+    x.fillStyle = '#6f9aa6'; x.beginPath(); x.arc(gx, gy, 8.5, 0, Math.PI * 2); x.fill();
+    x.fillStyle = 'rgba(255, 255, 255, .7)'; x.beginPath(); x.ellipse(gx - 3, gy - 3, 3, 1.8, -0.6, 0, Math.PI * 2); x.fill();
+    x.strokeStyle = '#c89b45'; x.lineWidth = 3.6; x.beginPath(); x.arc(gx, gy, 9.5, 0, Math.PI * 2); x.stroke();
+  }
 
   // Cockpit: Rand über dem Hals, davor eine kleine Scheibe
   x.fillStyle = '#7d4a12'; x.beginPath(); x.ellipse(290, 86, 46, 8, 0.05, 0, Math.PI * 2); x.fill();

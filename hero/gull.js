@@ -10,7 +10,7 @@ const tmp = new THREE.Vector3();
 
 const CREAM = new THREE.Color(0xf6efe0), PEACH = new THREE.Color(0xeeb98c), SHADE = new THREE.Color(0xd9cdbc);
 const MANTLE = new THREE.Color(0x667c94), MANTLE_SOFT = new THREE.Color(0x8297ae), UNDER = new THREE.Color(0xe6e3dc), INK = new THREE.Color(0x1d2229);
-const BEAK = new THREE.Color(0xffbf1a), BEAK_TIP = new THREE.Color(0xf0861c);
+const BEAK = new THREE.Color(0xff9f1c), BEAK_TIP = new THREE.Color(0xe8701a);
 
 function shaped(geo, fn) {
   const p = geo.attributes.position;
@@ -61,16 +61,15 @@ function slab(points, thick) {
 }
 
 const ARM = 0.42, FORE = 0.4, FOLD_IN = 0.76;
-const DEFAULTS = { yaw: -0.4, pitch: 0, roll: 0, sweep: 0, fold: 1, flapAmp: 0, flapRate: 10, tuck: 0, walk: 0, headYaw: 0, headPitch: 0, headRoll: 0, lid: 0.3, mouth: 0, squash: 0, stare: 0, lookX: 0, lookY: 0, brow: 0, cock: 0.7, smile: 0.62, tongue: 0, shades: 0, shadeTilt: 0, wide: 0, puff: 0, crest: 0, gesture: 0, tailUp: 0, stab: 0.6, blink: 1 };
+const DEFAULTS = { yaw: -0.4, pitch: 0, roll: 0, sweep: 0, fold: 1, flapAmp: 0, flapRate: 10, tuck: 0, walk: 0, headYaw: 0, headPitch: 0, headRoll: 0, lid: 0.56, mouth: 0, squash: 0, stare: 0, lookX: 0.3, lookY: 0, brow: -0.4, cock: 0.5, smile: -0.15, tongue: 0, shades: 0, shadeTilt: 0, wide: 0, puff: 0, crest: 0, gesture: 0, tailUp: 0, stab: 0.6, blink: 1 };
 
 export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
   let size = startSize;
   const soft = (color, o = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.62, clearcoat: 0.12, clearcoatRoughness: 0.5, envMap: env, envMapIntensity: 0.34, side: THREE.DoubleSide, ...o });
   const skin = soft(0xffffff, { vertexColors: true }), beakMat = soft(0xffffff, { vertexColors: true, roughness: 0.34, clearcoat: 0.55, clearcoatRoughness: 0.3, envMapIntensity: 0.5 });
-  const lidMat = soft(0xece5d6), browMat = soft(0x3a4a5e, { roughness: 0.5 }), lashMat = soft(0x262c35, { roughness: 0.4 }), footMat = soft(0xf07f2e, { roughness: 0.48, clearcoat: 0.25 }), ringMat = soft(0xe8437f, { roughness: 0.3, clearcoat: 0.6 });
+  const lidMat = soft(0xece5d6), browMat = soft(0x262f3b, { roughness: 0.5 }), footMat = soft(0xf07f2e, { roughness: 0.48, clearcoat: 0.25 }), ringMat = soft(0xe8437f, { roughness: 0.3, clearcoat: 0.6 });
   const redMat = soft(0xe03024, { roughness: 0.34, clearcoat: 0.5 }), mouthMat = soft(0x8c2230), tongueMat = soft(0xf07a86);
   const eyeMat = soft(0xfffdf5, { roughness: 0.2, clearcoat: 0.8, clearcoatRoughness: 0.12 });
-  const frameMat = soft(0xe8437f, { roughness: 0.26, clearcoat: 0.8, clearcoatRoughness: 0.2 }), lensMat = soft(0x14171d, { roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.5 });
   const irisMat = soft(0xffc62e, { roughness: 0.22, clearcoat: 0.8, clearcoatRoughness: 0.15 }), pupilMat = soft(0x101215, { roughness: 0.14, clearcoat: 0.9, clearcoatRoughness: 0.1 });
   const sparkMat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
   const mesh = (geo, mat, parent, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); parent.add(m); return m; };
@@ -108,8 +107,8 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
   const toneBeak = (L) => (v, c) => { c.copy(BEAK).lerp(BEAK_TIP, smooth(0.6, 1, v.x / L) * 0.6); };
   mesh(paint(shaped(new THREE.SphereGeometry(1, 28, 18), (v) => {
     const u = (v.x + 1) / 2, y = v.y > 0 ? 0.14 : 0.024;
-    v.set(u * 0.45, v.y * y * Math.pow(1 - u * u * 0.95, 0.62) - 0.062 * u * u * u + 0.014, v.z * 0.125 * Math.pow(1 - u * u * 0.9, 0.58));
-  }), toneBeak(0.45)), beakMat, head, 0.2, -0.01, 0);
+    v.set(u * 0.5, v.y * y * 1.08 * Math.pow(1 - u * u * 0.95, 0.62) - 0.095 * u * u * u + 0.016, v.z * 0.135 * Math.pow(1 - u * u * 0.9, 0.58));
+  }), toneBeak(0.5)), beakMat, head, 0.2, -0.01, 0);
   const roof = mesh(new THREE.SphereGeometry(1, 14, 10), mouthMat, head, 0.34, -0.01, 0);
   roof.scale.set(0.15, 0.012, 0.08);
   const jaw = new THREE.Group();
@@ -117,13 +116,14 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
   head.add(jaw);
   mesh(paint(shaped(new THREE.SphereGeometry(1, 24, 16), (v) => {
     const u = (v.x + 1) / 2, dn = v.y < 0 ? 0.088 * (1 + 0.5 * smooth(0.4, 0.68, u) * smooth(0.97, 0.72, u)) : 0.016;
-    v.set(u * 0.37, v.y * dn * Math.pow(1 - u * u * 0.96, 0.62), v.z * 0.1 * Math.pow(1 - u * u * 0.9, 0.58));
-  }), toneBeak(0.37)), beakMat, jaw);
+    v.set(u * 0.4, v.y * dn * Math.pow(1 - u * u * 0.96, 0.62), v.z * 0.108 * Math.pow(1 - u * u * 0.9, 0.58));
+  }), toneBeak(0.4)), beakMat, jaw);
   const floorMouth = mesh(new THREE.SphereGeometry(1, 14, 10), mouthMat, jaw, 0.13, 0.012, 0);
   floorMouth.scale.set(0.13, 0.01, 0.072);
   const tongue = mesh(new THREE.SphereGeometry(1, 14, 10), tongueMat, jaw, 0.13, 0.024, 0);
-  const spot = mesh(new THREE.SphereGeometry(1, 14, 10), redMat, jaw, 0.26, -0.044, 0);
-  spot.scale.set(0.04, 0.036, 0.056);
+  // Der rote Fleck sitzt wie bei echten Möwen vorn am Unterschnabel, nicht am Mundwinkel.
+  const spot = mesh(new THREE.SphereGeometry(1, 14, 10), redMat, jaw, 0.33, -0.03, 0);
+  spot.scale.set(0.026, 0.024, 0.05);
 
   // Die Mundwinkel laufen in die Wange und gehen nach oben: Daher kommt das freche Grinsen.
   const corners = [1, -1].map((side) => {
@@ -134,8 +134,6 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
   });
 
   const hemi = new THREE.SphereGeometry(0.113, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2);
-  const lashGeo = new THREE.TorusGeometry(0.113, 0.014, 6, 20, Math.PI);
-  lashGeo.rotateX(Math.PI / 2); lashGeo.rotateY(Math.PI / 2);
   const eyes = [1, -1].map((side) => {
     // Die Augen sitzen nah beieinander und nah am Schnabel. +x ist die Blickrichtung des Auges.
     const g = new THREE.Group();
@@ -145,6 +143,7 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
     const yy = new THREE.Vector3().crossVectors(zz, dir);
     g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(dir, yy, zz));
     head.add(g);
+    g.scale.setScalar(0.88);
     const ball = mesh(new THREE.SphereGeometry(0.106, 24, 18), eyeMat, g);
     const gaze = new THREE.Group();
     g.add(gaze);
@@ -156,24 +155,33 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
     const upper = new THREE.Group();
     lids.add(upper);
     mesh(hemi, lidMat, upper);
-    mesh(lashGeo, lashMat, upper);
     const low = new THREE.Group();
     lids.add(low);
     mesh(hemi, lidMat, low).rotation.x = Math.PI;
     // Die Braue ist außen dick und läuft zum Schnabel hin spitz zu.
-    const browGeo = shaped(new THREE.SphereGeometry(1, 16, 10), (v) => { const k = 0.62 + 0.38 * v.z * side; v.set(v.x * 0.056 * k, v.y * 0.042 * k, v.z * 0.15); });
+    const browGeo = shaped(new THREE.SphereGeometry(1, 16, 10), (v) => { const k = 0.62 + 0.38 * v.z * side; v.set(v.x * 0.064 * k, v.y * 0.05 * k, v.z * 0.16); });
     const brow = mesh(browGeo, browMat, lids, 0.015, 0.127, 0);
     return { g, gaze, ball, pupil, spark, lids, upper, low, brow, side, inv: g.quaternion.clone().invert() };
   });
-  // Die Sonnenbrille: oben auf der Stirn, auf den Augen oder vorn auf dem Schnabel, zum Drüberwegschauen.
+  // Lederhaube und Fliegerbrille wie bei den alten Kampfpiloten. Die Brille sitzt oben auf der Haube, rutscht über die Augen
+  // oder vorn auf den Schnabel, zum Drüberwegschauen.
+  const leder = soft(0x7b4a2b, { roughness: 0.55, clearcoat: 0.25, clearcoatRoughness: 0.45 }), fell = soft(0xf1e3c8, { roughness: 0.95 });
+  const messing = soft(0xc89b45, { metalness: 0.9, roughness: 0.28, clearcoat: 0.3, envMapIntensity: 1.1 });
+  const glasMat = soft(0x355a66, { roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.8 });
   const makeShades = (parent) => {
-    const sph = new THREE.SphereGeometry(1, 16, 12);
+    const glasGeo = new THREE.CylinderGeometry(0.094, 0.094, 0.012, 36); glasGeo.rotateZ(Math.PI / 2);
+    const randGeo = new THREE.TorusGeometry(0.1, 0.021, 12, 40); randGeo.rotateY(Math.PI / 2);
+    const kappeGeo = new THREE.CylinderGeometry(0.11, 0.085, 0.075, 32, 1, true); kappeGeo.rotateZ(Math.PI / 2);
     for (const side of [1, -1]) {
-      const f = mesh(sph, frameMat, parent, -0.03, 0, side * 0.2); f.scale.set(0.02, 0.096, 0.122); f.rotation.y = -side * 0.72;
-      const l = mesh(sph, lensMat, parent, -0.021, 0, side * 0.21); l.scale.set(0.018, 0.08, 0.106); l.rotation.y = -side * 0.72;
-      const arm = mesh(sph, frameMat, parent, -0.26, 0.015, side * 0.285); arm.scale.set(0.17, 0.013, 0.013);
+      const g = new THREE.Group(); g.position.set(0, 0, side * 0.155); g.rotation.y = -side * 0.4; parent.add(g);
+      mesh(kappeGeo, leder, g, -0.035, 0, 0);
+      mesh(randGeo, messing, g);
+      mesh(glasGeo, glasMat, g, -0.004, 0, 0);
     }
-    const bridge = mesh(sph, frameMat, parent, 0.006, 0.03, 0); bridge.scale.set(0.016, 0.017, 0.11);
+    const steg = mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.08, 10), leder, parent, -0.03, 0, 0); steg.rotation.x = Math.PI / 2;
+    // Der Riemen läuft hinten um den Kopf.
+    const riemenGeo = new THREE.TorusGeometry(0.318, 0.02, 8, 56, Math.PI * 4 / 3); riemenGeo.rotateX(Math.PI / 2);
+    mesh(riemenGeo, leder, parent, -0.3, 0, 0).rotation.y = -Math.PI / 3;
   };
   const shades = new THREE.Group();
   head.add(shades);
@@ -189,6 +197,29 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
     const m = mesh(tuft, skin, crest, -i * 0.024, y, z);
     m.rotation.y = z * 3.2; m.rotation.z = i === 3 ? 0.3 : 0; m.scale.setScalar(k);
   });
+
+  // Die Haube: oben eine geschlossene Kuppel bis über die Brauen, darunter Seiten und Nacken mit Öffnung fürs Gesicht (vorn ist +x),
+  // ein Fellrand ums Gesicht, eine Naht über den Scheitel und zwei Ohrenklappen.
+  crest.visible = false;
+  const haube = new THREE.Group();
+  haube.position.set(-0.015, 0.02, 0);
+  head.add(haube);
+  const R = 0.334, OFF = 1.05, T1 = Math.PI * 0.26, T2 = Math.PI * 0.55;
+  mesh(new THREE.SphereGeometry(R, 40, 12, 0, Math.PI * 2, 0, T1), leder, haube);
+  mesh(new THREE.SphereGeometry(R, 40, 18, Math.PI + OFF, Math.PI * 2 - 2 * OFF, T1, T2 - T1), leder, haube);
+  const aufKugel = (phi, theta, r = R + 0.012) => new THREE.Vector3(-r * Math.cos(phi) * Math.sin(theta), r * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta));
+  const rand = [];
+  for (let i = 0; i <= 16; i++) rand.push(aufKugel(Math.PI - OFF + 2 * OFF * i / 16, T1));
+  mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(rand), 64, 0.017, 8), fell, haube);
+  const naht = new THREE.TorusGeometry(R + 0.004, 0.008, 6, 40, Math.PI * 0.9);
+  mesh(naht, leder, haube).rotation.z = Math.PI * 0.08;
+  for (const side of [1, -1]) {
+    const klappe = mesh(new THREE.SphereGeometry(1, 20, 14), leder, haube, 0.05, -0.07, side * 0.29);
+    klappe.scale.set(0.1, 0.115, 0.034); klappe.rotation.set(side * 0.2, -side * 0.55, 0.1);
+  }
+  // Kinnriemen von Klappe zu Klappe unter dem Schnabel: Dann ist es klar eine Fliegerhaube.
+  const riemen = new THREE.TorusGeometry(0.29, 0.012, 6, 28, Math.PI); riemen.rotateY(Math.PI / 2); riemen.rotateX(Math.PI);
+  mesh(riemen, leder, haube, 0.07, -0.06, 0);
 
   // Die Federn der Flügel: dunkle Spitzen mit weißem Fleck, graue Schwingen mit weißem Saum, darüber kurze Decken. Die Unterseite ist hell.
   const under = (c, s) => { if (s < 0.2) c.lerp(UNDER, smooth(0.2, -0.3, s)); };
@@ -329,9 +360,10 @@ export function buildGull(env, { depth, focal, cx, cy, size: startSize }) {
     crest.rotation.z = -0.1 - crestA;
     // Die Brille gleitet zwischen Stirn, Augen und Schnabel. Beim Kopfschütteln wackelt sie mit.
     const sh = Math.max(0, Math.min(2, p.shades)), a1 = Math.min(1, sh), a2 = Math.max(0, sh - 1);
-    shades.position.set(mix(mix(0.1, 0.262, a1), 0.31, a2), mix(mix(0.3, 0.118, a1), 0.006, a2), 0);
+    // Die Fliegerbrille liegt oben auf der Haube, rutscht über die Augen oder vorn auf den Schnabel.
+    shades.position.set(mix(mix(0.23, 0.33, a1), 0.35, a2), mix(mix(0.31, 0.122, a1), 0.006, a2), 0);
     shadeV += ((p.headYaw - shadeY) * 220 - shadeV * 14) * h; shadeY += shadeV * h;
-    shades.rotation.set((p.headYaw - shadeY) * 0.4 + p.shadeTilt, 0, mix(mix(0.95, 0, a1), -0.14, a2));
+    shades.rotation.set((p.headYaw - shadeY) * 0.4 + p.shadeTilt, 0, mix(mix(0.5, 0, a1), -0.14, a2));
     shades.scale.z = mix(0.6, 1, a1);
 
     const nearWing = Math.abs(p.yaw) < Math.PI / 2 ? 1 : -1;
