@@ -12,6 +12,9 @@
   --terra: #c4502a;
   /* Weiches Petrol für Menü und Kopf: Das volle Petrol wirkt in Shrikhand zu schwer (Ike, 02.11.2026). */
   --petrol-weich: #3f6f7c;
+  /* Feine Kontur für Wörter im hellen WhatsApp-Grün: Auf der hellen Wand fehlt dem Grün sonst der Rand, Buchstaben verschmelzen
+     und in Shrikhand liest sich z. B. das z in „Jetzt“ wie ein x (Ike, 02.11.2026). */
+  --wa-kontur: .02em 0 0 #0b6f60, -.02em 0 0 #0b6f60, 0 .02em 0 #0b6f60, 0 -.02em 0 #0b6f60, .014em .014em 0 #0b6f60, -.014em .014em 0 #0b6f60, .014em -.014em 0 #0b6f60, -.014em -.014em 0 #0b6f60;
   /* Kapitel-Welten: die Treppe vom Hero hinunter zum Pool */
   --terrasse: #e4572e; --vanille: #fcead1; --orange: #ff741f; --lagune: #1ec8d0; --creme: #fff4df; --zitrone: #ffe600; --petrol: #00343a;
   /* Ball */
@@ -211,7 +214,9 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .szene-vanille .weiter { font-size: clamp(1rem, 5vw, 1.8rem); }
 .szene-vanille .nebenweg { text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763, -.06em .09em .08em rgba(0, 40, 50, .2); }
 /* „Jetzt per WhatsApp bewerben“ im Original-Grün von WhatsApp (#25D366), mit Kanten in den dunklen WhatsApp-Tönen. */
-.szene-vanille .weiter.wa { --flip: #075e54; color: #25d366; text-shadow: 0 -.012em 0 #7ef0a6, -.015em .015em 0 #1fb455, -.03em .03em 0 #169a52, -.045em .045em 0 #128c7e, -.06em .06em 0 #0b6f60, -.09em .13em .12em rgba(0, 60, 40, .3); }
+.szene-vanille .weiter.wa { --flip: #075e54; color: #25d366; letter-spacing: .015em; text-shadow: var(--wa-kontur), -.015em .015em 0 #0b6f60, -.03em .03em 0 #0a6458, -.045em .045em 0 #085a50, -.06em .06em 0 #075047, -.09em .13em .12em rgba(0, 60, 40, .3); }
+/* Beim Überfahren dreht sich die Schrift ins dunkle WhatsApp-Grün, dann tragen hellgrüne Kanten das Plastische. */
+.szene-vanille .weiter.wa .f + .f { text-shadow: 0 -.012em 0 #7ef0a6, -.015em .015em 0 #1fb455, -.03em .03em 0 #169a52, -.045em .045em 0 #128c7e, -.06em .06em 0 #0b6f60, -.09em .13em .12em rgba(0, 60, 40, .3); }
 .szene-vanille .weiter.wa svg { filter: drop-shadow(-.03em .03em 0 #128c7e) drop-shadow(-.05em .08em .06em rgba(0, 60, 40, .3)); }
 
 /* Fließtext-Link */
@@ -403,7 +408,7 @@ html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }
   .menue-offen .seitenmenue > a { animation: hoch 460ms var(--out) both; }
   .seitenmenue > a:nth-child(2) { animation-delay: 40ms; } .seitenmenue > a:nth-child(3) { animation-delay: 80ms; } .seitenmenue > a:nth-child(4) { animation-delay: 120ms; } .seitenmenue > a:nth-child(5) { animation-delay: 160ms; } .seitenmenue > a:nth-child(6) { animation-delay: 200ms; } .seitenmenue > a:nth-child(7) { animation-delay: 240ms; }
   .menue-wege { display: grid; gap: 6px; margin-top: clamp(14px, 3vh, 30px); }
-  .menue-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: #25d366; text-decoration: none; text-shadow: -.015em .015em 0 #1fb455, -.03em .03em 0 #128c7e, -.045em .045em 0 #0b6f60, -.07em .1em .1em rgba(0, 60, 40, .25); }
+  .menue-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: #25d366; text-decoration: none; text-shadow: var(--wa-kontur), -.015em .015em 0 #0b6f60, -.03em .03em 0 #0a6458, -.045em .045em 0 #085a50, -.07em .1em .1em rgba(0, 60, 40, .25); }
   .menue-wa svg { flex: none; width: 1.1em; height: 1.1em; fill: currentColor; filter: drop-shadow(-.03em .03em 0 #128c7e); }
   .menue-form { display: inline-flex; align-items: center; min-height: 44px; padding: 0; font: 400 clamp(17px, 4.6vw, 21px)/1.1 Shrikhand, Georgia, serif; color: var(--petrol-weich); text-decoration: none; text-shadow: -.015em .015em 0 #346470, -.03em .03em 0 #2a5763; }
   .der-aufkleber { --d: clamp(100px, 27vw, 150px); top: auto; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
