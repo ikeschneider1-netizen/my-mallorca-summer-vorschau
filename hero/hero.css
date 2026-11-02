@@ -21,18 +21,15 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 /* Ohne Flug ist alles normaler Seitenfluss; mit Flug steht die Bühne, während die Seite läuft. */
 .track { position: relative; }
 .stage { position: relative; }
-.hero { position: relative; height: 100vh; height: 100svh; min-height: 540px; overflow: hidden; background: var(--dawn); isolation: isolate; }
+.hero { position: relative; z-index: 3; height: 100vh; height: 100svh; min-height: 540px; overflow: hidden; background: var(--dawn); isolation: isolate; }
 .anchor { position: absolute; left: 0; bottom: 0; width: 1px; height: 100vh; pointer-events: none; }
-.through { display: grid; place-content: center; justify-items: center; gap: 14px; min-height: 58vh; padding: 72px 24px; text-align: center; color: var(--ink); background: var(--cream); }
-.through h2 { margin: 0; font: 400 clamp(40px, 6.4vw, 88px)/1.04 Shrikhand, Georgia, serif; }
-.through p { font-size: clamp(17px, 1.6vw, 21px); }
-.through a { margin-top: 10px; font-weight: 600; font-size: 16px; color: var(--coral); }
 
 .fly .track { height: calc(100vh + 190vh); height: calc(100svh + 190vh); }
-.fly .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--cream); }
+.fly .stage { position: sticky; z-index: 4; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--cream); }
 .fly:not(.ready) .stage { background: var(--dawn); }
 .fly .hero { position: absolute; inset: 0; z-index: 2; background: transparent; pointer-events: none; }
-.fly .through { position: absolute; inset: 0; z-index: 1; min-height: 0; }
+/* Hinter dem Ring liegt die Landung: der Anfang der Terrasse mit dem Titel des nächsten Kapitels (Stil in site/site.css). */
+.fly .landung { position: absolute; inset: 0; z-index: 1; min-height: 0; }
 .gl, .poster { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .gl { z-index: 0; touch-action: pan-y; pointer-events: auto; }
 .poster { z-index: 0; object-fit: cover; object-position: 0 0; }
@@ -72,7 +69,8 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 [data-nav="ball"] .links.on .hop { opacity: 1; }
 
 /* Bewerben: eine Sonne als Aufkleber statt eines Knopfs. */
-.apply { --flip: var(--ink); position: absolute; display: grid; place-items: center; right: clamp(14px, 2.2vw, 34px); top: clamp(6px, 1vw, 14px); width: var(--sticker); height: var(--sticker); font: 400 clamp(15px, 1.28vw, 19px)/1 Shrikhand, Georgia, serif; color: var(--cream); transition: scale 460ms cubic-bezier(.34, 1.56, .64, 1), translate 260ms var(--out); }
+/* Der eine Aufkleber: Er hängt fest am Bildschirm und wandert über die ganze Seite mit. */
+.apply { --flip: var(--ink); position: fixed; display: grid; place-items: center; right: clamp(14px, 2.2vw, 34px); top: clamp(6px, 1vw, 14px); width: var(--sticker); height: var(--sticker); font: 400 clamp(15px, 1.28vw, 19px)/1 Shrikhand, Georgia, serif; color: var(--cream); transition: scale 460ms cubic-bezier(.34, 1.56, .64, 1), translate 260ms var(--out); }
 .apply:active { scale: .94; transition-duration: 130ms; }
 .burst { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 10px 16px rgba(130, 10, 60, .42)); }
 .burst path { fill: var(--coral); transition: fill 320ms ease; }
@@ -106,7 +104,8 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 .lead { position: absolute; left: clamp(20px, 3vw, 48px); top: clamp(14px, 1.7vw, 24px); display: flex; align-items: center; gap: 8px; color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .55); }
 .kicker { padding: 10px 0 14px; font-size: clamp(14px, 1.08vw, 17px); font-weight: 600; white-space: nowrap; }
 .js.fallback .kicker { display: none; }
-.past .lead, .past .menu-btn { color: var(--ink); text-shadow: none; transition: color 300ms ease; }
+/* Nach der Landung liegt die Terrasse hinter dem Kopf: dunkle Schrift mit hellem Lichtschein, damit sie auch über den Palmblättern lesbar bleibt. */
+.past .lead, .past .menu-btn { color: var(--ink); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); transition: color 300ms ease; }
 .discover { --flip: var(--sun); position: relative; display: inline-flex; align-items: center; flex: none; gap: 12px; margin-left: auto; font: 400 clamp(16px, 1.42vw, 21px)/1 Shrikhand, Georgia, serif; padding: 6px 0; }
 .discover img { width: 26px; height: 26px; filter: drop-shadow(0 3px 4px rgba(60, 0, 0, .45)); animation: nudge 3.4s var(--key) infinite; }
 @keyframes nudge { 0%, 68%, 100% { transform: translateY(0) scale(1); } 76% { transform: translateY(-9px) scale(.96, 1.04); } 84% { transform: translateY(0) scale(1.1, .9); } 90% { transform: translateY(-3px); } 95% { transform: translateY(0); } }

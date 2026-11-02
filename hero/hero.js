@@ -86,7 +86,8 @@ function initUi() {
   nav.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
   addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
   matchMedia('(orientation: landscape)').addEventListener('change', () => setMenu(false));
-  const keyed = document.querySelectorAll('[data-key]');
+  // Nur die Klapp-Wörter des Heros; die übrigen Kapitel baut site.js.
+  const keyed = document.querySelectorAll('.hero [data-key]');
   for (const el of keyed) {
     const word = el.textContent;
     el.setAttribute('aria-hidden', 'true');

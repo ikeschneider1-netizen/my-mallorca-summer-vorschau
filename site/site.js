@@ -3,17 +3,20 @@
 (() => {
   const root = document.documentElement;
   if (!('IntersectionObserver' in window)) return;
-  root.classList.add('js');
+  // Eigene Klasse, damit der Hero (Klasse js) ungestört bleibt, auch wenn hier etwas schiefgeht.
+  root.classList.add('site-js');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
   const start = () => {
     try {
       // Der WhatsApp-Link steht nur einmal im Kopf; alle anderen Bewerben-Wege übernehmen ihn.
-      const wa = document.querySelector('a.der-aufkleber[href^="https://wa.me/"], a.aufkleber[href^="https://wa.me/"]');
+      const wa = document.querySelector('a.der-aufkleber[href^="https://wa.me/"], a.aufkleber[href^="https://wa.me/"], a.apply[href^="https://wa.me/"]');
       if (wa) document.querySelectorAll('[data-wa]').forEach((a) => { a.href = wa.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; });
 
       // Jeder Buchstabe hat zwei Seiten: Beim Überfahren klappt die farbige nach vorn (wie im Menü des Heros).
+      // Die Klapp-Wörter im Hero baut hero.js selbst.
       for (const el of document.querySelectorAll('[data-key]')) {
+        if (el.closest('.hero')) continue;
         const word = el.textContent;
         el.setAttribute('aria-hidden', 'true');
         const link = el.closest('a');
@@ -71,9 +74,14 @@
       const io = new IntersectionObserver((entries) => {
         for (const e of entries) if (e.isIntersecting) { e.target.classList.add('da'); io.unobserve(e.target); }
       }, { rootMargin: '0px 0px -10% 0px' });
-      document.querySelectorAll('[data-zeigen]').forEach((el) => io.observe(el));
+      // Die Landung liegt in der Bühne des Heros: Ihr Titel hüpft erst an seinen Platz, wenn der Flug durch den Ring ankommt.
+      const landung = [...document.querySelectorAll('[data-landung]')];
+      const imFlug = () => root.classList.contains('fly');
+      const landen = () => { const da = !imFlug() || root.classList.contains('past'); landung.forEach((el) => el.classList.toggle('da', da)); };
+      if (landung.length) { new MutationObserver(landen).observe(root, { attributes: true, attributeFilter: ['class'] }); landen(); }
+      document.querySelectorAll('[data-zeigen]').forEach((el) => { if (!el.hasAttribute('data-landung')) io.observe(el); });
     } catch (err) {
-      root.classList.remove('js');
+      root.classList.remove('site-js');
       throw err;
     }
   };
@@ -116,6 +124,9 @@
       });
     }, { passive: true });
     kopf.addEventListener('focusin', () => root.classList.remove('kopf-weg'));
+    // Auf der Startseite hat der Hero seinen eigenen Kopf. Der schwebende Kopf übernimmt erst, wenn der Hero aus dem Bild ist.
+    const spur = document.querySelector('.track');
+    if (spur) new IntersectionObserver((es) => root.classList.toggle('im-hero', es[0].isIntersecting), { rootMargin: '0px 0px -98% 0px' }).observe(spur);
     // Farbe: Liegt eine dunkle Wand unter dem Kopf, wird er hell.
     const dunkle = document.querySelectorAll('[data-kopf="dunkel"]');
     if (dunkle.length) {

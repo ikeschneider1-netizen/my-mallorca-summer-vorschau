@@ -1,7 +1,7 @@
 /* Nur für die Baukasten-Seite: Kopf, Treppe, Logo-Tafeln, Schriftproben. Das Beispiel-Kapitel nutzt nur site.css plus die Job-Anordnung. */
 
 .bk-intro { padding-top: clamp(150px, 14vw, 210px); padding-bottom: clamp(40px, 5vw, 80px); }
-.bk-intro .lead { max-width: 52ch; }
+.bk-intro .vorspann { max-width: 52ch; }
 .bk-hinweis { margin-top: 2.4em; }
 
 /* Die Treppe: jede Stufe eine Kapitel-Farbe, nach rechts unten versetzt, mit sichtbarer Stufenkante. */
@@ -41,13 +41,6 @@
 .bk-knoepfe .weiter { --flip: var(--cream); }
 .bk-textlink { max-width: 52ch; }
 
-/* Beispiel-Kapitel „Der Job auf einen Blick“: Text an der sonnigen Wand, unten Kübel, Treppe und Boden frei für den Ball. */
-.szene-vanille { padding-top: clamp(118px, 13cqw, 210px); padding-bottom: clamp(240px, 22cqw, 330px); }
-.job-kopf { margin-left: clamp(0px, 13cqw, 220px); max-width: 780px; }
-.job-kopf .lead { max-width: 44ch; }
-.job .fakten { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(28px, 4cqw, 60px); }
-.job .fakt dd { font-size: 1.0625rem; line-height: 1.55; }
-.job-los { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 36px; margin-top: clamp(24px, 3cqw, 44px); margin-left: clamp(0px, 13cqw, 220px); }
 
 .bk-unter { margin-top: clamp(48px, 6vw, 88px); margin-bottom: clamp(20px, 2.6vw, 32px); }
 .bk-regeln { display: grid; gap: 20px; max-width: 70ch; margin: clamp(24px, 3vw, 40px) 0 0; padding-left: 1.2em; }
@@ -61,15 +54,9 @@
 .fuss-credit { flex-basis: 100%; margin: 12px 0 0; opacity: .8; }
 .fuss .offen { color: var(--cream); background: rgba(255, 255, 255, .12); }
 
-@media (max-width: 1100px) {
-  .job .fakten { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 @media (max-width: 760px) {
   .stufe { --stufe: 3.2vw; width: auto; grid-template-columns: auto 1fr; padding: 16px 16px 14px; }
   .stufe code { grid-column: 2; }
   .bk-logos { grid-template-columns: 1fr; }
-  .szene-vanille { --ow: 2.3; --ol: -.45; --uw: 2.6; --ul: -1.17; --mx: .704; --my: .54; padding-top: 150px; padding-bottom: 300px; }
-  .job .fakten { grid-template-columns: 1fr; }
-  .job-kopf, .job-los { margin-left: 0; }
   .fuss-nav { margin-left: 0; }
 }
