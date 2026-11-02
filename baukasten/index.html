@@ -12,9 +12,10 @@
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="wa" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></symbol></svg>
 
-<header class="kopf">
-  <a class="kopf-logo" href="#oben" aria-label="My Mallorca Summer, nach oben"><img src="../site/marke/logo.svg" alt="My Mallorca Summer" width="362" height="108"></a>
-  <nav class="kopf-nav" aria-label="Baukasten">
+<header class="seitenkopf">
+  <a class="seitenkopf-logo" href="#oben"><img class="dunkel" src="../site/marke/logo.svg" alt="My Mallorca Summer, nach oben" width="362" height="108"><img class="hell" src="../site/marke/logo-hell.svg" alt="My Mallorca Summer, nach oben" width="362" height="108"></a>
+  <button class="menue-knopf" type="button" aria-expanded="false" aria-controls="seitenmenue"><span class="menue-auf">Menü</span><span class="menue-zu">Schließen</span></button>
+  <nav class="seitenmenue" id="seitenmenue" aria-label="Baukasten">
     <a href="#treppe"><span data-key>Gliederung</span></a>
     <a href="#logo"><span data-key>Logo</span></a>
     <a href="#schrift"><span data-key>Schrift</span></a>
@@ -22,17 +23,21 @@
     <a href="#der-job"><span data-key>Beispiel</span></a>
     <a href="#bausteine"><span data-key>Bausteine</span></a>
     <a href="#bewegung"><span data-key>Bewegung</span></a>
+    <div class="menue-wege">
+      <a class="menue-wa" data-wa href="#kontakt"><svg aria-hidden="true"><use href="#wa"/></svg>Per WhatsApp bewerben</a>
+      <a class="menue-form" href="https://www.mymallorcasummer.com/jetzt-bewerben/" target="_blank" rel="noopener noreferrer">Lieber per Formular</a>
+    </div>
   </nav>
-  <a class="aufkleber" href="https://wa.me/34604373583?text=Hey%20MyMallorcaSummer-Team%21%20%F0%9F%91%8B%0AIch%20bin%20%5BVorname%5D%2C%20%5BAlter%5D%20Jahre%20alt%2C%20und%20h%C3%A4tte%20richtig%20Lust%20auf%20die%20Saison%202027%20auf%20Mallorca.%0AIch%20k%C3%B6nnte%20ungef%C3%A4hr%20von%20%5BMonat%5D%20bis%20%5BMonat%5D.%0AKurz%20zu%20mir%3A%20%5Bein%20paar%20S%C3%A4tze%2C%20z.%20B.%20was%20ich%20gerade%20mache%20und%20warum%20ich%20Bock%20auf%20den%20Job%20habe%5D%0AEin%20Foto%20von%20mir%20schicke%20ich%20gleich%20hinterher.%20%F0%9F%93%B8" target="_blank" rel="noopener noreferrer" aria-label="Per WhatsApp bewerben, öffnet WhatsApp in einem neuen Tab">
-    <svg class="sonne" viewBox="-60 -60 120 120" aria-hidden="true"><path d="M0-52a52 52 0 1 0 0 104a52 52 0 1 0 0-104z"/></svg>
-    <span class="aufkleber-in" aria-hidden="true"><svg><use href="#wa"/></svg><span class="aufkleber-oben">Per WhatsApp</span><span>bewerben</span></span>
-  </a>
 </header>
+<a class="aufkleber der-aufkleber" href="https://wa.me/34604373583?text=Hey%20MyMallorcaSummer-Team%21%20%F0%9F%91%8B%0AIch%20bin%20%5BVorname%5D%2C%20%5BAlter%5D%20Jahre%20alt%2C%20und%20h%C3%A4tte%20richtig%20Lust%20auf%20die%20Saison%202027%20auf%20Mallorca.%0AIch%20k%C3%B6nnte%20ungef%C3%A4hr%20von%20%5BMonat%5D%20bis%20%5BMonat%5D.%0AKurz%20zu%20mir%3A%20%5Bein%20paar%20S%C3%A4tze%2C%20z.%20B.%20was%20ich%20gerade%20mache%20und%20warum%20ich%20Bock%20auf%20den%20Job%20habe%5D%0AEin%20Foto%20von%20mir%20schicke%20ich%20gleich%20hinterher.%20%F0%9F%93%B8" target="_blank" rel="noopener noreferrer" aria-label="Per WhatsApp bewerben, öffnet WhatsApp in einem neuen Tab">
+  <svg class="sonne" viewBox="-60 -60 120 120" aria-hidden="true"><path d="M0-52a52 52 0 1 0 0 104a52 52 0 1 0 0-104z"/></svg>
+  <span class="aufkleber-in" aria-hidden="true"><svg><use href="#wa"/></svg><span class="aufkleber-oben nur-gross">Per WhatsApp</span><span class="aufkleber-oben nur-klein">Jetzt</span><span>bewerben</span></span>
+</a>
 
 <main id="oben">
   <section class="kapitel bk-intro">
     <div>
-      <p class="dach">Baukasten · Runde 2 · 02.11.2026</p>
+      <p class="dach">Baukasten · Runde 3 · 02.11.2026</p>
       <h1 class="titel" data-zeigen>Alles nach dem Hero, <em>aus einem Guss.</em></h1>
       <p class="lead" data-zeigen>Hier steht, woraus jede weitere Seite gebaut wird: Gliederung, Logo, Farben, Schrift, Knöpfe und Bewegung. Weiter unten steht das erste Kapitel der Startseite im Stil des Heros: echte Kulisse, 3D-Schrift, Ball und Möwe.</p>
     </div>
@@ -94,9 +99,10 @@
   <section class="kapitel welt-orange bk-knoepfe" id="knoepfe" aria-labelledby="knoepfe-t">
     <div>
       <p class="dach">Knöpfe und Links</p>
-      <h2 class="titel" id="knoepfe-t" data-zeigen>Keine Kästen. <em>Aufkleber, Wörter, Wellen.</em></h2>
+      <h2 class="titel" id="knoepfe-t" data-zeigen>Ein Aufkleber. <em>Der Rest sind Wörter.</em></h2>
+      <p class="lead" data-zeigen>Den Bewerben-Aufkleber gibt es nur einmal. Er wandert mit: am Rechner oben rechts, am Handy unten rechts im Daumenbereich. Nur im Schlusskapitel landet er groß in der Szene. In den Kapiteln führt ein Wort-Link zu WhatsApp.</p>
       <div class="bk-knopfreihe" data-zeigen>
-        <figure><a class="aufkleber gross" data-wa href="#kontakt"><svg class="sonne" viewBox="-60 -60 120 120" aria-hidden="true"><path d="M0-52a52 52 0 1 0 0 104a52 52 0 1 0 0-104z"/></svg><span class="aufkleber-in" aria-hidden="true"><svg><use href="#wa"/></svg><span class="aufkleber-oben">Per WhatsApp</span><span>bewerben</span></span><span class="sr-only">Per WhatsApp bewerben, öffnet WhatsApp in einem neuen Tab</span></a><figcaption>Hauptweg: der Aufkleber</figcaption></figure>
+        <figure><a class="weiter wa" data-wa href="#kontakt"><svg aria-hidden="true"><use href="#wa"/></svg><span data-key>Jetzt per WhatsApp bewerben</span></a><figcaption>WhatsApp in den Kapiteln: Wort statt zweitem Aufkleber</figcaption></figure>
         <figure><a class="nebenweg" href="https://www.mymallorcasummer.com/jetzt-bewerben/" target="_blank" rel="noopener noreferrer"><span data-key>Lieber per Formular</span><i class="wave"></i></a><figcaption>Nebenweg: Wort mit Welle</figcaption></figure>
         <figure><a class="weiter" href="#der-job"><span data-key>Mehr über den Job</span><img src="../hero/assets/ball-96.png" alt="" width="26" height="26"></a><figcaption>Weiter: der Ball rollt los</figcaption></figure>
       </div>
@@ -106,6 +112,7 @@
 
   <section class="kapitel szene szene-vanille" id="der-job" aria-labelledby="job-t" data-boden="[[0,0.108,0.44],[0.108,0.6,0.75],[0.6,0.643,0.673],[0.643,0.684,0.607],[0.684,0.724,0.54],[0.724,0.92,0.493],[0.92,1,0.5]]">
     <img class="szene-oben" src="../site/szene/vanille-oben.webp" width="1740" height="700" alt="" decoding="async">
+    <span class="szene-licht" aria-hidden="true"></span>
     <img class="szene-unten" src="../site/szene/vanille-unten.webp" width="1740" height="750" alt="" loading="lazy" decoding="async">
     <div class="job">
       <div class="job-kopf">
@@ -114,17 +121,17 @@
         <p class="lead" data-zeigen>Bevor du dich bewirbst, sollst du genau wissen, worauf du dich einlässt. Hier steht alles Wichtige, ohne Werbesprech und ohne Hochglanz-Gelaber.</p>
       </div>
       <dl class="fakten">
-        <div class="fakt" data-zeigen><dt>Was du machst</dt><dd>Du sprichst Urlauber an der Playa de Palma an, stellst ihnen Events, Partys und Locations unserer Partner vor und verkaufst Tickets oder bringst Gäste direkt hin. Je nach Einsatz hilfst du auch beim Einlass oder an Events mit. <span class="offen">⚠️ Aufgaben mit Kunde bestätigen</span></dd></div>
-        <div class="fakt" data-zeigen><dt>Wo</dt><dd>Playa de Palma und El Arenal auf Mallorca, rund um die bekannten Hotspots und Balnearios.</dd></div>
-        <div class="fakt" data-zeigen><dt>Wann</dt><dd>Die Saison läuft von März bis Oktober. Du kannst die ganze Saison bleiben oder für einen Teil davon kommen. <span class="offen">⚠️ Zeitraum und Mindestdauer mit Kunde bestätigen</span></dd></div>
-        <div class="fakt" data-zeigen><dt>Arbeitszeiten</dt><dd>Vor allem abends und nachts, wenn an der Playa am meisten los ist. Tagsüber hast du meistens frei. Das ist der Teil, bei dem deine Freunde zu Hause still werden. <span class="offen">⚠️ Mit Kunde bestätigen</span></dd></div>
-        <div class="fakt" data-zeigen><dt>Verdienst</dt><dd>Du arbeitest auf Provisionsbasis. Wie viel du verdienst, hängt davon ab, wie viele Gäste du gewinnst. An starken Tagen sind bis zu 300 € drin. <span class="offen">⚠️ Zahl mit Kunde bestätigen</span></dd></div>
-        <div class="fakt" data-zeigen><dt>Vertrag</dt><dd>Du arbeitest als Freelancer (selbstständig). Eine eigene Krankenversicherung, die auf Mallorca gilt, brauchst du selbst. Wir sagen dir vorher, worauf du achten musst. <span class="offen">⚠️ Mit Kunde bestätigen</span></dd></div>
-        <div class="fakt" data-zeigen><dt>Unterkunft</dt><dd>Wir helfen dir, eine gute und günstige Unterkunft in der Nähe zu finden, meistens zusammen mit anderen aus dem Team.</dd></div>
-        <div class="fakt" data-zeigen><dt>Voraussetzungen</dt><dd>Mindestens 18 Jahre, gutes Deutsch, Spaß am Umgang mit Menschen. Vorerfahrung brauchst du nicht.</dd></div>
+        <div class="fakt" data-zeigen><dt><img class="fakt-ding" src="../site/requisiten/ticket.webp" width="280" height="280" alt="" loading="lazy" decoding="async">Was du machst</dt><dd>Du sprichst Urlauber an der Playa de Palma an, stellst ihnen Events, Partys und Locations unserer Partner vor und verkaufst Tickets oder bringst Gäste direkt hin. Je nach Einsatz hilfst du auch beim Einlass oder an Events mit. <span class="offen">⚠️ Aufgaben mit Kunde bestätigen</span></dd></div>
+        <div class="fakt" data-zeigen><dt><img class="fakt-ding" src="../site/requisiten/pin.webp" width="280" height="280" alt="" loading="lazy" decoding="async">Wo</dt><dd>Playa de Palma und El Arenal auf Mallorca, rund um die bekannten Hotspots und Balnearios.</dd></div>
+        <div class="fakt" data-zeigen><dt><img class="fakt-ding" src="../site/requisiten/sonne.webp" width="280" height="280" alt="" loading="lazy" decoding="async">Wann</dt><dd>Die Saison läuft von März bis Oktober. Du kannst die ganze Saison bleiben oder für einen Teil davon kommen. <span class="offen">⚠️ Zeitraum und Mindestdauer mit Kunde bestätigen</span></dd></div>
+        <div class="fakt" data-zeigen><dt><img class="fakt-ding" src="../site/requisiten/disko.webp" width="280" height="280" alt="" loading="lazy" decoding="async">Arbeitszeiten</dt><dd>Vor allem abends und nachts, wenn an der Playa am meisten los ist. Tagsüber hast du meistens frei. Das ist der Teil, bei dem deine Freunde zu Hause still werden. <span class="offen">⚠️ Mit Kunde bestätigen</span></dd></div>
+        <div class="fakt" data-zeigen><dt><img class="fakt-ding" src="../site/requisiten/muenzen.webp" width="280" height="280" alt="" loading="lazy" decoding="async">Verdienst</dt><dd>Du arbeitest auf Provisionsbasis. Wie viel du verdienst, hängt davon ab, wie viele Gäste du gewinnst. An starken Tagen sind bis zu 300 € drin. <span class="offen">⚠️ Zahl mit Kunde bestätigen</span></dd></div>
+        <div class="fakt" data-zeigen><dt><img class="fakt-ding" src="../site/requisiten/vertrag.webp" width="280" height="280" alt="" loading="lazy" decoding="async">Vertrag</dt><dd>Du arbeitest als Freelancer (selbstständig). Eine eigene Krankenversicherung, die auf Mallorca gilt, brauchst du selbst. Wir sagen dir vorher, worauf du achten musst. <span class="offen">⚠️ Mit Kunde bestätigen</span></dd></div>
+        <div class="fakt" data-zeigen><dt><img class="fakt-ding" src="../site/requisiten/schluessel.webp" width="280" height="280" alt="" loading="lazy" decoding="async">Unterkunft</dt><dd>Wir helfen dir, eine gute und günstige Unterkunft in der Nähe zu finden, meistens zusammen mit anderen aus dem Team.</dd></div>
+        <div class="fakt" data-zeigen><dt><img class="fakt-ding" src="../site/requisiten/blase.webp" width="280" height="280" alt="" loading="lazy" decoding="async">Voraussetzungen</dt><dd>Mindestens 18 Jahre, gutes Deutsch, Spaß am Umgang mit Menschen. Vorerfahrung brauchst du nicht.</dd></div>
       </dl>
       <div class="job-los" data-zeigen>
-        <a class="aufkleber" data-wa href="#kontakt"><svg class="sonne" viewBox="-60 -60 120 120" aria-hidden="true"><path d="M0-52a52 52 0 1 0 0 104a52 52 0 1 0 0-104z"/></svg><span class="aufkleber-in" aria-hidden="true"><svg><use href="#wa"/></svg><span class="aufkleber-oben">Per WhatsApp</span><span>bewerben</span></span><span class="sr-only">Per WhatsApp bewerben, öffnet WhatsApp in einem neuen Tab</span></a>
+        <a class="weiter wa" data-wa href="#kontakt"><svg aria-hidden="true"><use href="#wa"/></svg><span data-key>Jetzt per WhatsApp bewerben</span></a>
         <a class="nebenweg" href="https://www.mymallorcasummer.com/jetzt-bewerben/" target="_blank" rel="noopener noreferrer"><span data-key>Lieber per Formular</span><i class="wave"></i></a>
       </div>
     </div>
@@ -138,11 +145,15 @@
       <p class="dach">Bausteine</p>
       <h2 class="titel" id="bausteine-t" data-zeigen>Fotos, Schritte, <em>Fragen.</em></h2>
 
-      <h3 class="zwischen bk-unter" data-zeigen>Fotos: hingelegt, nicht eingerahmt</h3>
-      <div class="bk-fotos">
-        <figure class="foto" data-zeigen><img src="../fotos/team-gallery-03-768.webp" width="768" height="1080" alt="Teammitglieder lachen bei einem Ausflug am Wasser in die Kamera" loading="lazy" decoding="async"><figcaption>Ausflug am Wasser</figcaption></figure>
-        <figure class="foto" data-zeigen><img src="../fotos/team-gallery-05-768.webp" width="768" height="1080" alt="Gruppenfoto an der Strandpromenade im Abendlicht" loading="lazy" decoding="async"><figcaption>Promenade im Abendlicht</figcaption></figure>
-        <figure class="foto" data-zeigen><img src="../fotos/team-gallery-10-768.webp" width="768" height="1080" alt="Teammitglieder auf einem Boot im Hafen" loading="lazy" decoding="async"><figcaption>Auf dem Boot im Hafen</figcaption></figure>
+      <h3 class="zwischen bk-unter" data-zeigen>Fotos: ein Stapel Sofortbilder</h3>
+      <p class="klein" data-zeigen>Am Rechner mit der Maus darüberfahren, am Handy wischen.</p>
+      <div class="faecher" data-zeigen>
+        <figure class="faecher-foto" style="--i:0"><img src="../fotos/team-gallery-01-768.webp" width="768" height="1080" alt="Gut gelaunte Gruppe aus dem Team unter Pinien am Strand" loading="lazy" decoding="async"><figcaption>Unter Pinien</figcaption></figure>
+        <figure class="faecher-foto" style="--i:1"><img src="../fotos/team-gallery-03-768.webp" width="768" height="1080" alt="Teammitglieder lachen bei einem Ausflug am Wasser in die Kamera" loading="lazy" decoding="async"><figcaption>Ausflug am Wasser</figcaption></figure>
+        <figure class="faecher-foto" style="--i:2"><img src="../fotos/team-gallery-05-768.webp" width="768" height="1080" alt="Gruppenfoto an der Strandpromenade im Abendlicht" loading="lazy" decoding="async"><figcaption>Promenade, abends</figcaption></figure>
+        <figure class="faecher-foto" style="--i:3"><img src="../fotos/team-gallery-10-768.webp" width="768" height="1080" alt="Teammitglieder auf einem Boot im Hafen" loading="lazy" decoding="async"><figcaption>Auf dem Boot</figcaption></figure>
+        <figure class="faecher-foto" style="--i:4"><img src="../fotos/team-gallery-07-768.webp" width="768" height="1080" alt="Teamabend an einem Tisch auf der Terrasse, einige tragen leuchtende Haarreifen" loading="lazy" decoding="async"><figcaption>Teamabend</figcaption></figure>
+        <figure class="faecher-foto" style="--i:5"><img src="../fotos/team-gallery-14-768.webp" width="768" height="1080" alt="Team mit Schwimmwesten auf einem Steg im Hafen" loading="lazy" decoding="async"><figcaption>Gleich geht’s raus</figcaption></figure>
       </div>
 
       <h3 class="zwischen bk-unter" data-zeigen>Schritte: die Bewerbung als Treppe</h3>
@@ -177,7 +188,7 @@
   </section>
 </main>
 
-<footer class="kapitel welt-petrol fuss">
+<footer class="kapitel welt-petrol fuss" data-kopf="dunkel">
   <div class="fuss-in">
     <img src="../site/marke/logo-hell.svg" alt="My Mallorca Summer" width="300" height="90">
     <nav class="fuss-nav" aria-label="Rechtliches"><a href="#oben">Impressum</a><a href="#oben">Datenschutz</a><a href="#oben">Cookies</a><a href="#der-job">FAQ</a></nav>

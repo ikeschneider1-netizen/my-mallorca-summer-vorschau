@@ -9,7 +9,7 @@
   const start = () => {
     try {
       // Der WhatsApp-Link steht nur einmal im Kopf; alle anderen Bewerben-Wege übernehmen ihn.
-      const wa = document.querySelector('a.aufkleber[href^="https://wa.me/"]');
+      const wa = document.querySelector('a.der-aufkleber[href^="https://wa.me/"], a.aufkleber[href^="https://wa.me/"]');
       if (wa) document.querySelectorAll('[data-wa]').forEach((a) => { a.href = wa.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; });
 
       // Jeder Buchstabe hat zwei Seiten: Beim Überfahren klappt die farbige nach vorn (wie im Menü des Heros).
@@ -37,7 +37,8 @@
         const sonne = a.querySelector('.sonne');
         sonne.querySelector('path').setAttribute('d', `${d}Z`);
         if (reduced.matches || !sonne.animate) continue;
-        const spin = sonne.animate([{ rotate: '0deg' }, { rotate: '360deg' }], { duration: 42000, iterations: Infinity });
+        // Gedreht wird nur die Zeichnung, nicht der Kasten: So ragt die Sonne nie über den Seitenrand hinaus.
+        const spin = sonne.querySelector('path').animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], { duration: 42000, iterations: Infinity });
         a.addEventListener('pointerenter', () => { spin.playbackRate = 6; });
         a.addEventListener('pointerleave', () => { spin.playbackRate = 1; });
       }
@@ -61,6 +62,8 @@
         t.querySelectorAll('.w').forEach((w, i) => w.style.setProperty('--i', i));
       }
 
+      seitenkopf();
+      faecher();
       const titel = raumTitel();
       spielbaelle(titel);
 
@@ -87,6 +90,51 @@
       if (takt.size) requestAnimationFrame(schritt); else tickt = false;
     });
   };
+
+  // Kopf wie im Hero: Menü als Sonne am Handy, Ausweichen beim Scrollen nach unten, Farbe passend zur Wand darunter.
+  function seitenkopf() {
+    const kopf = document.querySelector('.seitenkopf');
+    if (!kopf) return;
+    const knopf = kopf.querySelector('.menue-knopf'), menue = kopf.querySelector('.seitenmenue');
+    const zu = (fokus) => { root.classList.remove('menue-offen'); knopf.setAttribute('aria-expanded', 'false'); if (fokus) knopf.focus(); };
+    knopf.addEventListener('click', () => {
+      const auf = !root.classList.contains('menue-offen');
+      root.classList.toggle('menue-offen', auf); knopf.setAttribute('aria-expanded', String(auf));
+      if (auf) setTimeout(() => menue.querySelector('a').focus({ preventScroll: true }), 80);
+    });
+    menue.addEventListener('click', (e) => { if (e.target.closest('a')) zu(false); });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && root.classList.contains('menue-offen')) zu(true); });
+    // Ausweichen: nach unten weg, nach oben zurück. Ganz oben immer sichtbar.
+    let alt = scrollY, wartet = false;
+    addEventListener('scroll', () => {
+      if (wartet) return; wartet = true;
+      requestAnimationFrame(() => {
+        const y = scrollY, d = y - alt;
+        if (y < 80 || d < -6) root.classList.remove('kopf-weg'); else if (d > 6) root.classList.add('kopf-weg');
+        root.classList.toggle('gescrollt', y > 40);
+        alt = y; wartet = false;
+      });
+    }, { passive: true });
+    kopf.addEventListener('focusin', () => root.classList.remove('kopf-weg'));
+    // Farbe: Liegt eine dunkle Wand unter dem Kopf, wird er hell.
+    const dunkle = document.querySelectorAll('[data-kopf="dunkel"]');
+    if (dunkle.length) {
+      const unter = new Set();
+      const io = new IntersectionObserver((es) => {
+        for (const e of es) if (e.isIntersecting) unter.add(e.target); else unter.delete(e.target);
+        if (unter.size) root.dataset.kopf = 'dunkel'; else delete root.dataset.kopf;
+      }, { rootMargin: '0px 0px -92% 0px' });
+      dunkle.forEach((el) => io.observe(el));
+    }
+  }
+
+  // Fotofächer am Handy: Das Foto in der Mitte richtet sich auf, die anderen bleiben schräg liegen.
+  function faecher() {
+    for (const f of document.querySelectorAll('.faecher')) {
+      const io = new IntersectionObserver((es) => { for (const e of es) e.target.classList.toggle('mitte', e.isIntersecting); }, { root: f, rootMargin: '0px -30% 0px -30%', threshold: 0.5 });
+      f.querySelectorAll('.faecher-foto').forEach((el) => io.observe(el));
+    }
+  }
 
   // Kapiteltitel im Hero-Look: Jeder Buchstabe ist eine Klaviertaste an einer Feder (Werte wie im Hero).
   // Die Maus drückt die Tasten unter sich, Nachbarn gehen ein wenig mit, ein Ballaufprall läuft als Welle durch.

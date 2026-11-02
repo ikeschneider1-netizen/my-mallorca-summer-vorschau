@@ -1,11 +1,6 @@
 /* Nur für die Baukasten-Seite: Kopf, Treppe, Logo-Tafeln, Schriftproben. Das Beispiel-Kapitel nutzt nur site.css plus die Job-Anordnung. */
-.kopf { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: clamp(16px, 3vw, 40px); padding: 10px var(--rand); background: color-mix(in srgb, var(--creme) 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-.kopf-logo img { width: clamp(150px, 15vw, 210px); height: auto; }
-.kopf-nav { display: flex; gap: clamp(14px, 2vw, 30px); margin-left: auto; font-weight: 600; font-size: clamp(14px, 1.1vw, 17px); }
-.kopf-nav a { --flip: var(--coral); padding: 8px 0; text-decoration: none; }
-.kopf .aufkleber { --d: clamp(84px, 7.4vw, 108px); margin: -4px 0 -28px; }
 
-.bk-intro { padding-top: clamp(48px, 7vw, 110px); padding-bottom: clamp(40px, 5vw, 80px); }
+.bk-intro { padding-top: clamp(150px, 14vw, 210px); padding-bottom: clamp(40px, 5vw, 80px); }
 .bk-intro .lead { max-width: 52ch; }
 .bk-hinweis { margin-top: 2.4em; }
 
@@ -32,7 +27,7 @@
 /* Schriftproben */
 .bk-proben { display: grid; gap: 6px; margin-top: clamp(24px, 3vw, 40px); }
 .bk-probe { position: relative; padding: 22px 0 10px; }
-.bk-probe::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 7px; background: currentColor; opacity: .18; -webkit-mask: var(--wave) repeat-x 0 0 / 22px 7px; mask: var(--wave) repeat-x 0 0 / 22px 7px; }
+.bk-probe::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(rgba(90, 45, 10, .16) 50%, rgba(255, 255, 255, .55) 50%); }
 .bk-probe p { margin-bottom: .2em; }
 .bk-probe .titel, .bk-probe .zwischen { margin: 0; }
 .bk-etikett { display: block; margin-bottom: .5em; font-size: .8125rem; font-weight: 600; letter-spacing: .03em; opacity: .6; }
@@ -55,7 +50,6 @@
 .job-los { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 36px; margin-top: clamp(24px, 3cqw, 44px); margin-left: clamp(0px, 13cqw, 220px); }
 
 .bk-unter { margin-top: clamp(48px, 6vw, 88px); margin-bottom: clamp(20px, 2.6vw, 32px); }
-.bk-fotos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 3vw, 48px); max-width: 980px; }
 .bk-regeln { display: grid; gap: 20px; max-width: 70ch; margin: clamp(24px, 3vw, 40px) 0 0; padding-left: 1.2em; }
 .bk-regeln strong { font-weight: 700; }
 
@@ -70,20 +64,12 @@
 @media (max-width: 1100px) {
   .job .fakten { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 960px) {
-  .kopf-nav { display: none; }
-  .kopf .aufkleber { margin-left: auto; }
-}
 @media (max-width: 760px) {
-  .kopf { padding-block: 8px; }
-  .kopf .aufkleber { --d: 74px; margin-block: -2px -18px; }
   .stufe { --stufe: 3.2vw; width: auto; grid-template-columns: auto 1fr; padding: 16px 16px 14px; }
   .stufe code { grid-column: 2; }
   .bk-logos { grid-template-columns: 1fr; }
   .szene-vanille { --ow: 2.3; --ol: -.45; --uw: 2.6; --ul: -1.17; --mx: .704; --my: .54; padding-top: 150px; padding-bottom: 300px; }
   .job .fakten { grid-template-columns: 1fr; }
   .job-kopf, .job-los { margin-left: 0; }
-  .bk-fotos { grid-template-columns: repeat(3, 72%); overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px 4px 24px; margin-inline: calc(var(--rand) * -1); padding-inline: var(--rand); }
-  .bk-fotos .foto { scroll-snap-align: center; }
   .fuss-nav { margin-left: 0; }
 }

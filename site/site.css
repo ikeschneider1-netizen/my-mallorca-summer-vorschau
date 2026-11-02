@@ -6,6 +6,8 @@
 :root {
   /* Marke, wie im Hero */
   --ink: #00343a; --cream: #fff4df; --sun: #ffd21f; --coral: #d6336f; --plum: #a80f4b;
+  /* Pink gehört allein dem Bewerben-Aufkleber. Akzente sonst in Meerblau. */
+  --meer: #0a6f94; --meer-tief: #08506c;
   /* Kapitel-Welten: die Treppe vom Hero hinunter zum Pool */
   --terrasse: #e4572e; --vanille: #fcead1; --orange: #ff741f; --lagune: #1ec8d0; --creme: #fff4df; --zitrone: #ffe600; --petrol: #00343a;
   /* Ball */
@@ -29,7 +31,7 @@ body { margin: 0; background: var(--creme); color: var(--ink); font: 400 var(--t
 img { display: block; max-width: 100%; height: auto; }
 a { color: inherit; }
 p { margin: 0 0 1em; max-width: 62ch; }
-:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; border-radius: 2px; }
+:focus-visible { outline: 3px solid var(--meer); outline-offset: 4px; border-radius: 2px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* Kapitel: eine farbige Wand, darüber der Palmenschatten wie auf dem Boden des Heros. */
@@ -40,7 +42,7 @@ p { margin: 0 0 1em; max-width: 62ch; }
 /* Pink trägt auf Orange und Türkis nicht: Dort betont ein tiefes Weinrot. */
 .welt-orange { --welt: var(--orange); --schatten: .14; --betont: #7a0d38; }
 .welt-lagune { --welt: var(--lagune); --schatten: .13; --betont: #7a0d38; }
-.welt-zitrone { --welt: var(--zitrone); --schatten: .12; --betont: var(--plum); }
+.welt-zitrone { --welt: var(--zitrone); --schatten: .12; --betont: var(--meer-tief); }
 .welt-petrol { --welt: var(--petrol); color: var(--cream); --schatten: 0; }
 @keyframes wiegen { from { rotate: -1.4deg; translate: 0 0; } to { rotate: 1.2deg; translate: -14px 6px; } }
 
@@ -48,7 +50,7 @@ p { margin: 0 0 1em; max-width: 62ch; }
 .dach { display: flex; align-items: center; gap: .55em; margin: 0 0 .9rem; font-size: var(--t-klein); font-weight: 600; letter-spacing: .02em; }
 .dach::before { content: ''; width: 1.05em; height: 1.05em; background: url('../hero/assets/ball-96.png') center / contain no-repeat; }
 .titel { margin: 0 0 .35em; font: 400 var(--t-titel)/.98 Shrikhand, Georgia, serif; letter-spacing: -.005em; text-wrap: balance; }
-.titel em { font-style: normal; color: var(--betont, var(--coral)); }
+.titel em { font-style: normal; color: var(--betont, var(--meer)); }
 .zwischen { margin: 0 0 .4em; font: 400 var(--t-zwischen)/1.12 Shrikhand, Georgia, serif; text-wrap: balance; }
 .lead { font-size: var(--t-lead); font-weight: 500; line-height: 1.45; max-width: 40ch; text-wrap: pretty; }
 .klein { font-size: var(--t-klein); }
@@ -63,15 +65,18 @@ p { margin: 0 0 1em; max-width: 62ch; }
 
 /* Szene: Das Kapitel ist eine Stufe der gerenderten Terrasse. Oben Himmel und Palme, unten Treppe und Kante zur nächsten Wand,
    dazwischen wächst die Wand mit dem Inhalt. */
-.szene { --ball-d: clamp(64px, 6.6cqw, 104px); container-type: inline-size; background: var(--band) 0 0 / 100% 100% no-repeat, var(--welt); }
+.szene { --ball-d: clamp(64px, 6.6cqw, 104px); container-type: inline-size; background: url('putz.webp') 0 0 / 256px repeat, var(--band) 0 0 / 100% 100% no-repeat, var(--welt); background-blend-mode: soft-light, normal; }
+/* Licht über dem Inhalt: Palmenschatten und Sonne fallen auch über die Schrift, sie steht in der Szene, nicht davor. */
+.kapitel > .szene-licht { position: absolute; z-index: 1; inset: 0; max-width: none; margin: 0; pointer-events: none; background: radial-gradient(120% 70% at 92% 0%, rgba(255, 236, 190, .35), transparent 60%); mix-blend-mode: soft-light; }
+.kapitel > .szene-licht::after { content: ''; position: absolute; right: -6%; top: 22%; width: min(1100px, 95%); aspect-ratio: 5 / 4; background: url('palme-schatten.svg') no-repeat right top / contain; opacity: .1; mix-blend-mode: multiply; transform-origin: 100% 0; animation: wiegen 11s ease-in-out infinite alternate; }
 .szene::before { display: none; }
 .kapitel > .spielball, .kapitel > .spielball-schatten { max-width: none; margin: 0; }
 .szene-vanille { --moewe-b: clamp(104px, 11.5cqw, 176px); --mx: .072; --my: .44; }
 .kapitel > .szene-oben, .kapitel > .szene-unten { position: absolute; z-index: -1; max-width: none; height: auto; margin: 0; pointer-events: none; user-select: none; }
-.szene-oben { top: 0; left: calc(var(--ol, 0) * 100cqw); width: calc(var(--ow, 1) * 100cqw); -webkit-mask: linear-gradient(#000 66%, transparent); mask: linear-gradient(#000 66%, transparent); }
-.szene-unten { bottom: 0; left: calc(var(--ul, 0) * 100cqw); width: calc(var(--uw, 1) * 100cqw); -webkit-mask: linear-gradient(transparent, #000 24%); mask: linear-gradient(transparent, #000 24%); }
+.szene-oben { top: 0; left: calc(var(--ol, 0) * 100%); width: calc(var(--ow, 1) * 100%); -webkit-mask: linear-gradient(#000 66%, transparent); mask: linear-gradient(#000 66%, transparent); }
+.szene-unten { bottom: 0; left: calc(var(--ul, 0) * 100%); width: calc(var(--uw, 1) * 100%); -webkit-mask: linear-gradient(transparent, #000 24%); mask: linear-gradient(transparent, #000 24%); }
 /* Die Möwe aus dem Hero, freigestellt in drei Haltungen. Sie steht mit den Füßen auf einer Stelle des unteren Szenenbilds (--mx, --my). */
-.kapitel > .moewe { position: absolute; z-index: 2; max-width: none; margin: 0; width: var(--moewe-b, 150px); aspect-ratio: 420 / 291; left: calc((var(--ul, 0) + var(--mx, .1) * var(--uw, 1)) * 100cqw - .61 * var(--moewe-b, 150px)); bottom: calc(var(--uw, 1) * 100cqw * 750 / 1740 * (1 - var(--my, .5)) - .02 * var(--moewe-b, 150px)); transform-origin: 61% 100%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.kapitel > .moewe { position: absolute; z-index: 2; max-width: none; margin: 0; width: var(--moewe-b, 150px); aspect-ratio: 420 / 291; left: calc((var(--ul, 0) + var(--mx, .1) * var(--uw, 1)) * 100% - .61 * var(--moewe-b, 150px)); bottom: calc(var(--uw, 1) * (100cqw + 2 * var(--rand)) * 750 / 1740 * (1 - var(--my, .5)) - .02 * var(--moewe-b, 150px)); transform-origin: 61% 100%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .moewe img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; filter: drop-shadow(0 6px 5px rgba(80, 30, 0, .28)); }
 .moewe img:first-child, .moewe[data-lage='frech'] img:nth-child(2), .moewe[data-lage='schreck'] img:nth-child(3) { opacity: 1; }
 .moewe[data-lage='frech'] img:first-child, .moewe[data-lage='schreck'] img:first-child { opacity: 0; }
@@ -89,7 +94,8 @@ p { margin: 0 0 1em; max-width: 62ch; }
 html:not(.js) .spielball-schatten { display: none; }
 
 /* Markierung für offene Kundenfragen: sichtbar, aber ohne die Gestaltung zu sprengen. */
-.offen { display: inline-block; margin-left: .25em; padding: 0 .4em; font-size: .78em; font-weight: 600; line-height: 1.5; color: var(--plum); background: color-mix(in srgb, var(--coral) 14%, transparent); border-radius: 3px; white-space: nowrap; vertical-align: .08em; }
+.offen { position: relative; display: inline-block; margin: .35em 0 0 .2em; padding: .15em .55em .2em; font-size: .78em; font-weight: 600; line-height: 1.4; color: var(--ink); background: #fffdf6; box-shadow: -2px 3px 6px rgba(90, 40, 0, .16); rotate: -1.4deg; white-space: nowrap; vertical-align: .08em; }
+.offen::before { content: ''; position: absolute; left: 50%; top: -.45em; width: 2.4em; height: .8em; translate: -50% 0; rotate: 3deg; background: rgba(255, 214, 80, .55); }
 
 /* Links: keine Rahmen, keine Pillen. Wörter, die umklappen, und eine Welle darunter. */
 [data-key] { white-space: nowrap; }
@@ -98,21 +104,24 @@ html:not(.js) .spielball-schatten { display: none; }
 .f + .f { position: absolute; left: 0; top: 0; color: var(--flip, var(--plum)); transform-origin: 50% 100%; transform: rotateX(90deg); visibility: hidden; transition: transform 560ms var(--flap) calc(var(--i) * 30ms), visibility 0s linear calc(var(--i) * 30ms + 560ms); }
 a:focus-visible .f { transform: rotateX(90deg); transition-delay: calc(var(--i) * 30ms); }
 a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition: transform 560ms var(--flap) calc(var(--i) * 30ms + 100ms), visibility 0s; }
-.wave { position: absolute; left: 0; right: 0; bottom: -2px; height: 7px; background: var(--coral); -webkit-mask: var(--wave) repeat-x 0 0 / 22px 7px; mask: var(--wave) repeat-x 0 0 / 22px 7px; clip-path: inset(0 100% 0 0); transition: clip-path 520ms var(--key); animation: flow 1.5s linear infinite; animation-play-state: paused; }
+.wave { position: absolute; left: 0; right: 0; bottom: -2px; height: 7px; background: var(--meer); -webkit-mask: var(--wave) repeat-x 0 0 / 22px 7px; mask: var(--wave) repeat-x 0 0 / 22px 7px; clip-path: inset(0 100% 0 0); transition: clip-path 520ms var(--key); animation: flow 1.5s linear infinite; animation-play-state: paused; }
 @keyframes flow { to { -webkit-mask-position: -22px 0; mask-position: -22px 0; } }
 
 /* „Lieber per Formular“ und andere Nebenwege: Wort mit Welle, die beim Überfahren hereinläuft. */
-.nebenweg { --flip: var(--plum); position: relative; display: inline-block; padding: 6px 0; font-weight: 600; text-decoration: none; }
-.nebenweg .wave { clip-path: inset(0 0 0 0); opacity: .35; transition: clip-path 520ms var(--key), opacity 300ms ease; }
+.nebenweg { --flip: var(--meer); position: relative; display: inline-block; padding: 6px 0; font-weight: 600; text-decoration: none; }
+.nebenweg .wave { bottom: 2px; height: 2px; -webkit-mask: none; mask: none; clip-path: inset(0 0 0 0); opacity: .35; animation: none; transition: opacity 300ms ease; }
 .nebenweg:focus-visible .wave { opacity: 1; animation-play-state: running; }
 
 /* Weiter-Link: Shrikhand, daneben der Ball, der beim Überfahren losrollt. */
-.weiter { --flip: var(--coral); display: inline-flex; align-items: center; gap: .55em; padding: 6px 0; font: 400 clamp(1.1rem, 1rem + .5vw, 1.4rem)/1 Shrikhand, Georgia, serif; text-decoration: none; }
+.weiter { --flip: var(--meer); display: inline-flex; align-items: center; gap: .55em; padding: 6px 0; font: 400 clamp(1.1rem, 1rem + .5vw, 1.4rem)/1 Shrikhand, Georgia, serif; text-decoration: none; }
 .weiter img { width: 1.25em; height: 1.25em; filter: drop-shadow(0 3px 4px rgba(60, 0, 0, .3)); transition: transform 700ms var(--boing); }
 .weiter:focus-visible img { transform: translateX(.5em) rotate(200deg); }
+/* WhatsApp in den Kapiteln: dasselbe Wort-Format, mit WhatsApp-Zeichen in Pink. Der Aufkleber bleibt der einzige große Knopf. */
+.weiter.wa svg { flex: none; width: 1.15em; height: 1.15em; fill: currentColor; transition: transform 600ms var(--boing); }
+.weiter.wa:focus-visible svg { transform: rotate(-14deg) scale(1.12); }
 
 /* Fließtext-Link */
-.text a { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2em; text-decoration-color: color-mix(in srgb, var(--coral) 70%, transparent); transition: color 200ms ease, text-decoration-color 200ms ease; }
+.text a { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2em; text-decoration-color: color-mix(in srgb, var(--meer) 70%, transparent); transition: color 200ms ease, text-decoration-color 200ms ease; }
 
 /* Der Bewerben-Aufkleber aus dem Hero als Baustein: Sonne mit Strahlen, schräger Text, beim Überfahren gerade und gelb. */
 .aufkleber { --flip: var(--ink); --d: clamp(118px, 11vw, 156px); position: relative; display: inline-grid; place-items: center; flex: none; width: var(--d); height: var(--d); font: 400 calc(var(--d) * .135)/1 Shrikhand, Georgia, serif; color: var(--cream); text-decoration: none; transition: scale 460ms var(--boing); }
@@ -129,9 +138,9 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 
 /* Fakten-Tafel: Begriff und Antwort, getrennt durch Wellenlinien statt Kästen. */
 .fakten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(28px, 4vw, 64px); margin: 0; }
-.fakt { position: relative; padding: 22px 0 20px; }
-.fakt::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 7px; background: currentColor; opacity: .22; -webkit-mask: var(--wave) repeat-x 0 0 / 22px 7px; mask: var(--wave) repeat-x 0 0 / 22px 7px; }
-.fakt dt { margin-bottom: .3em; font: 400 1.25rem/1.15 Shrikhand, Georgia, serif; color: var(--plum); }
+.fakt { position: relative; padding: 18px 0 22px; }
+.fakt dt { display: flex; flex-direction: column; align-items: flex-start; gap: .3em; margin-bottom: .45em; font: 400 1.32rem/1.12 Shrikhand, Georgia, serif; color: var(--ink); text-shadow: -.015em .015em 0 #0a4c52, -.03em .03em 0 #08454b, -.045em .045em 0 #063d42, -.09em .13em .12em rgba(110, 50, 0, .28); }
+.fakt-ding { flex: none; width: clamp(58px, 5.4cqw, 82px); height: auto; margin-bottom: -.12em; filter: drop-shadow(-6px 9px 7px rgba(110, 50, 0, .3)); transform-origin: 50% 80%; transition: rotate 700ms var(--boing), scale 700ms var(--boing); }
 .fakt dd { margin: 0; }
 
 /* Fotos: ohne Rahmen, leicht schräg wie hingelegt, mit warmem Schatten. Beim Überfahren richten sie sich auf. */
@@ -144,13 +153,13 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 /* Schritte: vier Stufen, die nach rechts unten absteigen wie die Treppe. */
 .schritte { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(18px, 2.4vw, 36px); margin: 0; padding: 0; list-style: none; counter-reset: s; }
 .schritte li { counter-increment: s; padding-top: calc(var(--n) * clamp(18px, 3vw, 48px)); }
-.schritte li::before { content: counter(s); display: block; margin-bottom: .1em; font: 400 clamp(3rem, 2rem + 3vw, 5rem)/1 Shrikhand, Georgia, serif; color: var(--coral); }
+.schritte li::before { content: counter(s); display: block; margin-bottom: .1em; font: 400 clamp(3rem, 2rem + 3vw, 5rem)/1 Shrikhand, Georgia, serif; color: var(--meer); }
 .schritte h3 { margin: 0 0 .35em; font: 400 1.35rem/1.15 Shrikhand, Georgia, serif; }
 
 /* Fragen: aufklappbar, Text steht im HTML. Der kleine Ball dreht sich beim Öffnen. */
 .fragen { margin: 0; }
 .frage { position: relative; }
-.frage::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 7px; background: currentColor; opacity: .2; -webkit-mask: var(--wave) repeat-x 0 0 / 22px 7px; mask: var(--wave) repeat-x 0 0 / 22px 7px; }
+.frage::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(rgba(90, 45, 10, .16) 50%, rgba(255, 255, 255, .55) 50%); }
 .frage summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 0 20px; list-style: none; cursor: pointer; }
 .frage summary::-webkit-details-marker { display: none; }
 .frage h3 { margin: 0; font: 600 clamp(1.1rem, 1rem + .4vw, 1.3rem)/1.3 UI, system-ui, sans-serif; }
@@ -173,16 +182,20 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
   a:hover .f + .f { transform: rotateX(0); visibility: visible; transition: transform 560ms var(--flap) calc(var(--i) * 30ms + 100ms), visibility 0s; }
   .nebenweg:hover .wave { opacity: 1; animation-play-state: running; }
   .weiter:hover img { transform: translateX(.5em) rotate(200deg); }
-  .text a:hover { color: var(--plum); text-decoration-color: var(--plum); }
+  .weiter.wa:hover svg { transform: rotate(-14deg) scale(1.12); }
+  .text a:hover { color: var(--meer); text-decoration-color: var(--meer); }
   .aufkleber:hover { scale: 1.08; }
   .aufkleber:hover .sonne path { fill: var(--sun); }
   .aufkleber:hover .aufkleber-in { rotate: 0deg; color: var(--ink); }
   .foto:hover { rotate: 0deg; translate: 0 -6px; }
-  .frage summary:hover h3 { color: var(--plum); }
+  .frage summary:hover h3 { color: var(--meer); }
+  .fakt:hover .fakt-ding { rotate: -9deg; scale: 1.1; }
 }
 
 @media (max-width: 760px) {
   .fakten { grid-template-columns: 1fr; }
+  .fakt dt { flex-direction: row; align-items: center; gap: .55em; }
+  .fakt-ding { width: 60px; }
   .schritte { grid-template-columns: 1fr; }
   .schritte li { padding-top: 0; padding-left: calc(var(--n) * 14px); }
   .kapitel::before { width: 150vw; right: -40vw; }
@@ -190,8 +203,90 @@ a:focus-visible .f + .f { transform: rotateX(0); visibility: visible; transition
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .kapitel::before, .moewe-atem { animation: none; }
+  .kapitel::before, .moewe-atem, .kapitel > .szene-licht::after { animation: none; }
+  .fakt-ding { transition: none; }
   .js [data-zeigen], .js .titel[data-zeigen] .w, .js .foto[data-zeigen] { opacity: 1; translate: none; transition: none; }
   .js .foto[data-zeigen] { rotate: var(--kipp); }
   .f, .f + .f, .wave, .weiter img, .aufkleber, .aufkleber-in, .foto, .frage summary img { transition-duration: 1ms !important; transition-delay: 0ms !important; animation: none !important; }
+}
+
+/* Kopf wie im Hero: kein Balken, keine Fläche. Logo und Wörter schweben über der Szene, der eine Aufkleber hängt oben rechts.
+   Beim Scrollen nach unten weicht der Kopf aus, nach oben kommt er zurück. Der Aufkleber bleibt immer. */
+.seitenkopf { position: fixed; z-index: 15; inset: 0 0 auto 0; display: flex; align-items: center; gap: clamp(16px, 3vw, 40px); padding: clamp(12px, 1.5vw, 22px) calc(clamp(108px, 9.8vw, 148px) + clamp(28px, 3.4vw, 56px)) clamp(12px, 1.5vw, 22px) var(--rand); color: var(--ink); text-shadow: 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); pointer-events: none; transition: translate 460ms var(--out), opacity 320ms ease, color 400ms ease; }
+.seitenkopf a, .seitenkopf button { pointer-events: auto; }
+/* Kein Balken, nur ein weicher Lichtschleier ohne Kante, sobald unter dem Kopf Text vorbeiläuft. Ganz oben bleibt die Szene frei. */
+.seitenkopf::before { content: ''; position: absolute; z-index: -1; inset: 0 0 -70px; background: linear-gradient(rgba(252, 234, 209, .94), rgba(252, 234, 209, .72) 45%, rgba(252, 234, 209, 0)); opacity: 0; transition: opacity 320ms ease; pointer-events: none; }
+html.gescrollt .seitenkopf::before { opacity: 1; }
+html[data-kopf='dunkel'] .seitenkopf::before { background: linear-gradient(rgba(0, 52, 58, .9), rgba(0, 52, 58, .65) 45%, rgba(0, 52, 58, 0)); }
+html.kopf-weg:not(.menue-offen) .seitenkopf { translate: 0 -120%; opacity: 0; }
+.seitenkopf-logo { display: block; flex: none; }
+.seitenkopf-logo img { width: clamp(150px, 13vw, 200px); height: auto; filter: drop-shadow(0 0 10px rgba(255, 246, 230, .7)); }
+.seitenkopf-logo .hell, html[data-kopf='dunkel'] .seitenkopf-logo .dunkel { display: none; }
+html[data-kopf='dunkel'] .seitenkopf-logo .hell { display: block; filter: drop-shadow(0 1px 8px rgba(0, 34, 44, .6)); }
+html[data-kopf='dunkel'] .seitenkopf { color: var(--cream); text-shadow: 0 1px 10px rgba(0, 34, 44, .85), 0 0 3px rgba(0, 34, 44, .5); }
+.seitenmenue { --flip: var(--plum); display: flex; align-items: center; gap: clamp(18px, 2.4vw, 38px); margin-left: auto; font: 600 clamp(15px, 1.15vw, 18px)/1.2 UI, system-ui, sans-serif; }
+.seitenmenue > a { padding: 8px 0; text-decoration: none; }
+html[data-kopf='dunkel'] .seitenmenue { --flip: var(--sun); }
+.menue-knopf, .menue-wege { display: none; }
+.der-aufkleber { --d: clamp(108px, 9.8vw, 148px); position: fixed; z-index: 16; right: clamp(14px, 2.2vw, 34px); top: clamp(6px, 1vw, 14px); }
+.aufkleber .nur-klein { display: none; }
+
+/* Handy: nur das Wort „Menü“. Das Menü geht als Sonne vom Knopf aus auf, wie im Hero. Der Aufkleber sitzt unten rechts im Daumenbereich. */
+@media (max-width: 760px), (orientation: landscape) and (max-height: 540px) {
+  .seitenkopf { padding: max(8px, env(safe-area-inset-top, 0px)) var(--rand) 8px; }
+  .seitenkopf-logo img { width: 132px; }
+  .menue-knopf { position: relative; z-index: 22; display: block; min-height: 44px; margin-left: auto; border: 0; padding: 10px 0; font: 600 clamp(16px, 4.1vw, 20px)/1.2 UI, system-ui, sans-serif; color: inherit; background: none; text-shadow: inherit; cursor: pointer; }
+  .menue-zu, .menue-offen .menue-auf { display: none; }
+  .menue-offen .menue-zu { display: inline; }
+  .menue-offen .menue-knopf { color: var(--ink); text-shadow: none; }
+  html.menue-offen { overflow: hidden; }
+  html.menue-offen .seitenkopf { z-index: 30; }
+  .seitenmenue { position: fixed; inset: 0; z-index: 21; flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(2px, .9vh, 10px); margin: 0; padding: 72px var(--rand) calc(28px + env(safe-area-inset-bottom, 0px)); font: 400 clamp(32px, 9.8vw, 60px)/1.12 Shrikhand, Georgia, serif; color: var(--ink); text-shadow: none; background: var(--sun); clip-path: circle(0 at calc(100% - 44px) 34px); visibility: hidden; transition: clip-path 420ms var(--key), visibility 0s linear 420ms; }
+  .menue-offen .seitenmenue { clip-path: circle(150vmax at calc(100% - 44px) 34px); visibility: visible; transition: clip-path 560ms var(--out); }
+  .seitenmenue > a { padding: 2px 0; }
+  .menue-offen .seitenmenue > a { animation: hoch 460ms var(--out) both; }
+  .seitenmenue > a:nth-child(2) { animation-delay: 40ms; } .seitenmenue > a:nth-child(3) { animation-delay: 80ms; } .seitenmenue > a:nth-child(4) { animation-delay: 120ms; } .seitenmenue > a:nth-child(5) { animation-delay: 160ms; } .seitenmenue > a:nth-child(6) { animation-delay: 200ms; } .seitenmenue > a:nth-child(7) { animation-delay: 240ms; }
+  .menue-wege { display: grid; gap: 6px; margin-top: clamp(14px, 3vh, 30px); }
+  .menue-wa { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-size: clamp(22px, 6.2vw, 34px); color: var(--plum); text-decoration: none; }
+  .menue-wa svg { flex: none; width: 1.1em; height: 1.1em; fill: currentColor; }
+  .menue-form { min-height: 44px; padding: 10px 0; font: 600 clamp(15px, 3.9vw, 19px)/1.2 UI, system-ui, sans-serif; color: var(--ink); }
+  .der-aufkleber { --d: clamp(100px, 27vw, 150px); top: auto; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .der-aufkleber .nur-gross { display: none; }
+  .der-aufkleber .nur-klein { display: block; }
+}
+@keyframes hoch { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) {
+  .seitenkopf, .seitenmenue { transition: none !important; }
+  .menue-offen .seitenmenue > a { animation: none; }
+}
+
+/* Fotofächer: Teamfotos wie ein Stapel Sofortbilder. Am Rechner fächern sie beim Überfahren auf wie ein Kartenblatt,
+   das Foto unter der Maus hebt sich mit Lichtreflex, die Nachbarn rücken zur Seite. Am Handy wischt man durch den Stapel. */
+.faecher { --n: 6; --b: clamp(190px, 17vw, 250px); position: relative; height: calc(var(--b) * 1.55); margin: clamp(20px, 3vw, 40px) auto 0; max-width: 1100px; }
+.faecher-foto { --o: calc(var(--i) - (var(--n) - 1) / 2); --dreh: calc(var(--o) * 4deg + var(--zufall, 0deg)); --weit: calc(var(--o) * var(--b) * .16); --hoch: 0px; --gross: 1;
+  position: absolute; left: 50%; top: 4%; width: var(--b); margin: 0; padding: 9px 9px 0; background: #fffaf0; border-radius: 3px; box-shadow: -4px 8px 14px rgba(80, 35, 0, .22), 0 1px 2px rgba(80, 35, 0, .15);
+  transform-origin: 50% 120%; transform: translateX(-50%) translateX(var(--weit)) translateY(var(--hoch)) rotate(var(--dreh)) scale(var(--gross)); transition: transform 760ms var(--boing), box-shadow 400ms ease; cursor: pointer; overflow: hidden; }
+.faecher-foto img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 1px; }
+.faecher-foto figcaption { padding: 8px 2px 12px; font: 400 .95rem/1.2 Shrikhand, Georgia, serif; color: var(--ink); text-align: center; }
+.faecher-foto::after { content: ''; position: absolute; inset: 9px 9px auto; aspect-ratio: 4 / 5; background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, .5) 50%, transparent 62%); transform: translateX(-120%); transition: transform 0s; pointer-events: none; mix-blend-mode: soft-light; }
+.faecher-foto:nth-child(odd) { --zufall: -1.5deg; }
+.faecher-foto:nth-child(3n) { --zufall: 2deg; }
+
+@media (hover: hover) and (pointer: fine) {
+  .faecher:hover .faecher-foto { --dreh: calc(var(--o) * 8deg); --weit: calc(var(--o) * var(--b) * .62); --hoch: calc(var(--o) * var(--o) * 9px); }
+  .faecher .faecher-foto:hover { --dreh: calc(var(--o) * 2deg); --hoch: calc(var(--o) * var(--o) * 9px - 34px); --gross: 1.08; z-index: 10; box-shadow: -10px 22px 30px rgba(80, 35, 0, .3), 0 1px 2px rgba(80, 35, 0, .15); }
+  .faecher .faecher-foto:hover::after { transform: translateX(120%); transition: transform 900ms var(--out); }
+  .faecher:hover .faecher-foto:has(+ .faecher-foto:hover) { --weit: calc(var(--o) * var(--b) * .62 - 26px); }
+  .faecher:hover .faecher-foto:hover + .faecher-foto { --weit: calc(var(--o) * var(--b) * .62 + 26px); }
+}
+@media (max-width: 760px) {
+  .faecher { --b: 66vw; display: flex; gap: 0; height: auto; margin-inline: calc(var(--rand) * -1); padding: 26px calc(17vw) 34px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .faecher::-webkit-scrollbar { display: none; }
+  .faecher-foto { position: relative; left: auto; top: auto; flex: none; margin-right: -12vw; scroll-snap-align: center; transform: rotate(var(--dreh)) scale(.92); --dreh: calc(var(--zufall, 0deg) + 3deg); }
+  .faecher-foto:nth-child(even) { --dreh: calc(var(--zufall, 0deg) - 3deg); }
+  .faecher-foto.mitte { z-index: 5; transform: rotate(0deg) scale(1); }
+  .faecher-foto.mitte::after { transform: translateX(120%); transition: transform 900ms var(--out) 120ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .faecher-foto, .faecher-foto::after { transition: none !important; }
 }
