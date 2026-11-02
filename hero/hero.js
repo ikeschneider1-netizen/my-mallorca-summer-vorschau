@@ -1273,9 +1273,11 @@ function layout() {
   u.uShadowOff.value.set(14 / vw, 15 / vh);
   u.uStretch.value = !portrait && vh > H ? clamp(86 / (vh - 640 - 30), 0.22, 1) : 1;
   u.uMirror.value = portrait ? 1 : 0;
-  const rw = Math.max(2, Math.round(w * dpr / 4)), rh = Math.max(2, Math.round(h * dpr / 4));
+  // Schatten der Schrift: Viertelauflösung reicht für den großen Schriftzug. Im Hochformat und auf schmalen Bildschirmen
+  // ist der Spruch so klein, dass seine Striche durchs Raster fallen (Punktmuster): dort halbe Auflösung, gleich weich.
+  const teil = portrait || w < 900 ? 2 : 4, rw = Math.max(2, Math.round(w * dpr / teil)), rh = Math.max(2, Math.round(h * dpr / teil));
   rtA.setSize(rw, rh); rtB.setSize(rw, rh);
-  blurMat.userData.rw = rw; blurMat.userData.rh = rh;
+  blurMat.userData.rw = rw; blurMat.userData.rh = rh; blurMat.userData.k = 4 / teil;
   setFly(!reduced.matches);
 }
 const homeSlot = () => (comp.on ? 'xP' : 'xA');
@@ -1700,7 +1702,7 @@ function tick(dt, render = true) {
   pointLight.position.set((pointer.px - CX) * 700 / F, -(pointer.py - CY) * 700 / F, -700);
   pointLight.intensity = S.sheen * 15000;
   glint.value.x = S.glint;
-  if (!still() && mode === 'rest' && fly.s < 0.01 && time % 15 < dt && window.gsap) window.gsap.fromTo(S, { glint: -0.2 }, { glint: 1.4, duration: 1.6, ease: 'sine.inOut', overwrite: 'auto' });
+  if (!still() && mode === 'rest' && fly.s < 0.01 && time % 9 < dt && window.gsap) window.gsap.fromTo(S, { glint: -0.2 }, { glint: 1.4, duration: 1.6, ease: 'sine.inOut', overwrite: 'auto' });
 
   const u = plateMat.uniforms;
   u.uTime.value = time; u.uMouse.value.set(pointer.sx, pointer.sy); u.uDawn.value = S.dawn; u.uReveal.value = S.reveal; u.uFlare.value = S.flare; u.uGust.value = S.gust; u.uSheen.value = S.sheen;
@@ -1719,10 +1721,15 @@ function draw() {
   renderer.setRenderTarget(rtA); renderer.setClearColor(0x000000, 1); renderer.clear(); renderer.render(scene, comp.on ? camL : cam);
   scene.overrideMaterial = null; ballGroup.visible = true; confetti.visible = cv; gull.root.visible = gv; plop.mesh.visible = pv; feathers.mesh.visible = fv; gull.flyer.visible = sv;
   const rw = blurMat.userData.rw, rh = blurMat.userData.rh, u = blurMat.uniforms;
-  u.tSrc.value = rtA.texture; u.uDir.value.set(2.4 / rw, 0);
-  renderer.setRenderTarget(rtB); renderer.render(blurScene, bgCam);
-  u.tSrc.value = rtB.texture; u.uDir.value.set(0, 2.4 / rh);
-  renderer.setRenderTarget(rtA); renderer.render(blurScene, bgCam);
+  // Bei feinerem Raster mehrmals mit engen Abständen weichzeichnen: Die Durchgänge addieren sich zu einem weichen Schatten.
+  // Weite Abstände würden selbst ein Punktmuster erzeugen.
+  const durchgaenge = (blurMat.userData.k || 1) > 1 ? 4 : 1;
+  for (let pass = 0; pass < durchgaenge; pass++) {
+    u.tSrc.value = rtA.texture; u.uDir.value.set(2.4 / rw, 0);
+    renderer.setRenderTarget(rtB); renderer.render(blurScene, bgCam);
+    u.tSrc.value = rtB.texture; u.uDir.value.set(0, 2.4 / rh);
+    renderer.setRenderTarget(rtA); renderer.render(blurScene, bgCam);
+  }
 
   plateMat.uniforms.tShadow.value = rtA.texture;
   renderer.setRenderTarget(null); renderer.setClearColor(0x000000, 0); renderer.clear();
