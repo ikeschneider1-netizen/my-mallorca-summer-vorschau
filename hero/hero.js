@@ -25,8 +25,10 @@ const LINES = [
 const KERN = { My: 0.7, Ma: -0.1, al: 2.4, ll: 4, lo: 3.6, or: 2.8, rc: 4.2, ca: 2.6, Su: 0, um: 3.7, mm: 2.9, me: 3.5, er: 2.1 };
 // Der Satz steht klein auf der Terrasse. Die Möwe tauscht „Arbeiten“ und „Urlaub machen“, Komma und Punkt bleiben stehen.
 const KLEIN = { Ar: 3.7, rb: 0.7, be: 4.9, ei: 2.2, it: 3.1, te: 0.4, en: 2.1, ar: 2.1, wo: 3.7, an: 2.1, nd: 4.2, de: 3.7, er: 2.1, re: 4.4, Ur: -1.8, rl: -0.4, la: 1.6, au: 2.7, ub: 4.6, ma: 2.3, ac: 2.6, ch: 1.5, he: 3.5 };
-const CLAIM_TOK = [['work', 'Arbeiten'], ['comma', ','], ['wo', 'wo'], ['and', 'andere'], ['fun', 'Urlaub'], ['mach', 'machen'], ['end', '.']];
-const ORDER_A = ['work', 'comma', 'wo', 'and', 'fun', 'mach', 'end'], ORDER_B = ['fun', 'mach', 'comma', 'wo', 'and', 'work', 'end'];
+// Seit 03.11.2026 (Ike): „Dein Sommer. Deine Bühne. Dein Job.“ Die Möwe setzt sich auf das letzte „Dein“ und dreht sein D zum M:
+// „Mein Job.“ Der Ball holt es zurück. Die Wörter bleiben stehen, ORDER_B ist nur noch die alte Schnittstelle.
+const CLAIM_TOK = [['s1', 'Dein'], ['s2', 'Sommer.'], ['b1', 'Deine'], ['b2', 'Bühne.'], ['work', 'Dein'], ['job', 'Job.']];
+const ORDER_A = ['s1', 's2', 'b1', 'b2', 'work', 'job'], ORDER_B = ORDER_A;
 const edgeToVP = (x, y, to) => y + (VP[1] - y) / (VP[0] - x) * (to - x);
 const CLAIM_QUAD = [[116, 644], [1012, edgeToVP(116, 644, 1012)], [1014, edgeToVP(112, 682, 1014)], [112, 682]];
 const HIT_LINES = ['Treffer! Jetzt bewerben?', 'Schon wieder. Das ist ein Zeichen.', 'Drei Treffer! Jetzt aber bewerben.', 'Okay, du kannst zielen. Bewerben?'];
@@ -751,14 +753,14 @@ function buildClaim(font) {
     claim.tok[key] = t;
   }
   const A = claim.tok.work.items[0];
-  A.alt = new THREE.Mesh(geoOf('a'), [front, side]); A.alt.visible = false; A.pivot.add(A.alt);
+  A.alt = new THREE.Mesh(geoOf('M'), [front, side]); A.alt.visible = false; A.pivot.add(A.alt);
   const flow = (order, lower, slot) => {
     let x = 0;
     order.forEach((key, oi) => {
       const t = claim.tok[key];
       if (oi && t.text.length > 1) x += 27;
       const chars = [...t.text];
-      if (lower && key === 'work') chars[0] = 'a';
+      if (lower && key === 'work') chars[0] = 'M';
       chars.forEach((ch, i) => {
         t.items[i][slot] = x + geoOf(ch).userData.cx;
         x += font.data.glyphs[ch].ha * k + (KLEIN[ch + (chars[i + 1] || '')] || 0) + 1.2;
@@ -768,9 +770,9 @@ function buildClaim(font) {
   };
   claim.w = flow(ORDER_A, false, 'xA');
   flow(ORDER_B, true, 'xB');
-  // Im Hochformat steht der Satz auf zwei Zeilen: „Arbeiten, wo andere“ und „Urlaub machen.“
-  const w1 = flow(['work', 'comma', 'wo', 'and'], false, 'xP'), w2 = flow(['fun', 'mach', 'end'], false, 'xP');
-  for (const key of ['work', 'comma', 'wo', 'and']) for (const it of claim.tok[key].items) it.lyP = CLAIM_LINE;
+  // Im Hochformat steht der Satz auf zwei Zeilen: „Dein Sommer. Deine Bühne.“ und „Dein Job.“
+  const w1 = flow(['s1', 's2', 'b1', 'b2'], false, 'xP'), w2 = flow(['work', 'job'], false, 'xP');
+  for (const key of ['s1', 's2', 'b1', 'b2']) for (const it of claim.tok[key].items) it.lyP = CLAIM_LINE;
   claim.wP = Math.max(w1, w2); claim.hP = CLAIM_LINE + 66.6;
   const rect = [[0, 66.6], [claim.w, 66.6], [claim.w, 0], [0, 0]];
   claim.inv = solveH(CLAIM_QUAD, rect);
@@ -1007,7 +1009,7 @@ function startGag() {
   // Sie stutzt: zurück aufs Wort, dann zu dir. „Arbeiten? Hier?“ Sie schüttelt den Kopf, und dann reift der Plan.
   tl.to(p, { headYaw: -0.1, headPitch: -0.75, lookX: 0, lookY: -0.5, brow: 0.9, headRoll: 0.22, duration: 0.14, ease: 'power3.out' }, T + 4.3)
     .to(p, { headYaw: -0.74, headPitch: -0.06, stare: 1, headRoll: 0.14, lid: 0.08, cock: 0.8, smile: 0.2, duration: 0.18, ease: 'power3.out' }, T + 4.72)
-    .call(() => say('Arbeiten? Hier?', 1800), null, T + 4.84)
+    .call(() => say('Dein Job? Hier?', 1800), null, T + 4.84)
     .to(p, { headYaw: -0.42, headRoll: 0, duration: 0.09, ease: 'sine.inOut' }, T + 5.56)
     .to(p, { headYaw: -1.08, duration: 0.12, ease: 'sine.inOut' }, T + 5.65)
     .to(p, { headYaw: -0.42, duration: 0.12, ease: 'sine.inOut' }, T + 5.77)
@@ -1017,42 +1019,24 @@ function startGag() {
     .to(p, { gesture: 0.5, duration: 0.1, ease: 'power2.out' }, T + 6.46)
     .to(p, { shades: 0, duration: 0.14, ease: 'power2.inOut' }, T + 6.5)
     .to(p, { gesture: 0, duration: 0.14, ease: 'power2.in' }, T + 6.58);
-  // Sie hüpft hoch, kippt nach vorn und schnappt sich das „n“ mit dem Schnabel, wie eine Möwe ihr Futter.
-  const B0 = T + 7;
+  // Der Plan: Sie hüpft auf das D, pickt einmal kräftig drauf, und das D dreht sich zum M. „Mein Job.“ Dann setzt sie sich stolz drauf.
+  const B0 = T + 7, L = B0 + 1.3;
   tl.call(() => { gag.onClaim = false; }, null, B0)
     .to(p, { fold: 0, flapAmp: 0.9, flapRate: 14, tuck: 0.5, stare: 0, headYaw: 0, headRoll: 0, cock: 0.3, smile: 0.3, duration: 0.14 }, B0)
-    .to(P, { x: b.x + 22, y: b.y - 34, duration: 0.3, ease: 'power2.out' }, B0)
-    .to(p, { pitch: -0.55, headPitch: -0.55, mouth: 0.9, lid: 0.15, brow: -0.5, lookY: -0.6, lookX: 0, duration: 0.22, ease: 'power2.inOut' }, B0 + 0.12)
-    .to(P, { y: '+=12', duration: 0.08, ease: 'power2.in' }, B0 + 0.34)
-    .call(() => { n.jv = 120; n.wv += 1.5; ropeStart(); }, null, B0 + 0.4)
-    .to(gag, { grip: 1, duration: 0.12, ease: 'power2.out' }, B0 + 0.4)
-    .to(p, { mouth: 0.12, duration: 0.06 }, B0 + 0.44);
-  // Mit aller Kraft nach oben: Das Wort löst sich Buchstabe für Buchstabe vom Boden wie ein Reißverschluss. Es ist schwer, sie sackt einmal durch.
-  tl.to(p, { pitch: 0.14, headPitch: 0.05, flapAmp: 1.2, flapRate: 20, stab: 0.8, roll: 0.15, tuck: 0.35, lid: 0.78, puff: 0.5, brow: 0.7, lookY: 0, duration: 0.24, ease: 'power2.out' }, B0 + 0.52)
-    .to(P, { x: b.x + 40, y: b.y - 240, duration: 0.72, ease: 'power2.out' }, B0 + 0.52)
-    .to(P, { y: '+=12', duration: 0.15, ease: 'sine.inOut', yoyo: true, repeat: 1 }, B0 + 1.2)
-    // Oben angekommen: ein stolzer Blick zu dir, das Wort baumelt am Schnabel. Unter ihr rückt der Satz zusammen.
-    .to(p, { pitch: 0.1, flapAmp: 1, flapRate: 15, lid: 0.15, puff: 0.2, brow: -0.3, cock: 0.8, stare: 1, headYaw: -0.7, duration: 0.24, ease: 'power2.out' }, B0 + 1.3)
-    .call(shiftRest, null, B0 + 1.35);
-  // Sie hält kurz, unter ihr rückt der Satz zusammen. Dann das Wort als Banner im Schlepp ans Satzende, und sie legt „arbeiten“ von hinten auf den Boden.
-  const F0 = B0 + 1.8, D = 2.8, L = F0 + D, flightY = c.y - 150;
-  tl.to(P, { x: c.x + 2, duration: D, ease: 'sine.inOut' }, F0)
-    .to(P, { y: flightY, duration: 1, ease: 'sine.inOut' }, F0)
-    .to(p, { pitch: 0.12, flapAmp: 0.95, flapRate: 13, roll: 0.26, lid: 0.2, puff: 0, brow: -0.1, cock: 0.7, smile: 1, stare: 1, headYaw: -0.72, headPitch: 0, duration: 0.5 }, F0 + 0.1)
-    .call(() => { gag.print = true; }, null, F0 + 0.9)
-    .to(p, { stare: 0, headYaw: -0.1, headPitch: -0.55, lookY: -0.5, brow: 0, lid: 0.25, duration: 0.24 }, F0 + 1.6)
-    .to(P, { y: c.y, duration: 1.3, ease: 'sine.inOut' }, L - 1.3)
-    .call(() => { gag.force = true; }, null, L - 0.72)
-    .call(lastLetter, null, L - 0.2)
-    .to(p, { pitch: 0.5, sweep: 0.5, tuck: 0, flapAmp: 1, roll: 0, mouth: 0, duration: 0.22 }, L - 0.34);
-  // Fertig: „Urlaub machen, wo andere arbeiten.“ Sie setzt sich drauf, stolz, und klopft sich den Flügel ab. Dann macht sie selig die Augen zu.
-  tl.call(() => { gag.onClaim = true; n.v += 5; n.sv += 4; impact(c.x, FLOOR - 30, 0.18); }, null, L)
+    .to(P, { x: a.x, y: a.y - 70, duration: 0.42, ease: 'power2.out' }, B0)
+    .to(P, { y: a.y, duration: 0.3, ease: 'power2.in' }, B0 + 0.42)
+    .to(p, { pitch: -0.5, headPitch: -0.6, mouth: 0.8, lid: 0.15, brow: -0.5, lookY: -0.6, duration: 0.2, ease: 'power2.inOut' }, B0 + 0.5)
+    .call(() => { A.v += 6; A.sv += 5; A.wv += 1.6; impact(a.x, FLOOR - 30, 0.2); spinSwap(true); }, null, B0 + 0.72)
+    .to(p, { fold: 1, flapAmp: 0, pitch: 0.04, mouth: 0, headPitch: -0.1, duration: 0.3, ease: 'power2.out' }, B0 + 0.72)
+    .fromTo(p, { squash: 0.22 }, { squash: 0, duration: 0.42, ease: 'back.out(3)', immediateRender: false }, B0 + 0.72);
+  // Fertig: „Dein Sommer. Deine Bühne. Mein Job.“ Sie setzt sich drauf, stolz, und klopft sich den Flügel ab. Dann macht sie selig die Augen zu.
+  tl.call(() => { gag.onClaim = true; }, null, L)
     .to(p, { fold: 1, flapAmp: 0, pitch: 0.04, sweep: 0, yaw: -0.42, duration: 0.34, ease: 'power2.out' }, L)
     .fromTo(p, { squash: 0.2 }, { squash: 0, duration: 0.42, ease: 'back.out(3)', immediateRender: false }, L)
     .to(p, { headYaw: -0.78, headPitch: 0.12, stare: 1, lookY: 0, lid: 0.22, cock: 0.75, smile: 1, duration: 0.3, ease: 'power2.inOut' }, L + 0.24)
     .to(p, { puff: 1, duration: 0.42, ease: 'back.out(2)' }, L + 0.56)
     .call(() => carryLook(false), null, L + 0.3)
-    .call(() => say('Na also.', 2300), null, L + 0.74)
+    .call(() => say('Mein Job!', 2300), null, L + 0.74)
     // Jetzt macht sie Urlaub: Brille runter, Schnabel hoch, Augen zu.
     .to(p, { gesture: 0.5, duration: 0.1, ease: 'power2.out' }, L + 1.34)
     .to(p, { shades: 1, duration: 0.13, ease: 'power2.in' }, L + 1.4)
@@ -1083,12 +1067,13 @@ function startGagHoch() {
     .to(p, { fold: 1, flapAmp: 0, pitch: 0.04, sweep: 0, duration: 0.34, ease: 'power2.out' }, A)
     .fromTo(p, { squash: 0.22 }, { squash: 0, duration: 0.42, ease: 'back.out(3)', immediateRender: false }, A)
     .to(p, { headYaw: -0.74, headPitch: -0.06, stare: 1, shades: 2, lid: 0.08, cock: 0.8, smile: 0.2, headRoll: 0.14, duration: 0.24, ease: 'power3.out' }, A + 0.5)
-    .call(() => say('Arbeiten? Hier?', 1700), null, A + 0.72)
+    .call(() => say('Dein Job?', 1500), null, A + 0.72)
     .to(p, { headYaw: -0.42, headRoll: 0, duration: 0.09, ease: 'sine.inOut' }, A + 1.5)
     .to(p, { headYaw: -1.08, duration: 0.12, ease: 'sine.inOut' }, A + 1.59)
     .to(p, { headYaw: -0.42, duration: 0.12, ease: 'sine.inOut' }, A + 1.71)
     .to(p, { headYaw: -0.74, duration: 0.09, ease: 'sine.out' }, A + 1.83)
     .to(p, { tongue: 1, smile: 1, cock: 0.85, duration: 0.16, ease: 'back.out(2)' }, A + 2.2)
+    .call(() => say('Mein Job!', 1500), null, A + 2.3)
     .to(p, { tongue: 0, shades: 1, puff: 1, lid: 1, blink: 0, headYaw: -0.5, headPitch: 0.34, stare: 0, duration: 0.3, ease: 'sine.inOut' }, A + 3)
     .call(shootGull, null, A + 3.5)
     .to(p, { lid: 0, wide: 1, brow: 0.9, cock: 0.2, smile: 0, shades: 2, lookX: 0.9, crest: 0.5, duration: 0.08, ease: 'power3.out' }, A + 3.78)
@@ -1829,7 +1814,7 @@ function draw() {
 // --- Auftakt: Stille, Aufschlag, dann springt der Ball aus und bleibt auf der Terrasse liegen ---
 // Die Flugbahn sind echte Wurfparabeln mit derselben Schwerkraft wie beim Spielen, als reine Funktion der Zeit.
 function buildPath() {
-  const floorY = FLOOR - BALL_R, drop = floorY + 160, T0 = 1.25, fall = Math.sqrt(2 * drop / GRAV), T1 = T0 + fall;
+  const floorY = FLOOR - BALL_R, drop = floorY + 160, T0 = 0.55, fall = Math.sqrt(2 * drop / GRAV), T1 = T0 + fall;
   const vHit = GRAV * fall, contact = (v) => 0.018 + 0.05 * v / vHit, stretch = (v) => 0.11 * Math.abs(v) / 1500;
   // Erst das Muster der Sprünge, dann das Grundtempo so, dass der Ball genau an seinem Platz ausrollt.
   const raw = [], FRICTION = 0.94, ROLL = 0.62;
@@ -1894,17 +1879,18 @@ function buildIntro() {
   tl.to(clock, { t: P.end, duration: P.end, ease: 'none', onUpdate: () => P.at(clock.t) }, 0);
   P.hits.forEach((h) => tl.call(impact, [h.x, FLOOR, h.k], h.t));
   // Eine einzige Geste: Der Aufschlag löst eine Lichtfront aus, und wo sie ankommt, stehen die Buchstaben auf.
-  const sweep = 3.62;
-  tl.to(S, { reveal: FRONT * sweep, duration: sweep, ease: 'none' }, T1)
+  // Kürzer und kausal (03.11.2026): Die Lichtfront braucht 2,1 s statt 3,6 s, die Szene steht nach gut 3 s.
+  const sweep = 2.1, LICHT = FRONT * 3.62 / sweep;
+  tl.to(S, { reveal: LICHT * sweep, duration: sweep, ease: 'none' }, T1)
     .set(S, { dawn: 0 }, T1 + sweep)
-    .call(() => hero.classList.remove('dusk'), null, T1 + 2.3)
-    .fromTo(S, { gust: 0 }, { gust: 1, duration: 0.4, ease: 'power1.out' }, T1 + 0.5)
-    .to(S, { flare: 1.1, duration: 0.5, ease: 'power2.out' }, T1 + 2.3)
-    .to(S, { flare: 0.2, duration: 1.5, ease: 'power2.inOut' }, T1 + 2.8)
-    .fromTo(S, { glint: -0.2 }, { glint: 1.4, duration: 1.5, ease: 'sine.inOut' }, T1 + 2.7);
+    .call(() => hero.classList.remove('dusk'), null, T1 + 1.35)
+    .fromTo(S, { gust: 0 }, { gust: 1, duration: 0.4, ease: 'power1.out' }, T1 + 0.4)
+    .to(S, { flare: 1.1, duration: 0.5, ease: 'power2.out' }, T1 + 1.35)
+    .to(S, { flare: 0.2, duration: 1.3, ease: 'power2.inOut' }, T1 + 1.85)
+    .fromTo(S, { glint: -0.2 }, { glint: 1.4, duration: 1.3, ease: 'sine.inOut' }, T1 + 1.6);
   // Die Buchstaben gehorchen derselben Schwerkraft wie der Ball: Sie fallen von oben, unterste Zeile zuerst, und setzen schwer auf.
   for (const l of letters) {
-    const land = T1 + 0.2 + clamp((l.sx - 110) / 890, 0, 1) * 1.35 + (2 - l.line) * 0.24;
+    const land = T1 + 0.15 + clamp((l.sx - 110) / 890, 0, 1) * 0.95 + (2 - l.line) * 0.16;
     const px = l.by + 190, dur = Math.sqrt(2 * px / GRAV);
     tl.call(() => { l.on = true; }, null, land - dur);
     tl.fromTo(l, { drop: px / l.pu }, { drop: 0, duration: dur, ease: 'power2.in' }, land - dur);
@@ -1914,7 +1900,7 @@ function buildIntro() {
   }
   // Zuletzt springen die kleinen Wörter aus dem Boden, während der Ball ausrollt.
   for (const l of claim.items) {
-    const at = T1 + 2.15 + clamp((l.sx - 110) / 900, 0, 1) * 0.95;
+    const at = T1 + 1.55 + clamp((l.sx - 110) / 900, 0, 1) * 0.6;
     tl.call(() => { l.on = true; l.jv = 420; }, null, at);
     tl.fromTo(l, { s: 0.2 }, { s: 1, duration: 0.4, ease: 'back.out(2)' }, at);
   }
@@ -1941,7 +1927,7 @@ function playIntro() {
     if (!reduced.matches && window.gsap && scrollY < 5) {
       // Sprunghöhe nach dem Platz unter dem Satz; das Tempo so, dass er nach den Hüpfern knapp vor seinem Platz ausrollt.
       const hop = clamp(FLOOR - 2 * B.r - claimFloor() - 10, 14, 56), hops = 2 * Math.sqrt(2 * hop / GRAV) / (1 - BOUNCE);
-      Object.assign(B, { x: view.x0 - B.r - 6, y: REST.y }); lastBx = B.x; phys.idle = 9; gag.next = 1.2;
+      Object.assign(B, { x: view.x0 - B.r - 6, y: REST.y }); lastBx = B.x; phys.idle = 9; gag.next = 2.2;
       launch((REST.x - B.x) / hops * 0.9, -Math.sqrt(2 * GRAV * hop));
       // Die Sonne blitzt im Ring auf, und ein Lichtstreif läuft über die Buchstaben.
       window.gsap.fromTo(S, { flare: 1.05 }, { flare: 0.2, duration: 1.7, delay: 0.3, ease: 'power2.out' });
@@ -1954,8 +1940,8 @@ function playIntro() {
   window.gsap.killTweensOf(S);
   abortGag();
   feathers.clear();
-  // Die Möwe kommt gleich, wenn der Ball ausgerollt ist: kein Loch zwischen Auftakt und erstem Lacher.
-  gag.next = 0.6;
+  // Die Möwe kommt nach einem Atemzug, wenn die Szene steht: Erst die Botschaft, dann der Lacher.
+  gag.next = 2.4;
   plop.splat.visible = false;
   mode = 'intro';
   intro = buildIntro();

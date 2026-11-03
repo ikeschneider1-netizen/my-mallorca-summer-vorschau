@@ -14,6 +14,9 @@ const canvas = document.querySelector('canvas.welt');
 const track = document.querySelector('.track');
 const root = document.documentElement;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+// Hochformat: Die Welt zeigt einen Ausschnitt von CW Bühnenpunkten Breite (je Bild data-x), die Bilder laufen als normale Seite darüber.
+const hoch = matchMedia('(orientation: portrait)');
+const CW_H = 520;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const ease = (t) => t * t * (3 - 2 * t);
@@ -100,7 +103,7 @@ function wort(text, { size = 100, depth = 17, front = CREAM, side = CREAM_SIDE }
 // Die Kapiteltitel: Zeilen, die auf dem Boden ihrer Ebene stehen. Sie gehören zu einem Bild (beat) und hüpfen herein und hinaus.
 const titel = [];
 function titelStellen(beat, zeilen, { size = 150, depth = 22, front = CREAM, side = CREAM_SIDE, x = 96, basis, abstand = 174 } = {}) {
-  const gruppen = zeilen.map((z, i) => { const g = wort(z, { size, depth, front, side }); const y = basis - (zeilen.length - 1 - i) * abstand; g.position.set(x, -y, 46); g.visible = false; scene.add(g); g.userData.fleck = fleck(x + g.userData.w / 2 + 10, y + 2, g.userData.w * 1.12, 42); g.userData.fleck.visible = false; return g; });
+  const gruppen = zeilen.map((z, i) => { const g = wort(z, { size, depth, front, side }); const y = basis - (zeilen.length - 1 - i) * abstand; g.position.set(x, -y, 46); g.visible = false; scene.add(g); g.userData.fleck = fleck(x + g.userData.w / 2 + 10, y + 2, g.userData.w * 1.12, 42); g.userData.fleck.visible = false; g.userData.x0 = x; g.userData.y0 = y; return g; });
   titel.push({ beat, gruppen, da: false, t: 0 });
 }
 function titelSchritt(dt, beatPos) {
@@ -168,9 +171,12 @@ function ballMaterial() {
 // Die Bilder (Beats) und ihre Kameralage. Jedes Kapitel hält seine Wand: Creme 452, Terrakotta 1230, Lagune 1980, Gelb 2992.
 const beats = [...document.querySelectorAll('.beat')];
 const PAN = beats.map((b) => +b.dataset.pan);
+const XH = beats.map((b) => +(b.dataset.x || 560));
+const PAN_H = beats.map((b) => +(b.dataset.panH || b.dataset.pan));
 // Wo Ball und Möwe je Bild sind (Bühnenpunkte). Dazwischen reisen sie: der Ball hüpfend, die Möwe fliegend.
-const BALL = beats.map((b) => b.dataset.ball ? b.dataset.ball.split(/\s+/).map(Number) : null);
-const MOEWE = beats.map((b) => b.dataset.moewe ? b.dataset.moewe.split(/\s+/).map(Number) : null);
+const BALL_D = beats.map((b) => b.dataset.ball ? b.dataset.ball.split(/\s+/).map(Number) : null), BALL_H = beats.map((b) => b.dataset.ballH ? b.dataset.ballH.split(/\s+/).map(Number) : null);
+const MOEWE_D = beats.map((b) => b.dataset.moewe ? b.dataset.moewe.split(/\s+/).map(Number) : null), MOEWE_H = beats.map((b) => b.dataset.moeweH ? b.dataset.moeweH.split(/\s+/).map(Number) : null);
+let BALL = BALL_D, MOEWE = MOEWE_D;
 const BALL_R = 52;
 function stuetze(liste, i) { for (let k = i; k >= 0; k--) if (liste[k]) return liste[k]; for (let k = i; k < liste.length; k++) if (liste[k]) return liste[k]; return [0, 0]; }
 
@@ -192,22 +198,43 @@ function bauenBuehne() {
 }
 
 // Scrollen: Jedes Bild ist eine Strecke von --beat Fensterhöhen. beatPos zählt die Bilder, die Kamera gleitet dazwischen.
-let beatPos = 0, pan = PAN[0] || 0, vhU = 900, sitzend = true;
+let beatPos = 0, pan = PAN[0] || 0, vhU = 900, sitzend = true, CW = W, xOff = 0;
+// Im Hochformat stehen die Titel kleiner und am linken Rand des Ausschnitts.
+function titelPassen() {
+  const k = hoch.matches ? 0.45 : 1;
+  for (const T of titel) for (const g of T.gruppen) {
+    const x = hoch.matches ? XH[T.beat] + 26 : g.userData.x0;
+    g.position.x = x; g.scale.set(k, k, 1);
+    const f = g.userData.fleck; f.position.x = x + g.userData.w * k / 2 + 10; f.scale.set(k, 1, 1);
+  }
+}
 const beatH = () => innerHeight * (parseFloat(getComputedStyle(root).getPropertyValue('--beat')) || 0.85);
 function layout() {
   const w = innerWidth, h = innerHeight;
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(w, h, false);
-  vhU = h * W / w;
+  CW = hoch.matches ? CW_H : W; vhU = h * CW / w;
+  BALL = hoch.matches ? BALL_H : BALL_D; MOEWE = hoch.matches ? MOEWE_H : MOEWE_D;
+  root.classList.toggle('welt-hoch', hoch.matches);
+  if (font) titelPassen();
+}
+// Im Hochformat liegen die Bilder in der Seite: Das Bild in der Fenstermitte bestimmt die Kameralage.
+function beatPosFluss() {
+  const mitte = innerHeight * 0.45; let k = 0;
+  for (let i = 0; i < beats.length; i++) { const r = beats[i].getBoundingClientRect(); if (r.top <= mitte) k = i + clamp((mitte - r.top) / Math.max(1, r.height), 0, 0.999); }
+  return clamp(k, 0, beats.length - 1);
 }
 let lastBallX = 0;
 function scrollen() {
   const s0 = track.offsetHeight - innerHeight, n = beats.length;
-  beatPos = clamp((scrollY - s0) / beatH(), 0, n - 1);
-  const i = Math.min(n - 2, Math.floor(beatPos)), f = ease(clamp(beatPos - i, 0, 1));
-  pan = clamp(lerp(PAN[i], PAN[i + 1], f) + 0, 0, HP - vhU);
-  // Bei flachen Fenstern zeigt die Kamera weiter die Oberkante der Wand.
-  cam.setViewOffset(W, HP, 0, pan, W, vhU); cam.updateProjectionMatrix();
-  beats.forEach((b, k) => {
+  beatPos = hoch.matches ? beatPosFluss() : clamp((scrollY - s0) / beatH(), 0, n - 1);
+  const i = Math.min(n - 2, Math.floor(beatPos)), fr = clamp(beatPos - i, 0, 1);
+  // Im Hochformat wechselt die Kamera erst im letzten Drittel eines Bildes, damit jedes Kapitel auf seiner Wand bleibt.
+  const f = hoch.matches ? ease(clamp((fr - 0.66) / 0.34, 0, 1)) : ease(fr);
+  const P = hoch.matches ? PAN_H : PAN;
+  pan = clamp(lerp(P[i], P[i + 1], f), 0, HP - vhU);
+  xOff = hoch.matches ? clamp(lerp(XH[i], XH[i + 1], f), 0, W - CW) : 0;
+  cam.setViewOffset(W, HP, xOff, pan, CW, vhU); cam.updateProjectionMatrix();
+  if (!hoch.matches) beats.forEach((b, k) => {
     const d = beatPos - k, a = clamp(1 - Math.abs(d) * 1.7, 0, 1);
     b.style.opacity = a.toFixed(3); b.style.transform = `translateY(${(-d * 60).toFixed(1)}px)`; b.style.visibility = a > 0.01 ? 'visible' : 'hidden';
     b.toggleAttribute('data-aktiv', Math.abs(d) < 0.5);
@@ -237,7 +264,7 @@ function frame() {
 }
 
 // Menü: Die Kapitel sind Bilder, ein Anker springt zu seinem Bild.
-function zuBeat(k) { const s0 = track.offsetHeight - innerHeight; scrollTo({ top: s0 + k * beatH(), behavior: reduced.matches ? 'instant' : 'smooth' }); }
+function zuBeat(k) { const s0 = track.offsetHeight - innerHeight; const top = hoch.matches ? beats[k].getBoundingClientRect().top + scrollY - innerHeight * 0.08 : s0 + k * beatH(); scrollTo({ top, behavior: reduced.matches ? 'instant' : 'smooth' }); }
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a[href^="#"]'); if (!a) return;
   const ziel = document.getElementById(a.getAttribute('href').slice(1)); if (!ziel || !ziel.dataset.beat) return;
@@ -246,9 +273,10 @@ document.addEventListener('click', (e) => {
 
 Promise.all([fetch('fonts/shrikhand-welt.typeface.json').then((r) => r.json()), document.fonts?.ready]).then(([json]) => {
   font = new FontLoader().parse(json);
-  layout(); bauenBuehne(); scrollen(); titelSchritt(0, beatPos);
+  layout(); bauenBuehne(); titelPassen(); scrollen(); titelSchritt(0, beatPos);
   addEventListener('resize', () => { layout(); scrollen(); });
+  hoch.addEventListener('change', () => { layout(); beats.forEach((b) => { b.style.opacity = ''; b.style.transform = ''; b.style.visibility = ''; }); scrollen(); });
   requestAnimationFrame(frame);
   root.classList.add('welt-da');
-  if (new URLSearchParams(location.search).has('debug')) window.__welt = { scene, cam, renderer, gull, ball, titel, beats: beats.length, pan: () => pan, beat: () => beatPos, beatH, advance: (s) => { for (let k = 0; k < s * 60; k++) { titelSchritt(1 / 60, beatPos); gull?.update(1 / 60); } }, render: () => { scrollen(); renderer.render(scene, cam); } };
+  if (new URLSearchParams(location.search).has('debug')) window.__welt = { scene, cam, renderer, gull, ball, titel, beats: beats.length, pan: () => pan, beat: () => beatPos, beatH, beatTop: (k) => beats[k].getBoundingClientRect().top + scrollY, advance: (s) => { for (let k = 0; k < s * 60; k++) { titelSchritt(1 / 60, beatPos); gull?.update(1 / 60); } }, render: () => { scrollen(); renderer.render(scene, cam); } };
 }).catch((e) => console.error('Welt', e));

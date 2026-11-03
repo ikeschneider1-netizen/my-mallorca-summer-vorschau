@@ -78,3 +78,28 @@ html:not(.welt-da) .beat { position: relative; inset: auto; min-height: 60vh; pa
 html:not(.welt-da) .beat.hell { background: var(--terrasse); }
 html:not(.welt-da) canvas.welt { display: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* Handy (Hochformat): Die Bilder stehen untereinander als normale Seite über der Welt, die Kamera folgt dem Bild in der Mitte.
+   Eine Spalte, Schrift in festen Größen, viel Luft. Die 3D-Titel bekommen ein eigenes Bild mit Höhe. */
+@media (orientation: portrait) {
+  .welt-rest .lauf { display: none; }
+  .beat { position: relative; inset: auto; min-height: 0; padding: 12vh var(--rand) 10vh; opacity: 1 !important; visibility: visible !important; transform: none !important; font-size: 17px; line-height: 1.55; }
+  .beat:has(> .sr-only:only-child) { min-height: 78vh; }
+  .beat .etikett { font-size: 12px; letter-spacing: .12em; margin-bottom: .9em; }
+  .beat h3 { font-size: clamp(30px, 8.6vw, 38px); max-width: none; }
+  .beat p { max-width: none; }
+  .beat .gross { font-size: clamp(30px, 8.6vw, 38px); max-width: none; }
+  .beat .paar, .beat .drei, .beat .vier, .zeit, .stimmen, .wissen, .faq, .kontakt { grid-template-columns: 1fr; gap: 1.6em; max-width: none; }
+  .beat .paar h3, .beat .drei h3, .beat .vier h3 { font-size: clamp(26px, 7.4vw, 32px); }
+  .beat .drei p, .beat .vier p, .zeit p, .wissen, .faq p, .kontakt dl { font-size: 16px; }
+  .zeit b { font-size: 28px; }
+  .fotos { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .fotos figure { padding: 7px 7px 24px; } .fotos figcaption { font-size: 12px; }
+  .check { columns: 1; font-size: 16px; }
+  .beat .offen, .beat .klein { font-size: 13px; }
+  .stimmen blockquote { font-size: 16px; } .stimmen cite { font-size: 13px; }
+  .faq summary { font-size: 17px; }
+  .beat .nr { font-size: 34px; }
+  .beat .weiter.wa { font-size: clamp(30px, 8.4vw, 38px); }
+  .beat .nebenweg { font-size: 17px; }
+  .fuss { font-size: 14px; } .fuss nav a { margin-right: 1em; }
+}
