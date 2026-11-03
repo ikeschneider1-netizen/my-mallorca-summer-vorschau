@@ -30,7 +30,9 @@ canvas.welt { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; 
 .beat .vier p { font-size: calc(19 * var(--bp)); max-width: none; }
 .beat .nr { display: block; margin-bottom: .5em; font: 400 calc(44 * var(--bp)) / 1 Shrikhand, Georgia, serif; color: var(--terra); }
 /* Auf Terrakotta und Lagune: Text in Creme, Akzent in Sonne. */
-.beat.hell { color: var(--cream); } .beat.hell h3, .beat.hell .gross { color: var(--cream); } .beat.hell .etikett, .beat.hell .nr, .beat.hell .gross em { color: var(--sun); }
+.beat.hell { color: var(--cream); } .beat.hell h3, .beat.hell .gross { color: var(--cream); } .beat.hell .nr, .beat.hell .gross em { color: var(--sun); }
+/* Kleine Etiketten auf Terrakotta in dunkler Tinte: Sonnengelb hätte dort nur 1,3:1 Kontrast. */
+.beat.hell .etikett { color: #00232a; }
 .beat.hell .offen, .beat.hell .klein { color: rgba(255, 244, 223, .78); }
 .beat.hell .marker { background: linear-gradient(transparent 58%, rgba(255, 210, 31, .55) 58%); }
 /* Auf Terrakotta ist der Lauftext größer und kräftiger, damit Creme darauf sicher lesbar ist (große Schrift ab 24 px). */
