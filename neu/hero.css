@@ -191,8 +191,9 @@ a:focus-visible .ch::after { transform: rotateX(0); opacity: 1; transition: tran
   .past .menu-btn { right: calc(.74 * var(--sticker) + 18px); }
   .past .links { clip-path: circle(0 at calc(100% - .74 * var(--sticker) - 44px) 34px); }
   .past.menu-open .links { clip-path: circle(150vmax at calc(100% - .74 * var(--sticker) - 44px) 34px); }
-  .apply-desk { display: none; }
-  .apply-mob { display: block; font: inherit; font-size: .86em; line-height: 1.05; }
+  /* Auch am Handy steht „Per WhatsApp bewerben“ auf dem Aufkleber: sichtbarer Text = zugänglicher Name (WCAG 2.5.3). */
+  .apply-mob { display: none; }
+  .apply-desk { font-size: .58em; }
   .apply-in .wa-i { width: 1.05em; height: 1.05em; }
   .form-link { top: auto; right: auto; left: var(--m); bottom: calc(10px + var(--safe)); width: auto; min-height: 44px; display: inline-flex; align-items: center; padding: 0; text-align: left; font-size: clamp(15px, 4vw, 18px); }
   .hit { position: fixed; z-index: 20; top: auto; right: 12px; bottom: calc(var(--sticker) + 16px + var(--safe)); max-width: 74vw; white-space: normal; text-align: right; font-size: clamp(18px, 5vw, 26px); transform-origin: 100% 100%; }

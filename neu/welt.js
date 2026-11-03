@@ -16,6 +16,8 @@ const root = document.documentElement;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 // Hochformat: Die Welt zeigt einen Ausschnitt von CW Bühnenpunkten Breite (je Bild data-x), die Bilder laufen als normale Seite darüber.
 const hoch = matchMedia('(orientation: portrait)');
+// Fluss: Hochformat und flache Querformate (Handy quer) zeigen die Bilder als normale Seite statt als feste Leinwand.
+const fluss = matchMedia('(orientation: portrait), (max-height: 540px)');
 const CW_H = 520;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -221,7 +223,7 @@ function layout() {
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(w, h, false);
   CW = hoch.matches ? CW_H : W; vhU = h * CW / w;
   BALL = hoch.matches ? BALL_H : BALL_D; MOEWE = hoch.matches ? MOEWE_H : MOEWE_D;
-  root.classList.toggle('welt-hoch', hoch.matches);
+  root.classList.toggle('welt-hoch', hoch.matches); root.classList.toggle('welt-fluss', fluss.matches);
   if (font) titelPassen();
 }
 // Im Hochformat liegen die Bilder in der Seite: Das Bild in der Fenstermitte bestimmt die Kameralage.
@@ -233,15 +235,15 @@ function beatPosFluss() {
 let lastBallX = 0;
 function scrollen() {
   const s0 = track.offsetHeight - innerHeight, n = beats.length;
-  beatPos = hoch.matches ? beatPosFluss() : clamp((scrollY - s0) / beatH(), 0, n - 1);
+  beatPos = fluss.matches ? beatPosFluss() : clamp((scrollY - s0) / beatH(), 0, n - 1);
   const i = Math.min(n - 2, Math.floor(beatPos)), fr = clamp(beatPos - i, 0, 1);
   // Im Hochformat wechselt die Kamera erst im letzten Drittel eines Bildes, damit jedes Kapitel auf seiner Wand bleibt.
-  const f = hoch.matches ? ease(clamp((fr - 0.66) / 0.34, 0, 1)) : ease(fr);
+  const f = fluss.matches ? ease(clamp((fr - 0.66) / 0.34, 0, 1)) : ease(fr);
   const P = hoch.matches ? PAN_H : PAN;
   pan = clamp(lerp(P[i], P[i + 1], f), 0, HP - vhU);
   xOff = hoch.matches ? clamp(lerp(XH[i], XH[i + 1], f), 0, W - CW) : 0;
   cam.setViewOffset(W, HP, xOff, pan, CW, vhU); cam.updateProjectionMatrix();
-  if (!hoch.matches) beats.forEach((b, k) => {
+  if (!fluss.matches) beats.forEach((b, k) => {
     const d = beatPos - k, a = clamp(1 - Math.abs(d) * 1.7, 0, 1);
     b.style.opacity = a.toFixed(3); b.style.transform = `translateY(${(-d * 60).toFixed(1)}px)`; b.style.visibility = a > 0.01 ? 'visible' : 'hidden';
     b.toggleAttribute('data-aktiv', Math.abs(d) < 0.5);
@@ -271,7 +273,7 @@ function frame() {
 }
 
 // Menü: Die Kapitel sind Bilder, ein Anker springt zu seinem Bild.
-function zuBeat(k) { const s0 = track.offsetHeight - innerHeight; const top = hoch.matches ? beats[k].getBoundingClientRect().top + scrollY - innerHeight * 0.08 : s0 + k * beatH(); scrollTo({ top, behavior: reduced.matches ? 'instant' : 'smooth' }); }
+function zuBeat(k) { const s0 = track.offsetHeight - innerHeight; const top = fluss.matches ? beats[k].getBoundingClientRect().top + scrollY - innerHeight * 0.08 : s0 + k * beatH(); scrollTo({ top, behavior: reduced.matches ? 'instant' : 'smooth' }); }
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a[href^="#"]'); if (!a) return;
   const ziel = document.getElementById(a.getAttribute('href').slice(1)); if (!ziel || !ziel.dataset.beat) return;
@@ -282,7 +284,7 @@ Promise.all([fetch('fonts/shrikhand-welt.typeface.json').then((r) => r.json()), 
   font = new FontLoader().parse(json);
   layout(); bauenBuehne(); titelPassen(); scrollen(); titelSchritt(0, beatPos);
   addEventListener('resize', () => { layout(); scrollen(); });
-  hoch.addEventListener('change', () => { layout(); beats.forEach((b) => { b.style.opacity = ''; b.style.transform = ''; b.style.visibility = ''; }); scrollen(); });
+  for (const m of [hoch, fluss]) m.addEventListener('change', () => { layout(); beats.forEach((b) => { b.style.opacity = ''; b.style.transform = ''; b.style.visibility = ''; }); scrollen(); });
   requestAnimationFrame(frame);
   root.classList.add('welt-da');
   if (new URLSearchParams(location.search).has('debug')) window.__welt = { scene, cam, renderer, gull, ball, titel, beats: beats.length, pan: () => pan, beat: () => beatPos, beatH, beatTop: (k) => beats[k].getBoundingClientRect().top + scrollY, advance: (s) => { for (let k = 0; k < s * 60; k++) { titelSchritt(1 / 60, beatPos); gull?.update(1 / 60); } }, render: () => { scrollen(); renderer.render(scene, cam); } };
