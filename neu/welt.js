@@ -44,7 +44,7 @@ scene.add(fill, fill.target);
 // Die Kulisse: Terrasse oben, gelbe Terrasse unten (auf 900 Höhe gebracht, links beschnitten, damit der Ring rechts bleibt).
 const plateMat = new THREE.MeshBasicMaterial({ color: 0xf8e9d3, toneMapped: false });
 const bilder = (srcs) => Promise.all(srcs.map((s) => new Promise((ok, nein) => new THREE.ImageLoader().load(s, ok, undefined, nein))));
-bilder(['../assets/scene/terrace.png', '../assets/scene/closing-background.png']).then(([t, g]) => {
+bilder(['../assets/scene/terrace.webp', '../assets/scene/closing-background.webp']).then(([t, g]) => {
   const c = document.createElement('canvas'); c.width = W; c.height = HP; const k = c.getContext('2d');
   k.drawImage(t, 0, 0, t.width, t.height, 0, 0, W, HT);
   const sc = HG / g.height, gw = g.width * sc, links = gw - W;
@@ -109,7 +109,7 @@ function titelStellen(beat, zeilen, { size = 150, depth = 22, front = CREAM, sid
 function titelSchritt(dt, beatPos) {
   for (const T of titel) {
     const soll = Math.abs(beatPos - T.beat) < 0.55;
-    if (soll !== T.da) { T.da = soll; T.t = 0; if (soll) { let n = 0; for (const g of T.gruppen) for (const b of g.userData.own) { b.y = 560 + n * 7; b.v = 0; n++; } } }
+    if (soll !== T.da) { T.da = soll; T.t = 0; if (soll) { let n = 0; for (const g of T.gruppen) for (const b of g.userData.own) { b.y = 560 + n * 7; b.v = 0; n++; } moeweErschrickt(); } }
     T.t += dt;
     let n = 0, fertig = true;
     for (const g of T.gruppen) {
@@ -133,6 +133,13 @@ function titelSchritt(dt, beatPos) {
   }
 }
 
+// Wenn ein Titel auf den Boden kracht, zuckt die Möwe zusammen, flattert kurz und setzt sich wieder: ihr kleiner Moment je Kapitel.
+function moeweErschrickt() {
+  const g = window.gsap; if (!g || !gull || !sitzend || reduced.matches) return;
+  g.killTweensOf(gull.pose);
+  g.timeline().to(gull.pose, { wide: 1, brow: 0.9, lid: 0, fold: 0.3, flapAmp: 1, flapRate: 18, tuck: 0.7, crest: 0.6, headYaw: -0.2, duration: 0.12, delay: 0.55 })
+    .to(gull.pose, { wide: 0, brow: -0.4, lid: 0.56, fold: 1, flapAmp: 0, tuck: 0, crest: 0, headYaw: -0.8, headPitch: 0.1, duration: 0.6, ease: 'power2.out' }, 1.1);
+}
 // Der Ball wie im Hero: die Felder sitzen im Material.
 function ballMaterial() {
   const col = (h) => { const c = new THREE.Color(h); return new THREE.Vector3(c.r, c.g, c.b); };

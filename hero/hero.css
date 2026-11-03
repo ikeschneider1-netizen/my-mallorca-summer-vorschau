@@ -108,8 +108,8 @@ a:focus-visible .ch::after { transform: rotateX(0); opacity: 1; transition: tran
 .kicker { font-size: clamp(14px, 1.08vw, 17px); font-weight: 800; white-space: nowrap; }
 /* Nach der Landung liegt die Terrasse hinter dem Kopf: dunkle Schrift mit hellem Lichtschein, damit sie auch über den Palmblättern lesbar bleibt.
    Weiches Petrol statt des vollen, das in Shrikhand zu schwer wirkt. */
-.past .lead, .past .menu-btn { color: var(--petrol-weich); text-shadow: 0 0 14px rgb(255, 246, 230), 0 0 6px rgba(255, 246, 230, .95), 0 0 2px rgb(255, 246, 230); transition: color 300ms ease; }
-@media (orientation: landscape) and (min-height: 541px) { .past .links { --flip: var(--plum); color: var(--petrol-weich); text-shadow: -.022em .022em 0 #2a5763, 0 0 12px rgba(255, 246, 230, .95), 0 0 3px rgba(255, 246, 230, .9); } }
+.past .lead, .past .menu-btn { color: #2c5a66; text-shadow: 0 0 14px rgb(255, 246, 230), 0 0 6px rgba(255, 246, 230, .95), 0 0 2px rgb(255, 246, 230); transition: color 300ms ease; }
+@media (orientation: landscape) and (min-height: 541px) { .past .links { --flip: var(--plum); color: #2c5a66; text-shadow: -.022em .022em 0 #1d3f48, 0 0 10px rgba(255, 246, 230, .7), 0 0 2px rgba(255, 246, 230, .6); } }
 /* „Job entdecken“ ist der nächste Schritt: plastisch wie der Spruch, Creme mit Sandkante, dahinter ein warmer Schein. */
 .discover { --flip: var(--sun); position: relative; display: inline-flex; align-items: center; flex: none; gap: 12px; margin-left: auto; font: 400 clamp(18px, 1.75vw, 27px)/1 Shrikhand, Georgia, serif; padding: 6px 0; text-shadow: -.025em .03em 0 #d9b585, 0 2px 14px rgba(70, 12, 0, .6); }
 .discover img { width: 1.35em; height: 1.35em; filter: drop-shadow(0 3px 4px rgba(60, 0, 0, .45)); animation: nudge 3.4s var(--key) infinite; }
