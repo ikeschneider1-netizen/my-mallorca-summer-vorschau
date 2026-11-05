@@ -1,0 +1,1257 @@
+/* Seitenlayout. Handy zuerst; 768 (Tablet) und ab 1024 das 12-Spalten-Raster der Desktop-Vorlage. */
+
+/* ---------- Kopfleiste: ohne Balken, ohne Linie, scrollt mit ---------- */
+.kopf {
+  position: relative;
+  z-index: 58;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  padding: 18px var(--rand) 6px;
+}
+.logo {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: 900 clamp(19px, 2.05vw, 29px)/1 var(--f-knopf);
+  letter-spacing: -.035em;
+  text-decoration: none;
+}
+.nav ul { display: flex; flex-wrap: wrap; gap: 0 4px; }
+.nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 10px;
+  font: 700 clamp(15px, 1.2vw, 17px)/1 var(--f-mono);
+  text-decoration: none;
+  isolation: isolate;
+}
+/* Gold-Hinterlegung wie ein aufgeklebter Schnipsel */
+.nav a::before, .menue-liste a::before {
+  content: '';
+  position: absolute;
+  inset: 6px 0;
+  z-index: -1;
+  background: var(--gold);
+  clip-path: var(--k-chip);
+  rotate: var(--rot, -1.5deg);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .12s steps(3, jump-end);
+}
+@media (hover: hover) {
+  .nav a:hover::before, .menue-liste a:hover::before { transform: scaleX(1); }
+}
+.nav a:active::before, .nav a[aria-current="true"]::before,
+.menue-liste a:active::before, .menue-liste a[aria-current="true"]::before { transform: scaleX(1); }
+
+/* Ohne JS bleibt die Navigation am Handy als Zeile sichtbar; mit JS übernimmt das Menü. */
+.menue-knopf { display: none; }
+.js .menue-knopf {
+  position: fixed;
+  top: 12px;
+  right: var(--rand);
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  min-width: 96px;
+  min-height: 54px;
+  padding: 6px 10px 8px;
+  isolation: isolate;
+  rotate: 2deg;
+}
+.js .menue-knopf::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--gold);
+  clip-path: var(--k-menue);
+}
+.menue-knopf .rw { font-size: 26px; }
+.menue-knopf .rp { padding: .08em .08em .02em; }
+
+/* Menü als Zettel am gelben Tape (Ike, 05.11.2026): Die Kapitel hängen als Papierstreifen in den Kapitelfarben
+   unter dem Menü-Schnipsel, die Seite bleibt dahinter sichtbar. Kein Vollbild, kein Hintergrund. */
+.menue {
+  position: fixed;
+  top: 52px;
+  right: calc(var(--rand) - 14px);
+  z-index: 55;
+  width: min(340px, calc(100vw - var(--rand) * 2 + 28px));
+  max-height: calc(100dvh - 60px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 10px 14px 26px;
+  background: none;
+  pointer-events: none; /* Lücken zwischen den Zetteln gehören zur Seite: Tippen dort schließt das Menü */
+}
+.menue a { pointer-events: auto; }
+.menue[hidden] { display: none; }
+.menue nav { display: grid; justify-items: end; }
+.menue-liste { display: grid; justify-items: end; gap: 6px; margin: 0; }
+.menue-liste li {
+  --f: var(--papier); --t: var(--schwarz); --k: var(--k-karte-1); --r: -1.5deg; --x: 0px;
+  transform-origin: 85% 0;
+  filter: drop-shadow(5px 6px 0 rgba(17, 17, 17, .82));
+}
+.menue-liste li:nth-child(1) { --i: 0; --f: var(--aprikose); --k: var(--k-karte-1); --r: -2.2deg; --x: -4px; }
+.menue-liste li:nth-child(2) { --i: 1; --f: var(--papier); --k: var(--k-karte-2); --r: 1.6deg; --x: -22px; }
+.menue-liste li:nth-child(3) { --i: 2; --f: var(--gold); --k: var(--k-karte-3); --r: -1deg; --x: 2px; }
+.menue-liste li:nth-child(4) { --i: 3; --f: var(--lagune); --k: var(--k-karte-4); --r: 2.4deg; --x: -14px; }
+.menue-liste li:nth-child(5) { --i: 4; --f: var(--magenta); --t: var(--papier); --k: var(--k-karte-2); --r: -1.8deg; --x: -2px; }
+.menue-liste li:nth-child(6) { --i: 5; --f: var(--schwarz); --t: var(--papier); --k: var(--k-karte-3); --r: 1.2deg; --x: -26px; }
+.menue-liste a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 46px; /* Ike, 05.11.2026: „ein Tick kleiner“; Tippfläche bleibt über 44 px */
+  padding: 7px 20px 5px 16px;
+  font: 900 clamp(20px, 5.4vw, 24px)/1.05 var(--f-knopf);
+  letter-spacing: -.02em;
+  text-decoration: none;
+  color: var(--t);
+  background: var(--f);
+  clip-path: var(--k);
+  rotate: var(--r);
+  translate: var(--x) 0;
+  transition: translate .12s steps(2, jump-end), rotate .12s steps(2, jump-end);
+}
+.menue-liste a::before { display: none; } /* kein Gold-Schnipsel: der Zettel selbst ist die Fläche */
+/* Aktives Kapitel: Zettel ein Stück herausgezogen */
+.menue-liste a[aria-current="true"] { translate: calc(var(--x) - 14px) 0; rotate: 0deg; }
+@media (hover: hover) {
+  .menue-liste a:hover { translate: calc(var(--x) - 8px) -2px; rotate: calc(var(--r) * -.5); }
+}
+
+@media (max-width: 1023px) {
+  .js .nav { display: none; }
+  .nav { width: 100%; }
+  .nav ul { margin-left: -10px; }
+}
+/* Platz für den festen Menü-Schnipsel oben rechts */
+@media (max-width: 1023px) {
+  .js .kopf { padding-right: calc(var(--rand) + 112px); }
+}
+@media (min-width: 1024px) {
+  .kopf { flex-wrap: nowrap; padding-top: 14px; padding-bottom: 2px; }
+  .js .menue-knopf { opacity: 0; visibility: hidden; transform: translateY(-14px); transition: opacity .15s steps(2, jump-end), transform .15s steps(2, jump-end), visibility 0s .15s; }
+  .js .menue-knopf.zeigen, .js .menue-knopf[aria-expanded="true"] { opacity: 1; visibility: visible; transform: none; transition: opacity .15s steps(2, jump-end), transform .15s steps(2, jump-end); }
+}
+
+/* ---------- Hero ---------- */
+.hero { position: relative; padding: 0 var(--rand); }
+.hero-oben { position: relative; z-index: 3; padding-top: 12px; }
+/* Deckend nur, solange es beim Riss angeheftet ist (Text rutscht darunter weg) */
+.hero-oben.gepinnt { background: var(--papier); }
+.hero .dachzeile { margin: 10px 0 18px; }
+.hero-titel { margin-bottom: 26px; }
+.hero-titel .label-1 { margin: 0 0 4px 6px; }
+/* Wörter als Ganzes gekippt, Zeilen greifen ineinander */
+.hero-titel .zeile { transform-origin: 0 60%; }
+.z-werde { margin: 0 0 -.12em .06em; rotate: -3deg; }
+/* „Promoter“ liegt oben: „Playa“ greift darunter, verdeckt das Wort aber nicht */
+.z-promoter { margin-left: -.06em; rotate: 1.5deg; position: relative; z-index: 3; }
+.z-playa { margin: -.06em 0 0 .3em; rotate: -2.5deg; position: relative; z-index: 2; }
+.z-playa .label-2 { margin-right: .2em; vertical-align: .9em; }
+.z-palma { margin: -.04em 0 0 .4em; rotate: 1.5deg; }
+/* Treppe nach rechts, am Handy nur angedeutet ("Promoter" füllt dort schon die Breite) */
+@media (max-width: 1023px) {
+  .z-playa { margin-left: 6vw; margin-top: calc(var(--fs-xxl) * .1); }
+  .z-palma { margin-left: 11vw; }
+}
+.collage { position: relative; margin: 0 calc(-1 * var(--rand)); }
+.collage-rahmen { position: relative; clip-path: var(--k-collage-m); }
+.collage-foto { width: 100%; height: auto; }
+.tape-foto { width: 128px; height: 36px; left: 4px; top: -6px; rotate: -24deg; clip-path: var(--k-tape-3); }
+.tape-foto-2 { display: none; }
+.riss-rand { position: absolute; left: calc(-1 * var(--rand)); right: calc(-1 * var(--rand)); top: 100%; opacity: 0; }
+
+.hero-unten { position: relative; z-index: 1; padding: 22px 0 40px; }
+.hero-unten .aktionen { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.hero-text { display: flex; flex-direction: column; gap: 26px; }
+/* Am Handy steht der Knopf direkt unter der Collage, dann folgen Text und Fakten (Vorlage mobil). */
+.hero-text .aktionen { order: -1; }
+.lead { max-width: 62ch; }
+.hero-fakten { margin-top: 26px; display: grid; justify-items: start; align-content: start; gap: 8px; }
+/* Vertrauensleiste als Bildunterschrift: Papierstreifen unter dem Foto */
+.vertrauen {
+  padding: .6em .95em .55em;
+  background: var(--weiss);
+  clip-path: var(--k-feld);
+  rotate: -1deg;
+  font: 700 var(--fs-mono)/1.55 var(--f-mono);
+}
+.hero-fakten .warn { padding: .45em .85em .4em; background: var(--weiss); clip-path: var(--k-feld); rotate: .8deg; }
+
+.riss-statisch { position: relative; z-index: 4; margin-bottom: -32px; }
+
+@media (min-width: 768px) {
+  .hero-text .aktionen { order: 0; flex-direction: row; align-items: center; gap: 28px; flex-wrap: wrap; }
+}
+
+@media (min-width: 1024px) {
+  .hero-oben, .hero-unten {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gasse);
+  }
+  .hero-oben { padding-top: 0; padding-bottom: 14px; align-items: start; }
+  .hero .dachzeile { grid-column: 1 / 8; grid-row: 1; margin: 22px 0 6px; }
+  /* Slogan als Treppe nach rechts. „Promoter“ wächst, bis sein Ende den Fotorand gerade berührt (Ike: Mund unten links bleibt frei).
+     --foto-b rechnet die Breite des Fotos genau wie .collage-rahmen: halbe Breite, auf flachen Bildschirmen schmaler.
+     --foto-x = linker Fotorand. Teiler = Wortbreite je Schriftgröße (gemessen: Promoter 5,9 · de Palma. 5,3). */
+  .hero-oben { container-type: inline-size; }
+  .hero-titel {
+    grid-column: 1 / 13; grid-row: 2; margin: 0; position: relative; z-index: 2;
+    --stufe: clamp(32px, 4.4cqw, 100px);
+    --foto-b: min(50cqw - var(--gasse) / 2 + 8px, (100vh - 330px) * 1.3371);
+    --foto-x: calc(100cqw + 8px - var(--foto-b));
+    --fs-xxl: min(clamp(84px, 20vh, 210px), (var(--foto-x) + 2px - var(--stufe)) / 5.95);
+    --fs-m: clamp(50px, min(6cqw, 11vh), 104px);
+    /* „de Palma.“ endet vor dem Foto, damit der Mund frei bleibt */
+    --fs-l: max(56px, min(clamp(64px, min(8cqw, 13.2vh), 140px), (var(--foto-x) - 28px - 4.2 * var(--stufe)) / 5.3));
+  }
+  .hero-titel .z-promoter { width: max-content; margin-left: var(--stufe); }
+  .z-werde { margin-bottom: -.2em; }
+  .z-playa { margin: calc(var(--fs-xxl) * .13) 0 0 calc(2.7 * var(--stufe)); }
+  .z-palma { margin: -.1em 0 0 calc(4.2 * var(--stufe)); }
+  .hero .dachzeile { margin-bottom: 0; }
+  /* Foto als aufgeklebtes Bild: ganz sichtbar, leicht gedreht, mit Schatten, zwei Tapes und Luft zur Navigation */
+  .collage {
+    grid-column: 7 / 13;
+    grid-row: 1 / span 2;
+    margin: 30px -8px 0 0;
+    rotate: -2deg;
+    filter: drop-shadow(var(--schatten-plakat));
+  }
+  /* Nie beschneiden: Auf niedrigen Bildschirmen wird die Collage kleiner, das Seitenverhältnis bleibt. */
+  .collage-rahmen { clip-path: var(--k-collage-d); width: min(100%, calc((100vh - 330px) * 1.3371)); margin-left: auto; }
+  .tape-foto { width: 156px; height: 40px; left: -34px; top: -8px; rotate: -32deg; }
+  .tape-foto-2 { display: block; width: 140px; height: 38px; right: -30px; bottom: 4px; rotate: -30deg; clip-path: var(--k-tape-1); }
+  .hero-unten { padding: 16px 0 64px; }
+  .hero-text { gap: 18px; }
+  .lead { line-height: 1.46; }
+  .hero-text { grid-column: 1 / 7; }
+  /* Knopf direkt unter den Slogan (wie am Handy), damit er auch mit großem Slogan im ersten Bild bleibt */
+  .hero-text .aktionen { gap: 40px; order: -1; }
+  .hero-fakten { grid-column: 7 / 13; margin: -4px 0 0; padding-left: clamp(12px, 2vw, 32px); position: relative; z-index: 2; }
+}
+
+/* ---------- Kapitel 01 ---------- */
+.kapitel { position: relative; z-index: 2; }
+.seite-links { position: relative; padding: 56px var(--rand) 40px; }
+.job-titel { margin: 18px 0 26px -.04em; }
+.z-blick { margin: -.04em 0 0 .1em; }
+.z-blick .label-3 { margin-right: .3em; vertical-align: .9em; font-size: clamp(16px, 1.6vw, 24px); }
+.job-intro { max-width: 46ch; font-size: clamp(18px, 1.6vw, 23px); line-height: 1.45; }
+.hafen { display: none; }
+.seite-rechts { position: relative; padding: 52px var(--rand) 64px; background: var(--weiss); clip-path: var(--k-zacken-oben-m); }
+.fakten { display: grid; gap: 30px; }
+.fakten dt { font: 900 clamp(18px, 1.5vw, 21px)/1.2 var(--f-knopf); letter-spacing: -.02em; margin-bottom: 8px; }
+.fakten dd { font-size: clamp(17px, 1.3vw, 18.5px); line-height: 1.55; }
+.fakten .warn { margin-top: 8px; }
+
+@media (min-width: 768px) {
+  .fakten { grid-template-columns: 1fr 1fr; column-gap: 40px; }
+  .seite-rechts { clip-path: var(--k-zacken-oben-d); }
+}
+@media (min-width: 1024px) {
+  .kapitel {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gasse);
+    padding: 0 var(--rand);
+    min-height: 100vh;
+  }
+  .seite-links {
+    grid-column: 1 / 7;
+    margin-left: calc(-1 * var(--rand));
+    padding: 72px 0 0 var(--rand);
+    display: flex;
+    flex-direction: column;
+  }
+  .job-titel { margin: 28px 0 40px -.05em; }
+  .hafen {
+    display: block;
+    position: relative;
+    margin: auto 0 0 calc(-1 * var(--rand));
+    padding-top: 36px;
+    width: calc(100% + var(--rand) - 40px);
+  }
+  .hafen img { width: 100%; height: auto; clip-path: var(--k-zacken-oben-d); mix-blend-mode: multiply; }
+  .seite-rechts {
+    grid-column: 7 / 13;
+    margin: 0 calc(-1 * var(--rand)) 0 calc(-1 * var(--gasse));
+    padding: 80px var(--rand) 80px clamp(40px, 4.4vw, 64px);
+    clip-path: var(--k-blatt-d);
+  }
+  .fakten { grid-template-rows: repeat(4, auto); grid-auto-flow: column; column-gap: clamp(28px, 3.2vw, 46px); row-gap: 34px; align-content: start; }
+}
+
+/* ---------- Clip (Zwischenspiel) ---------- */
+.zwischenspiel { position: relative; z-index: 2; padding: 64px var(--rand) 56px; }
+.clip { max-width: 1344px; margin: 0 auto; }
+.clip-rahmen { position: relative; margin: 0 calc(-1 * var(--rand) + 10px); rotate: -.8deg; filter: none; }
+.clip-blatt { position: relative; clip-path: var(--k-collage-m); background: var(--papier); }
+.clip-video { width: 100%; height: auto; aspect-ratio: 9 / 16; object-fit: cover; background: var(--papier); }
+.clip-link { position: absolute; display: none; left: 5%; width: 76%; top: 87%; height: 8%; }
+.clip-fertig .clip-link { display: block; }
+.clip-link:focus-visible { outline-offset: -3px; }
+.tape-clip-1 { width: 130px; height: 34px; left: 8px; top: -10px; rotate: -28deg; clip-path: var(--k-tape-4); z-index: 3; }
+.tape-clip-2 { width: 130px; height: 34px; right: 8px; top: -8px; rotate: 24deg; clip-path: var(--k-tape-1); z-index: 3; }
+.clip-knopf {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  color: var(--papier);
+  isolation: isolate;
+}
+.clip-knopf::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--schwarz); clip-path: var(--k-knopf-icon); }
+.clip-knopf svg { width: 22px; height: 22px; }
+.clip-knopf[hidden] { display: none; }
+.clip figcaption { margin-top: 22px; }
+
+@media (min-width: 768px) {
+  .clip-rahmen { margin: 0; }
+  .clip-video { aspect-ratio: 16 / 9; }
+  .clip-blatt { clip-path: var(--k-collage-d); }
+  .clip-link { left: 4.7%; width: 33%; top: 75%; height: 12.5%; }
+  .tape-clip-1 { width: 170px; height: 42px; left: -14px; top: 6px; }
+  .tape-clip-2 { width: 170px; height: 42px; right: -14px; top: 10px; }
+  .clip-knopf { left: 22px; bottom: 22px; width: 58px; height: 58px; }
+}
+@media (min-width: 1024px) {
+  .zwischenspiel { padding: 104px var(--rand) 88px; }
+}
+
+/* ---------- Mitlaufender Knopf (Handy und Tablet, vom Hero bis vor den Ablauf) ----------
+   Fest am unteren Rand. Sichtbar, solange der große grüne Knopf im Hero nicht zu sehen ist: so ist auf kleinen
+   Bildschirmen (360 × 740, iPhone SE, Tablet hochkant) schon beim Ankommen ein Bewerben-Knopf da. Nie zwei Grüne
+   gleichzeitig (js/seite.js). Versteckt ist er auch für Tastatur und Screenreader weg (visibility). */
+.sticky-wa { display: none; }
+@media (max-width: 1023px) {
+  .sticky-wa {
+    position: fixed; left: 0; right: 0;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index: 30;
+    display: block;
+    padding: 0 var(--rand);
+    pointer-events: none;
+    transition: transform .2s steps(3, jump-end), opacity .2s steps(3, jump-end), visibility 0s;
+  }
+  .sticky-wa .knopf-halter { pointer-events: auto; }
+  .sticky-wa.weg { transform: translateY(140%); opacity: 0; visibility: hidden; transition: transform .2s steps(3, jump-end), opacity .2s steps(3, jump-end), visibility 0s .2s; }
+  .sticky-wa.weg .knopf-halter { pointer-events: none; }
+  .knopf-klein { font-size: 20px; padding: 8px 30px 8px 8px; }
+  .knopf-klein .knopf-ico-feld { width: 2.3em; height: 2.3em; }
+  .tape-sticky { width: 82px; height: 26px; right: -30px; top: -8px; rotate: 30deg; clip-path: var(--k-tape-4); }
+}
+/* ohne JS: kein fester Knopf über dem Inhalt (der Hero-Knopf und alle anderen bleiben) */
+html:not(.js) .sticky-wa { display: none; }
+
+/* ---------- Ablauf ---------- */
+.ablauf { position: relative; z-index: 2; padding: 72px var(--rand) 88px; background: var(--papier); }
+.ablauf-titel { margin: 16px 0 24px -.04em; }
+.z-deine { margin: -.12em 0 -.04em .08em; }
+.chips { display: none; }
+@media (min-width: 1024px) {
+  /* Fortschritt nur, wenn der Ablauf angeheftet ist (Desktop) */
+  .js .chips { display: flex; gap: 8px; margin-bottom: 28px; }
+}
+.chips li {
+  display: grid;
+  place-items: center;
+  min-width: 42px;
+  height: 30px;
+  padding: 0 8px;
+  font: 700 14px/1 var(--f-mono);
+  background: var(--weiss);
+  clip-path: var(--k-chip);
+}
+.chips li.an { background: var(--schwarz); color: var(--weiss); }
+.karten { display: grid; gap: 34px; margin-top: 18px; }
+.karte { position: relative; filter: drop-shadow(var(--schatten-sticker)); }
+.karte-blatt { position: relative; padding: 30px 26px 30px; background: var(--weiss); }
+.karte-1 { rotate: -2deg; } .karte-1 .karte-blatt { clip-path: var(--k-karte-1); }
+.karte-2 { rotate: 2.4deg; } .karte-2 .karte-blatt { clip-path: var(--k-karte-2); background: var(--gold); }
+.karte-3 { rotate: -1.4deg; } .karte-3 .karte-blatt { clip-path: var(--k-karte-3); }
+.karte-4 { rotate: 1.8deg; } .karte-4 .karte-blatt { clip-path: var(--k-karte-4); background: var(--ultramarin); color: var(--papier); }
+.karte-nr {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 44px;
+  margin-bottom: 14px;
+  padding: 0 8px;
+  font: 400 28px/1 'Bungee', sans-serif;
+  background: var(--gold);
+  color: var(--schwarz);
+  clip-path: var(--k-chip);
+  rotate: -4deg;
+}
+.karte-2 .karte-nr, .karte-4 .karte-nr { background: var(--schwarz); color: var(--weiss); }
+.karte h3 { font: 900 clamp(21px, 1.75vw, 26px)/1.1 var(--f-knopf); letter-spacing: -.025em; margin-bottom: 12px; }
+.karte p { font-size: 16.5px; line-height: 1.5; }
+.karte .warn { margin-top: 12px; font-size: 14.5px; }
+.karte-2 .platzhalter { background: var(--papier); }
+.tape-karte { width: 96px; height: 28px; top: -12px; left: 50%; translate: -50% 0; rotate: -4deg; clip-path: var(--k-tape-2); }
+.karte-2 .tape-karte { background: var(--weiss); rotate: 5deg; }
+.ablauf-aktion { margin-top: 48px; }
+.ablauf-aktion .knopf-text { max-width: 12.5em; }
+
+@media (min-width: 768px) {
+  .karten { grid-template-columns: 1fr 1fr; gap: 36px 30px; }
+}
+@media (min-width: 1024px) {
+  .ablauf {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: var(--gasse);
+    align-content: start;
+    min-height: 100vh;
+    padding-top: clamp(48px, 7vh, 80px);
+    padding-bottom: 56px;
+  }
+  .ablauf > .kapitelnr, .ablauf-titel, .chips, .ablauf-aktion { grid-column: 1 / 6; }
+  .ablauf > .kapitelnr { grid-row: 1; }
+  .ablauf-titel { grid-row: 2; margin-bottom: 30px; }
+  .js .chips { grid-row: 3; }
+  .ablauf-aktion { grid-row: 4; align-self: start; margin-top: 36px; }
+  .karten { grid-column: 6 / 13; grid-row: 1 / span 4; align-self: center; margin: 0; gap: clamp(24px, 4vh, 40px) clamp(22px, 2.2vw, 34px); }
+  .karte-blatt { padding: clamp(22px, 2.6vh, 30px) 24px; }
+  .karte p { font-size: clamp(15.5px, 1.15vw, 16.5px); }
+}
+
+/* ---------- Team-Galerie: Halftone + Zackenschere (Komponente design/entwurf-8/galerie, von Ike abgenommen) ---------- */
+.galerie { position: relative; z-index: 2; padding: 72px var(--rand) 104px; }
+.galerie-titel { margin-bottom: 44px; }
+.galerie-titel .zeile + .zeile { margin-top: -.06em; }
+.galerie-titel .label-2 { vertical-align: .9em; margin-left: .2em; }
+.galerie .ht-gallery { --ht-cols: 2; --ht-gap: 22px 16px; }
+@media (min-width: 768px) {
+  .galerie .ht-gallery { --ht-cols: 3; --ht-gap: 34px 26px; }
+}
+@media (min-width: 1024px) {
+  .galerie { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gasse); padding-top: 96px; }
+  .galerie-titel { grid-column: 1 / 5; align-self: start; position: sticky; top: 96px; }
+  .galerie .ht-gallery { grid-column: 5 / 13; --ht-gap: 44px 30px; padding-top: 12px; }
+  .galerie .ht-card:nth-child(3n+2) { --dy: 48px; }
+  .galerie .ht-card:nth-child(3n) { --dy: 16px; }
+}
+
+/* ---------- Carson-Probe: Ablauf auf Ultramarin (Typo als Bild, Video-Fragmente, gebrochenes Raster) ---------- */
+/* Farbe der Carson-Fläche über Variablen; Varianten: .carson-schwarz (Standard), .carson-aprikose, .carson-gold */
+.ablauf.carson {
+  --c-grund: var(--schwarz); --c-text: var(--papier); --c-nr: var(--gold); --c-riesen: var(--gold);
+  --c-k4-grund: var(--aprikose); --c-k4-text: var(--text); --c-mix: screen; --c-wort: var(--papier);
+}
+.ablauf.carson.carson-aprikose { --c-grund: var(--aprikose); --c-text: var(--text); --c-nr: var(--schwarz); --c-riesen: var(--schwarz); --c-k4-grund: var(--schwarz); --c-k4-text: var(--papier); --c-mix: multiply; --c-wort: var(--schwarz); }
+.ablauf.carson.carson-gold { --c-grund: var(--gold); --c-text: var(--text); --c-nr: var(--schwarz); --c-riesen: var(--schwarz); --c-k4-grund: var(--schwarz); --c-k4-text: var(--papier); --c-mix: multiply; --c-wort: var(--schwarz); }
+.ablauf.carson.carson-gold .karte-2 .karte-blatt { background: var(--aprikose); }
+.ablauf.carson { background: var(--c-grund); color: var(--c-text); overflow: hidden; clip-path: var(--k-blatt-ou-m); padding-top: 96px; padding-bottom: 110px; }
+.carson > :not(.carson-lagen):not(.reflex):not(.lagen) { position: relative; z-index: 1; }
+/* Tonerkanten wie schief kopiert */
+.ablauf.carson::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(90deg, rgba(0, 0, 0, .38), transparent 7%, transparent 93%, rgba(0, 0, 0, .3)); }
+.carson-lagen { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.riesen-nr::before, .riesen-wort::before { content: attr(data-text); display: block; white-space: nowrap; }
+.riesen-nr { position: absolute; left: -3vw; bottom: -9vh; font: 900 clamp(220px, 46vh, 520px)/.8 var(--f-knopf); letter-spacing: -.06em; color: var(--c-riesen); }
+.riesen-wort { position: absolute; color: var(--c-wort); opacity: .09; }
+.riesen-wort.w1 { right: -12vh; top: 50%; font: 400 clamp(120px, 26vh, 300px)/.8 'Anton', sans-serif; rotate: -90deg; translate: 0 -50%; transform-origin: center; }
+.riesen-wort.w2 { left: 34%; top: -4vh; font: 400 clamp(140px, 30vh, 340px)/.8 'Ultra', serif; opacity: .07; rotate: -6deg; }
+.fragment { display: none; }
+.carson .kapitelnr { color: var(--c-nr); }
+.carson .ablauf-titel { rotate: -4deg; transform-origin: 0 0; margin-bottom: 34px; }
+.carson .ablauf-titel .label-1 { vertical-align: 1.2em; margin-right: .1em; }
+.carson .ablauf-titel .z-deine { margin: -.5em 0 -.15em 2.2em; }
+.carson .karte-4 .karte-blatt { background: var(--c-k4-grund); }
+.carson .schnipsel-himmel { display: none !important; }
+.carson .chips li { background: var(--papier); }
+.carson .chips li.an { background: var(--gold); color: var(--schwarz); }
+.carson .lose { color: var(--text); }
+
+@media (min-width: 1024px) {
+  .ablauf.carson { clip-path: var(--k-blatt-ou-d); padding-top: clamp(64px, 9vh, 96px); }
+  .fragment {
+    display: block;
+    position: absolute;
+    overflow: hidden;
+    background: var(--c-grund);
+    clip-path: var(--k-karte-3);
+  }
+  .fragment video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scale(2.4);
+    filter: grayscale(1) contrast(1.7) brightness(1.05);
+    mix-blend-mode: var(--c-mix);
+    opacity: .85;
+  }
+  /* Halftone aus js/scroll.js: Punkte statt Video, das Video spult unsichtbar darunter */
+  .fragment-ht { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: var(--c-mix); opacity: .9; }
+  .fragment.als-raster video { opacity: 0; }
+  .fragment.f1 { left: 29%; top: 6vh; width: 15vw; height: 58vh; rotate: 3deg; }
+  .fragment.f1 video { object-position: 64% 50%; }
+  .fragment.f2 { right: 3%; bottom: 5vh; width: 21vw; height: 22vh; rotate: -4deg; }
+  .fragment.f2 video { object-position: 78% 40%; transform: scale(1.9); }
+  .carson .karten { gap: 18px 0; }
+  .carson .karte-1 { rotate: -4deg; }
+  .carson .karte-2 { rotate: 5deg; margin: 34px 0 0 -18px; }
+  .carson .karte-3 { rotate: -2.5deg; margin-top: -14px; }
+  .carson .karte-4 { rotate: 4deg; margin: 20px 0 0 -18px; }
+}
+/* Helle Karten und Chips behalten dunkle Schrift (Kontrast), nur Karte 4 auf Schwarz ist hell */
+.carson .karte-1 .karte-blatt, .carson .karte-2 .karte-blatt, .carson .karte-3 .karte-blatt, .carson .chips li { color: var(--text); }
+.carson .karte-4 .karte-blatt { color: var(--c-k4-text); }
+.carson .karte-4 :focus-visible { outline-color: var(--c-k4-text); }
+.ablauf.carson.carson-gold .chips li.an { background: var(--schwarz); color: var(--papier); }
+
+/* ---------- Eine Farbe pro Kapitel (Hero bleibt Papier wie in der Vorlage) ---------- */
+/* Tapes, Kapitelnummer und Hintergrund-Typo passen sich an, damit nichts in der Fläche untergeht. */
+.flaeche { --tape: var(--gold); --lw-farbe: var(--text); }
+.f-aprikose { background: var(--aprikose); --c-nr: var(--schwarz); }
+.f-schwarz { background: var(--schwarz); color: var(--papier); --lw-farbe: var(--papier); }
+.f-magenta { background: var(--magenta); color: var(--papier); --lw-farbe: var(--schwarz); }
+.ablauf.carson.carson-gold { --tape: var(--schwarz); }
+.flaeche .kapitelnr { color: var(--c-nr, var(--ultramarin)); }
+.f-aprikose .job-titel .rl, .f-schwarz .rl, .f-magenta .rl, .carson .ablauf-titel .rl { filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, .78)); }
+.f-magenta .ht-gallery { --ht-tape: var(--gold); }
+.f-schwarz .clip-rahmen { filter: none; }
+/* Inhalt liegt über Reflex und Typo */
+.kapitel > .seite-links, .kapitel > .seite-rechts { z-index: 1; }
+.galerie > .galerie-titel, .galerie > .ht-gallery { position: relative; z-index: 1; }
+@media (min-width: 1024px) { .galerie > .galerie-titel { position: sticky; } }
+/* Farbblätter greifen mit Zackenkanten ineinander */
+.zwischenspiel, .galerie { clip-path: var(--k-zacken-oben-m); margin-top: -9px; }
+.ablauf.carson { clip-path: var(--k-zacken-oben-m); margin-top: -9px; }
+@media (min-width: 768px) {
+  .zwischenspiel, .galerie, .ablauf.carson { clip-path: var(--k-zacken-oben-d); margin-top: -12px; }
+}
+/* Helle Etiketten auf dunklen Flächen behalten dunkle Schrift */
+.flaeche .clip figcaption .dachzeile { color: var(--text); }
+
+/* ---------- Schluss „Lust auf die Saison 2027?“ (Lagune: führt zum Formular, das auch Lagune ist) ---------- */
+.f-lagune { background: var(--lagune); color: var(--text); --c-nr: var(--schwarz); --tape: var(--schwarz); --lw-farbe: var(--schwarz); }
+.schluss { position: relative; z-index: 2; padding: 76px var(--rand) 100px; clip-path: var(--k-zacken-oben-m); margin-top: -9px; overflow: hidden; }
+.schluss > .schluss-titel, .schluss > .schluss-rechts { position: relative; z-index: 1; }
+.schluss-titel { margin-bottom: 30px; }
+.schluss-titel .label-1 { vertical-align: .9em; margin-left: .2em; }
+.schluss-titel .z-saison { margin: -.04em 0 0 .5em; }
+.schluss-titel .z-jahr { margin: -.06em 0 0 1.6em; }
+.schluss-text { max-width: 44ch; margin-bottom: 30px; }
+.schluss .aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 22px 40px; }
+/* Grün auf Lagune braucht eine Kante: harter Schatten wie ein aufgeklebter Sticker */
+.knopf-halter { filter: drop-shadow(var(--schatten-sticker)); }
+.f-schwarz .knopf-halter, .dunkel .knopf-halter { filter: none; }
+@media (min-width: 1024px) {
+  .schluss { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gasse); align-items: end; padding: 120px var(--rand) 140px; clip-path: var(--k-zacken-oben-d); margin-top: -12px; }
+  .schluss-titel { grid-column: 1 / 8; margin: 0; }
+  .schluss-rechts { grid-column: 8 / 13; padding-bottom: 12px; }
+}
+
+/* ---------- Footer: schwarzer Streifen mit Zackenkante, Riesenwort im Hintergrund ---------- */
+.fuss { position: relative; z-index: 2; overflow: hidden; background: var(--schwarz); color: var(--papier); padding: 64px var(--rand) 30px; clip-path: var(--k-zacken-oben-m); margin-top: -9px; --lw-farbe: var(--papier); }
+.fuss > .fuss-raster, .fuss > .fuss-unten { position: relative; z-index: 1; }
+.fuss-raster { display: grid; gap: 30px; }
+.fuss .fuss-logo { color: var(--papier); font-size: clamp(22px, 2.4vw, 32px); }
+.fuss-kurz { max-width: 42ch; margin: 10px 0 12px; }
+.fuss ul { list-style: none; margin: 0; padding: 0; }
+.fuss li a {
+  display: inline-flex; align-items: center; min-height: 44px; min-width: 44px;
+  color: var(--papier); font: 700 var(--fs-mono)/1.3 var(--f-mono);
+  text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px;
+}
+.fuss li a:hover { color: var(--gold); }
+.fuss-unten { display: flex; flex-wrap: wrap; gap: 6px 32px; margin-top: 40px; font: 700 var(--fs-mono)/1.5 var(--f-mono); }
+.fuss-unten .platzhalter { color: var(--text); }
+@media (min-width: 768px) {
+  .fuss-raster { grid-template-columns: 1.5fr 1fr 1.3fr; column-gap: var(--gasse); }
+}
+@media (min-width: 1024px) {
+  .fuss { padding: 96px var(--rand) 36px; clip-path: var(--k-zacken-oben-d); margin-top: -12px; }
+}
+
+/* ---------- 404 „Hier ist nur Sand.“ ---------- */
+.seite-404-blatt { position: relative; z-index: 1; padding-bottom: 80px; }
+.aktionen-404 { display: flex; flex-wrap: wrap; align-items: center; gap: 22px 32px; margin: 26px 0 30px; }
+.knopf-start { min-height: 54px; }
+.knopf-start .knopf-text { white-space: nowrap; }
+/* Ohne Schimmer-Band darüber: Titel nicht nach oben ziehen; alles in einer Spalte links, die 404 im Hintergrund bleibt frei */
+.seite-404-blatt .unter-titel { margin-top: 28px; }
+@media (min-width: 1024px) {
+  .seite-404-blatt .unter-titel { margin-top: 56px; }
+  .seite-404-blatt .aktionen-404, .seite-404-blatt .links-404 { grid-column: 1 / 9; }
+}
+.links-404 { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 26px; }
+.links-404 a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; font: 700 var(--fs-mono)/1.3 var(--f-mono); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; }
+
+/* ---------- Menü-Schnipsel weicht beim Runterscrollen aus (verdeckte Text), beim Hochscrollen ist er sofort da ---------- */
+@media (max-width: 1023px) {
+  .js .menue-knopf { transition: transform .15s steps(2, jump-end), opacity .15s steps(2, jump-end); }
+}
+.js .menue-knopf.versteckt:not([aria-expanded="true"]):not(:focus-visible) { transform: translateY(-170%); opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .js .menue-knopf { transition: none !important; } }
+
+/* =====================================================================
+   AD-Runde (Carson): Collagen auf die Bühne, Kanten-Dramaturgie, Druck statt Bildschirm, Schmutz
+   ===================================================================== */
+
+/* ---------- Kanten: vier Typen statt elfmal Zackenschere ---------- */
+/* Galerie: abgerissenes Papier · Schluss: Schnitt gegen die Richtung · Plakatwand: Schnitt mit Versatz · Footer: Klebeband-Naht */
+.galerie { clip-path: var(--k-riss-oben-m); margin-top: -12px; }
+.schluss { clip-path: var(--k-schnitt-gegen-m); margin-top: -20px; }
+.fuss { clip-path: none; margin-top: 0; overflow: visible; }
+.fuss .naht { top: -17px; height: 34px; width: clamp(90px, 13vw, 190px); z-index: 3; }
+.fuss .naht-1 { left: 9%; rotate: -4deg; clip-path: var(--k-tape-2); }
+.fuss .naht-2 { left: 46%; rotate: 3deg; clip-path: var(--k-tape-3); }
+.fuss .naht-3 { right: 8%; rotate: -2deg; clip-path: var(--k-tape-4); }
+@media (min-width: 1024px) {
+  .galerie { clip-path: var(--k-riss-oben-d); margin-top: -18px; }
+  .schluss { clip-path: var(--k-schnitt-gegen-d); margin-top: -34px; }
+}
+
+/* ---------- Collagen als Plakate ---------- */
+.plakat { position: relative; z-index: 2; margin: 0; pointer-events: none; }
+.plakat img { display: block; width: 100%; height: auto; }
+.plakat picture { display: block; }
+.tape-plakat { left: 33%; top: -14px; width: 34%; height: 32px; rotate: -5deg; clip-path: var(--k-tape-1); }
+/* AFTER HOURS im Nachtkapitel: Magenta auf Schwarz, schräg, läuft über den Rand (auf Schwarz kein Schatten) */
+.plakat-nacht { width: 62vw; margin: 34px -4vw 26px auto; rotate: 5deg; }
+.plakat-nacht img { clip-path: var(--k-karte-2); }
+/* ADRIFT im Schluss: „Find your people“ als letztes Bild */
+.plakat-schluss { width: 70vw; margin: 6px -4vw 30px auto; rotate: -4deg; filter: drop-shadow(var(--schatten-plakat)); }
+.plakat-schluss img { clip-path: var(--k-karte-3); }
+@media (min-width: 1024px) {
+  .zwischenspiel { position: relative; }
+  .plakat-nacht { position: absolute; right: -2.5vw; top: 7%; width: min(24vw, 360px); margin: 0; rotate: 6deg; }
+  .plakat-schluss { position: absolute; left: 39%; top: 10%; width: min(23vw, 340px); margin: 0; }
+  .schluss-titel { grid-column: 1 / 7; }
+  .schluss-rechts { grid-column: 9 / 13; }
+}
+
+/* ---------- Plakatwand: SUNSTRUCK, zerrissen, als Belohnung nach Schritt 4 ---------- */
+.plakatwand { position: relative; z-index: 3; overflow: hidden; background: var(--papier); padding: 84px var(--rand) 104px; clip-path: var(--k-schnitt-oben-m); margin-top: -22px; }
+.plakat-riss { position: relative; z-index: 1; width: min(86vw, 520px); margin: 0 auto; rotate: -2deg; }
+.riss-haelfte { display: block; filter: drop-shadow(var(--schatten-plakat)); }
+.riss-haelfte img { display: block; width: 100%; height: auto; }
+.riss-r { position: absolute; inset: 0; }
+.riss-l img { clip-path: var(--k-riss-plakat-l); }
+.riss-r img { clip-path: var(--k-riss-plakat-r); }
+/* Endzustand: zusammengeklebt, der Riss bleibt als feine Kante sichtbar. Das Zusammengehen macht js/scroll.js */
+.riss-l { transform: translate(-0.6%, 0.2%) rotate(-0.6deg); }
+.riss-r { transform: translate(0.6%, -0.3%) rotate(0.5deg); }
+.tape-riss-1 { left: 4%; top: -16px; width: 32%; height: 34px; rotate: -9deg; clip-path: var(--k-tape-2); }
+.tape-riss-2 { right: 2%; bottom: 7%; width: 28%; height: 32px; rotate: 26deg; clip-path: var(--k-tape-4); }
+@media (min-width: 1024px) {
+  .plakatwand { clip-path: var(--k-schnitt-oben-d); margin-top: -38px; padding: 120px var(--rand) 150px; }
+  .plakat-riss { width: min(36vw, 540px); margin-left: 26%; }
+}
+
+/* ---------- Galerie: Album-Raster brechen, ein Bild groß ---------- */
+.galerie .ht-card:nth-child(1) { grid-column: 1 / -1; }
+@media (min-width: 1024px) {
+  .galerie .ht-card:nth-child(1) { grid-column: span 2; grid-row: span 2; --rot: -2deg; }
+}
+
+/* ---------- Hero: unscharfe Geisterkopie der Collage dahinter (scharf gegen unscharf), nur Desktop ---------- */
+@media (min-width: 1024px) {
+  .hero-oben::before {
+    content: ''; position: relative; z-index: 0;
+    grid-column: 7 / 13; grid-row: 1 / span 2; align-self: center;
+    aspect-ratio: 1436 / 1074; margin: 0 -5vw 0 -1vw;
+    /* winzige eigene Fassung (260 px, 22 KB): bei 18 px Unschärfe sieht niemand den Unterschied. Vorher lud hier
+       team-m.avif ein zweites Mal parallel zum Foto (114 KB). */
+    background: url(../img/team-geist.webp) center / cover no-repeat;
+    background-image: image-set(url(../img/team-geist.avif) type('image/avif'), url(../img/team-geist.webp) type('image/webp'));
+    filter: blur(18px) saturate(1.2); opacity: .34;
+    transform: rotate(5deg) scale(1.08) translate(4%, 5%);
+    pointer-events: none;
+  }
+  .collage { z-index: 1; }
+}
+
+/* ---------- Kapitel 01: pro Faktenblock ein Wort groß (Text unverändert) ---------- */
+.fakten .gross {
+  display: inline-block; padding: 0 .16em; margin: 0 .04em;
+  font: 400 1.32em/1.05 'Anton', var(--f-text); letter-spacing: .01em;
+  background: var(--gold); color: var(--text); rotate: -1.5deg;
+  clip-path: var(--k-label-2);
+}
+.fakten dd:nth-of-type(2n) .gross { rotate: 1.2deg; }
+
+/* ---------- Schmutz: Kopierer-Staub, Kratzer, Tonerflecken über den Flächen (unter dem Inhalt) ---------- */
+.lagen::after, .carson-lagen::after {
+  content: ''; position: absolute; inset: 0;
+  background: url(../img/schmutz.webp) 0 0 / 820px auto repeat;
+  mix-blend-mode: multiply; opacity: .6;
+}
+.f-schwarz .lagen::after, .fuss .lagen::after { filter: invert(1); mix-blend-mode: screen; opacity: .32; }
+
+/* ---------- Typografisches Zwischenspiel (Runde A): ein Satz aus dem Text riesig quer über die Kapitelkante ---------- */
+.zwischenzeile { position: relative; z-index: 6; margin: -46px 0 -58px; padding: 0 var(--rand); pointer-events: none; rotate: -3deg; transform-origin: 30% 50%; }
+.zwischenzeile .zeile { display: block; }
+.zwischenzeile .rw.xl { font-size: clamp(46px, 12.5vw, 150px); }
+.zwischenzeile .rw.xxl { font-size: clamp(60px, 15vw, 196px); }
+.zwischenzeile .z-nicht { margin: -.12em 0 0 14vw; }
+.zwischenzeile .label-1 { vertical-align: .9em; margin-right: .25em; }
+.zwischenzeile .rl { filter: drop-shadow(3px 4px 0 rgba(17, 17, 17, .85)); }
+@media (min-width: 1024px) {
+  .zwischenzeile { margin: -96px 0 -78px; padding-left: 8vw; }
+  .zwischenzeile .z-nicht { margin-left: 30vw; }
+}
+/* Schmale Desktops: die Fakten reichen bis an die Kante, darum weniger weit hinein */
+@media (min-width: 1024px) and (max-width: 1279px) { .zwischenzeile { margin-top: -26px; } }
+
+/* Fetzen, die nur auf breiten Bildschirmen freien Platz haben */
+@media (max-width: 1399px) { .lb.nur-breit { display: none; } }
+
+/* =====================================================================
+   Design-Runde (vor B): Kritzeleien, Druckmarken, Tape-Sorten, Filmstreifen, Überdrucken,
+   Fehldruck-Versatz, Halftone-Übergänge, große Kapitelnummern, kleine Markenmomente
+   ===================================================================== */
+
+/* ---------- 1 Kritzeleien mit Marker (nur Zeichen, keine Wörter; Bewegung kommt in Runde B) ---------- */
+.kritzel-ziel { position: relative; }
+span.kritzel-ziel { display: inline-block; white-space: nowrap; }
+.kritzel { position: absolute; pointer-events: none; overflow: visible; fill: none; stroke: var(--kritzel, var(--magenta)); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.kritzel path { vector-effect: non-scaling-stroke; }
+.kritzel-kreis { left: -13%; top: -30%; width: 128%; height: 166%; rotate: -2deg; }
+.kritzel-strich { left: -2%; bottom: -14px; width: 92%; height: 14px; --kritzel: var(--gold); }
+.schluss .aktionen { position: relative; }
+.kritzel-pfeil { display: none; --kritzel: var(--schwarz); }
+@media (min-width: 1024px) {
+  .kritzel-pfeil { display: block; left: -118px; top: -58px; width: 112px; height: 72px; rotate: 6deg; }
+}
+
+/* ---------- 2 Druckmarken: Schnittmarken an den Ecken, Passkreuz, Farbbalken wie auf dem Druckbogen ---------- */
+.druckbogen {
+  --dm: rgba(17, 17, 17, .55);
+  position: absolute; inset: 44px 12px 12px; z-index: 0; pointer-events: none;
+  background:
+    linear-gradient(var(--dm), var(--dm)) left 0 top 9px / 20px 1px no-repeat,
+    linear-gradient(var(--dm), var(--dm)) left 9px top 0 / 1px 20px no-repeat,
+    linear-gradient(var(--dm), var(--dm)) right 0 top 9px / 20px 1px no-repeat,
+    linear-gradient(var(--dm), var(--dm)) right 9px top 0 / 1px 20px no-repeat,
+    linear-gradient(var(--dm), var(--dm)) left 0 bottom 9px / 20px 1px no-repeat,
+    linear-gradient(var(--dm), var(--dm)) left 9px bottom 0 / 1px 20px no-repeat,
+    linear-gradient(var(--dm), var(--dm)) right 0 bottom 9px / 20px 1px no-repeat,
+    linear-gradient(var(--dm), var(--dm)) right 9px bottom 0 / 1px 20px no-repeat;
+}
+.druckbogen::before {
+  content: ''; position: absolute; right: 44px; top: -2px; width: 22px; height: 22px; opacity: .8;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22' fill='none' stroke='%23111' stroke-width='1.2'%3E%3Ccircle cx='11' cy='11' r='6'/%3E%3Cpath d='M11 0v22M0 11h22'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.druckbogen::after {
+  content: ''; position: absolute; left: 44px; bottom: 3px; width: 92px; height: 9px; opacity: .85;
+  background: linear-gradient(90deg, var(--lagune) 0 25%, var(--magenta) 25% 50%, var(--gold) 50% 75%, var(--schwarz) 75%);
+}
+@media (max-width: 767px) { .druckbogen { inset: 30px 6px 6px; } .druckbogen::after { left: 30px; width: 64px; } }
+
+/* ---------- 3 Tape-Sorten und 5 Überdrucken: Tapes und Fetzen mischen sich mit dem Untergrund ---------- */
+.tape, .ht-card__tape { mix-blend-mode: multiply; }
+.f-schwarz .tape, .fuss .tape, .tape.klar, .tape.gaffa, .tape.krepp, .carson-gold .tape { mix-blend-mode: normal; }
+.tape.krepp {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 50%),
+    repeating-linear-gradient(90deg, rgba(17, 17, 17, .06) 0 1px, transparent 1px 4px), #ebdfbf;
+  opacity: .94;
+}
+.tape.gaffa, .carson-gold .tape {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 45%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .06) 0 1px, transparent 1px 3px), #1c1c1c;
+}
+.tape.klar {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .58), rgba(255, 255, 255, .2) 60%, rgba(255, 255, 255, .36)),
+    url(../img/schmutz.webp) 0 0 / 240px;
+  opacity: .82;
+}
+.lb { mix-blend-mode: multiply; }
+.f-schwarz .lb, .fuss .lb { mix-blend-mode: normal; }
+
+/* ---------- 4 Filmstreifen am Clip: Perforation oben und unten, Bildnummern ---------- */
+.film {
+  position: absolute; left: 0; right: 0; z-index: 3; height: 18px; pointer-events: none;
+  background: repeating-linear-gradient(90deg, transparent 0 8px, rgba(255, 244, 223, .9) 8px 17px, transparent 17px 26px) center / 100% 7px no-repeat, #111;
+}
+.film-oben { top: 0; }
+.film-unten { bottom: 0; }
+.film-unten::after {
+  content: '12A \25B8   13 \25B8   13A \25B8'; position: absolute; right: 18px; top: 50%; translate: 0 -50%;
+  padding: 0 6px; background: #111; color: var(--gold); font: 700 10px/1 var(--f-mono); letter-spacing: .08em; white-space: pre;
+}
+@media (min-width: 1024px) { .film { height: 22px; background-size: 100% 9px, auto; } }
+
+/* ---------- 6 Fehldruck-Versatz: zweiter, verrutschter Abdruck in der Akzentfarbe hinter jeder großen Überschrift ---------- */
+.hero-titel .rl { filter: drop-shadow(-3px -2px 0 rgba(30, 200, 208, .9)); }
+.f-aprikose .job-titel .rl { filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, .78)) drop-shadow(-4px -2px 0 var(--lagune)); }
+.carson .ablauf-titel .rl { filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, .78)) drop-shadow(-4px -2px 0 var(--magenta)); }
+.f-magenta .galerie-titel .rl { filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, .78)) drop-shadow(-4px -2px 0 var(--gold)); }
+.schluss-titel .rl { filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, .78)) drop-shadow(-4px -2px 0 var(--magenta)); }
+.zwischenzeile .rl { filter: drop-shadow(3px 4px 0 rgba(17, 17, 17, .85)) drop-shadow(-5px -3px 0 var(--lagune)); }
+
+/* ---------- 7 Halftone-Übergänge: die Farbe des vorigen Kapitels zerfällt in Punkte ---------- */
+.halbton-band {
+  position: absolute; left: 0; right: 0; top: 0; z-index: 0; height: clamp(80px, 11vw, 170px); pointer-events: none;
+  background: var(--hb);
+  -webkit-mask: url(../img/halbton-verlauf.webp) 0 0 / auto 100% repeat-x;
+  mask: url(../img/halbton-verlauf.webp) 0 0 / auto 100% repeat-x;
+}
+.ablauf .halbton-band { top: 8px; }
+
+/* ---------- 8 Große Kapitelnummern: Kontur mit Rasterfüllung, angeschnitten, die Überschrift greift drüber ---------- */
+.kapitel .kapitelnr, .ablauf .kapitelnr {
+  position: relative; z-index: 0;
+  font-size: clamp(96px, 15vw, 240px); line-height: .78; letter-spacing: -.02em;
+  color: transparent; -webkit-text-stroke: 2.5px var(--c-nr, var(--schwarz));
+  background: radial-gradient(circle, var(--c-nr, var(--schwarz)) 32%, transparent 35%) 0 0 / 7px 7px;
+  -webkit-background-clip: text; background-clip: text;
+  margin: 0 0 -.4em -.05em;
+}
+.kapitel .job-titel, .ablauf .ablauf-titel { position: relative; z-index: 1; }
+
+/* ---------- 9 Kleine Markenmomente: Scrollleiste, Abheben beim Drüberfahren ---------- */
+html { scrollbar-color: var(--schwarz) var(--papier); }
+::-webkit-scrollbar { width: 11px; }
+::-webkit-scrollbar-track { background: var(--papier); }
+::-webkit-scrollbar-thumb { background: var(--schwarz); border: 2px solid var(--papier); }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); border-color: var(--schwarz); }
+@media (hover: hover) and (pointer: fine) {
+  .karte, .knopf-halter { transition: translate .14s steps(2, jump-end), filter .14s steps(2, jump-end); }
+  .karte:hover, .knopf-halter:hover { translate: -2px -3px; filter: drop-shadow(9px 11px 0 rgba(17, 17, 17, .88)); }
+  .f-schwarz .knopf-halter:hover, .dunkel .knopf-halter:hover { filter: none; }
+}
+@media (prefers-reduced-motion: reduce) { .karte, .knopf-halter { transition: none !important; } }
+
+/* Hero: Knopf steht über dem Text, sein Tape darf den Text nicht berühren */
+.hero-text .lead { margin-top: 16px; }
+/* Knopf-Tape ragt weniger weit heraus: berührt keine Nachbar-Links und keinen Text darunter */
+.knopf-halter .tape-knopf { width: 84px; height: 28px; right: -30px; bottom: -11px; rotate: -28deg; }
+
+/* =====================================================================
+   Design-Runde 2: Feintuning (1–6) und Ideen (7–14)
+   ===================================================================== */
+
+/* 1 Fehldruck variiert pro Buchstabe: manche Platte hängt, manche sitzt */
+.ransom-titel .rl, .zwischenzeile .rl { --fdx: -4px; --fdy: -2px; }
+.ransom-titel .rl:nth-child(3n+1), .zwischenzeile .rl:nth-child(3n+1) { --fdx: -2px; --fdy: -1px; }
+.ransom-titel .rl:nth-child(4n+2), .zwischenzeile .rl:nth-child(4n+2) { --fdx: -6px; --fdy: -3px; }
+.ransom-titel .rl:nth-child(5n+3), .zwischenzeile .rl:nth-child(5n+3) { --fdx: 0px; --fdy: 0px; }
+.ransom-titel .rl:nth-child(7n+4), .zwischenzeile .rl:nth-child(7n+4) { --fdx: 3px; --fdy: -4px; }
+.hero-titel .rl { filter: drop-shadow(var(--fdx) var(--fdy) 0 rgba(30, 200, 208, .9)); }
+.f-aprikose .job-titel .rl { filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, .78)) drop-shadow(var(--fdx) var(--fdy) 0 var(--lagune)); }
+.carson .ablauf-titel .rl { filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, .78)) drop-shadow(var(--fdx) var(--fdy) 0 var(--magenta)); }
+.f-magenta .galerie-titel .rl { filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, .78)) drop-shadow(var(--fdx) var(--fdy) 0 var(--gold)); }
+.schluss-titel .rl { filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, .78)) drop-shadow(var(--fdx) var(--fdy) 0 var(--magenta)); }
+.zwischenzeile .rl { filter: drop-shadow(3px 4px 0 rgba(17, 17, 17, .85)) drop-shadow(var(--fdx) var(--fdy) 0 var(--lagune)); }
+
+/* 2 Kapitelnummern: Raster fein oben, grob unten */
+.kapitel .kapitelnr, .ablauf .kapitelnr {
+  /* eine Punktlage (kein Gitter), oben läuft sie in die Grundfarbe aus: fein oben, satt unten */
+  background:
+    linear-gradient(180deg, var(--nr-grund) 0%, transparent 55%),
+    radial-gradient(circle, var(--c-nr, var(--schwarz)) 34%, transparent 38%) 0 0 / 10px 10px;
+  -webkit-background-clip: text; background-clip: text;
+}
+.kapitel .kapitelnr { --nr-grund: var(--aprikose); }
+.ablauf .kapitelnr { --nr-grund: var(--gold); }
+
+/* 3 Filmstreifen: eckige Perforation mit Luft */
+.film {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='18'%3E%3Crect x='5' y='4' width='15' height='10' rx='1.5' fill='%23fff4df' fill-opacity='.92'/%3E%3C/svg%3E") center / auto 100% repeat-x, #111;
+}
+@media (min-width: 1024px) { .film { background-size: auto 100%, auto; } }
+
+/* 4 Schmutz: je Fläche eigener Versatz und eigene Größe, damit sich kein Muster wiederholt */
+.hero .lagen::after { background-position: 12% 40%; background-size: 980px auto; }
+.kapitel .lagen::after { background-position: 63% 10%; background-size: 1100px auto; }
+.zwischenspiel .lagen::after { background-position: 30% 70%; background-size: 760px auto; }
+.carson-lagen::after { background-position: 80% 30%; background-size: 1240px auto; }
+.plakatwand .lagen::after { background-position: 45% 85%; background-size: 900px auto; }
+.galerie .lagen::after { background-position: 5% 55%; background-size: 1060px auto; }
+.schluss .lagen::after { background-position: 70% 20%; background-size: 840px auto; }
+.fuss .lagen::after { background-position: 25% 65%; background-size: 1180px auto; }
+.seite-unter .lagen::after { background-position: 38% 18%; background-size: 1020px auto; }
+
+/* 7 Buchstabe als Bildfenster */
+/* kleine Zuschnitte (240 px), ein Buchstabe braucht kein ganzes Foto; früher lud jeder Buchstabe das volle Teamfoto */
+.rp.p-foto { background: var(--foto, url(../img/buchstaben/strand.webp)) 50% 40% / cover; color: var(--papier); -webkit-text-stroke: .6px var(--schwarz); text-shadow: 1px 1px 0 var(--schwarz); }
+.hero-titel { --foto: image-set(url(../img/buchstaben/himmel.avif) type('image/avif'), url(../img/buchstaben/himmel.webp) type('image/webp')); }
+.job-titel { --foto: image-set(url(../img/buchstaben/palmen.avif) type('image/avif'), url(../img/buchstaben/palmen.webp) type('image/webp')); }
+.ablauf-titel { --foto: image-set(url(../img/buchstaben/sonnenuntergang.avif) type('image/avif'), url(../img/buchstaben/sonnenuntergang.webp) type('image/webp')); }
+.galerie-titel { --foto: image-set(url(../img/buchstaben/strand.avif) type('image/avif'), url(../img/buchstaben/strand.webp) type('image/webp')); }
+.schluss-titel { --foto: image-set(url(../img/buchstaben/hafen.avif) type('image/avif'), url(../img/buchstaben/hafen.webp) type('image/webp')); }
+
+/* 8 Durchgerissenes Fenster: durch das Papier scheint die Farbe des nächsten Kapitels */
+.riss-fenster {
+  position: absolute; z-index: 0; pointer-events: none;
+  background: var(--f);
+  box-shadow: inset 7px 9px 0 rgba(0, 0, 0, .38), inset -3px -4px 0 rgba(255, 244, 223, .12);
+  clip-path: polygon(3% 12%, 18% 2%, 36% 9%, 52% 0, 70% 7%, 88% 3%, 100% 18%, 94% 38%, 100% 58%, 92% 78%, 97% 96%, 78% 100%, 60% 92%, 42% 100%, 24% 94%, 8% 100%, 0 80%, 6% 60%, 0 38%);
+}
+.riss-fenster { display: none; }
+@media (min-width: 1024px) {
+  .riss-fenster { display: block; }
+  .fenster-wand { right: 9%; top: 13%; width: 13%; height: 24%; rotate: -5deg; }
+  .fenster-schluss { left: 5%; bottom: 1.5%; width: 12%; height: 15%; rotate: 7deg; }
+  .schluss .lw-chip { left: 86%; top: auto; bottom: 1%; font-size: min(8vw, 14vh); }
+}
+
+/* 9 Ticket-Abriss */
+.ticket { position: absolute; left: 36%; top: 56px; z-index: 3; display: flex; rotate: 9deg; filter: drop-shadow(var(--schatten-sticker)); pointer-events: none; }
+.ticket-stub {
+  display: flex; flex-direction: column; gap: 2px; padding: 8px 12px 8px 12px; background: var(--papier); color: var(--text);
+  font: 700 11px/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+  -webkit-mask: radial-gradient(circle at 100% 50%, transparent 7px, #000 7.5px); mask: radial-gradient(circle at 100% 50%, transparent 7px, #000 7.5px);
+}
+.ticket-jahr { font: 400 22px/1 'Anton', var(--f-text); letter-spacing: .04em; }
+.ticket-code {
+  width: 34px; background:
+    repeating-linear-gradient(90deg, var(--text) 0 2px, transparent 2px 4px, var(--text) 4px 5px, transparent 5px 8px, var(--text) 8px 11px, transparent 11px 12px) padding-box,
+    var(--papier);
+  border-left: 2px dashed rgba(17, 17, 17, .45); background-clip: padding-box, border-box;
+  -webkit-mask: radial-gradient(circle at 0 50%, transparent 7px, #000 7.5px); mask: radial-gradient(circle at 0 50%, transparent 7px, #000 7.5px);
+}
+@media (max-width: 1023px) { .ticket { display: none; } }
+@media (min-width: 1280px) { .ticket { left: 38%; top: 62px; } }
+
+/* 10 Heftklammern */
+.geheftet::after, .vertrauen::after, .klammer {
+  content: ''; position: absolute; width: 15px; height: 5px; z-index: 5;
+  background: linear-gradient(180deg, #8f8f8f, #e8e8e8 45%, #6c6c6c); box-shadow: 0 1px 0 rgba(17, 17, 17, .55);
+  border-left: 1px solid #5a5a5a; border-right: 1px solid #5a5a5a;
+}
+.karte-1.geheftet::after { left: 14px; top: -2px; rotate: -6deg; }
+.karte-3.geheftet::after { right: 18px; top: -2px; rotate: 4deg; }
+.vertrauen { position: relative; }
+.vertrauen::after { left: 10px; top: -2px; rotate: -3deg; }
+
+/* 11 Riesen-Fragezeichen als Schnipsel */
+.lw-chip::before { background: var(--papier); color: var(--schwarz); padding: .02em .12em 0; clip-path: var(--k-karte-2); filter: drop-shadow(var(--schatten-plakat)); }
+.lw-chip { opacity: var(--o); }
+
+/* 12 Kaffeering, einer pro Seite, nie auf Text */
+.hero .lagen::before, .seite-unter .lagen::before {
+  content: ''; position: absolute; width: 230px; height: 230px; pointer-events: none; opacity: .5;
+  background: radial-gradient(circle at 50% 50%, transparent 55%, rgba(110, 72, 22, .42) 57%, rgba(110, 72, 22, .18) 62%, rgba(110, 72, 22, .3) 66%, transparent 68%);
+  mix-blend-mode: multiply; rotate: 20deg; transform: scaleX(1.06);
+}
+.hero .lagen::before { left: 60%; top: 68%; }
+.seite-unter .lagen::before { left: 72%; top: 4%; }
+@media (max-width: 767px) { .hero .lagen::before, .seite-unter .lagen::before { display: none; } }
+
+/* 13 Bedrucktes Tape */
+.tape.bedruckt { overflow: hidden; }
+.tape.bedruckt::after {
+  content: attr(data-text) ' · ' attr(data-text); position: absolute; left: -8px; top: 50%; translate: 0 -50%;
+  font: 700 9px/1 var(--f-mono); letter-spacing: .14em; white-space: nowrap; color: rgba(17, 17, 17, .5);
+}
+.tape.gaffa.bedruckt::after { color: rgba(255, 244, 223, .5); }
+
+/* 14 Stempel „2027“: Magenta-Tinte, verwischt (Schmutz als Maske) */
+.stempel {
+  position: absolute; z-index: 4; padding: .08em .3em 0; border: 4px solid var(--magenta); color: var(--magenta);
+  font: 400 clamp(34px, 4vw, 58px)/1 'Anton', var(--f-text); letter-spacing: .06em;
+  rotate: -12deg; opacity: .82; mix-blend-mode: multiply; pointer-events: none;
+  filter: blur(.4px) contrast(1.15); /* Tinte läuft minimal aus */
+}
+.stempel::after { content: ''; position: absolute; inset: -4px; background: url(../img/schmutz.webp) 20% 30% / 260px; opacity: .9; mix-blend-mode: screen; filter: invert(1); }
+.plakat-riss .stempel { right: -34%; bottom: 4%; }
+@media (max-width: 1023px) { .plakat-riss .stempel { right: -6%; bottom: -34px; } }
+.stempel-danke { right: 6%; top: -18px; }
+
+/* =====================================================================
+   Runde B: Bewegung und Technik
+   ===================================================================== */
+
+/* ---------- Lenis (aus vendor/lenis, dist/lenis.css) ---------- */
+html.lenis, html.lenis body { height: auto; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* ---------- Tiefe: Riesenwörter und Fetzen laufen langsamer als der Inhalt ----------
+   Jede Ebene hängt an der Zeitachse ihres Kapitels (benannte view-timeline). So stört es nicht,
+   dass Kapitel mit overflow:hidden für den Browser eigene Scroll-Behälter sind.
+   Browser ohne Scroll-Zeitachsen zeigen die Ebenen einfach still. */
+@supports (view-timeline-name: --tiefe) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero, .kapitel, .zwischenspiel, .ablauf, .plakatwand, .galerie, .schluss, .fuss, .seite-unter, .zwischenzeile { view-timeline: --tiefe block; }
+    .lw, .riesen-wort { animation: tiefe-fern linear both; animation-timeline: --tiefe; animation-range: cover 0% cover 100%; }
+    .lb { animation: tiefe-mitte linear both; animation-timeline: --tiefe; animation-range: cover 0% cover 100%; }
+    .lw-chip { animation-name: tiefe-nah; }
+  }
+}
+@keyframes tiefe-fern { from { translate: 0 -11vh; } to { translate: 0 11vh; } }
+@keyframes tiefe-mitte { from { translate: 0 -3.5vh; } to { translate: 0 3.5vh; } }
+@keyframes tiefe-nah { from { translate: 0 5vh; } to { translate: 0 -5vh; } }
+
+/* ---------- Kritzeleien zeichnen sich (Marker-Strich läuft) ---------- */
+.js .kritzel path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .75s cubic-bezier(.35, .8, .25, 1) .12s; }
+.js .kritzel.gezeichnet path { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: reduce) { .js .kritzel path { stroke-dashoffset: 0; transition: none; } }
+
+/* ---------- Schere als Mauszeiger über ungeschnittenen Galerie-Fotos ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .ht-card:not(.is-pinned) {
+    cursor: url(../img/cursor-schere.png) 4 6, pointer;
+    cursor: image-set(url(../img/cursor-schere.png) 1x, url(../img/cursor-schere@2x.png) 2x) 4 6, pointer;
+  }
+}
+
+/* ---------- Clip als Loop: kleiner, wie ein aufgeklebter Bildschirm neben AFTER HOURS ---------- */
+@media (min-width: 1024px) {
+  .zwischenspiel .clip { max-width: none; width: 62%; margin: 0 0 0 3%; }
+  .plakat-nacht { right: 3vw; top: 12%; width: min(29vw, 430px); rotate: 5deg; }
+}
+
+/* =====================================================================
+   Runde B2: Seitenwechsel als Riss, Fortschritts-Tape, Glanz, Sticker-Ecke, Marker-Ring, Menü, Laufband, Überraschungen
+   ===================================================================== */
+
+/* ---------- Seitenwechsel als Riss (Cross-Document View Transition, Chrome/Edge; andere wechseln normal) ---------- */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) { animation: seite-reisst .62s steps(8, end) both; z-index: 2; transform-origin: 0 50%; }
+  ::view-transition-new(root) { animation: seite-kommt .62s steps(8, end) both; }
+}
+@keyframes seite-reisst {
+  0%   { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0); transform: none; }
+  18%  { clip-path: polygon(0 0, 112% 0, 108% 9%, 114% 18%, 106% 29%, 113% 41%, 105% 52%, 112% 63%, 106% 74%, 113% 86%, 108% 100%, 0 100%); transform: rotate(-.6deg); }
+  100% { clip-path: polygon(0 0, -4% 0, -8% 9%, -2% 18%, -10% 29%, -3% 41%, -11% 52%, -4% 63%, -10% 74%, -3% 86%, -8% 100%, 0 100%); transform: rotate(-3deg) translateY(4%); }
+}
+@keyframes seite-kommt { from { transform: scale(1.03); filter: brightness(.9); } to { transform: none; filter: none; } }
+
+/* ---------- Fortschritts-Tape am rechten Rand ---------- */
+.fortschritt {
+  position: fixed; top: 0; right: 0; z-index: 57; width: 10px; height: 100vh; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 40%, rgba(17, 17, 17, .06)), var(--gold);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), 50% 100%, 0 calc(100% - 7px));
+  transform-origin: 50% 0; transform: scaleY(0);
+}
+@supports (animation-timeline: scroll()) {
+  .fortschritt { animation: tape-waechst linear both; animation-timeline: scroll(root); }
+}
+@keyframes tape-waechst { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@media (max-width: 767px) { .fortschritt { width: 6px; } }
+
+/* (Fensterscheiben-Glanz beim Drüberfahren: gebaut und auf Ikes Wunsch wieder entfernt, 04.11.2026) */
+
+/* ---------- Sticker-Ecke: beim Drüberfahren löst sich eine Ecke ---------- */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .karte-blatt, .form-blatt, .plakat img { position: relative; }
+  .karte-blatt::before, .plakat-nacht::before, .plakat-schluss::before {
+    content: ''; position: absolute; right: 0; bottom: 0; z-index: 3; width: 0; height: 0; pointer-events: none;
+    background: linear-gradient(315deg, var(--papier) 0 48%, rgba(17, 17, 17, .28) 49%, #e9dfc4 52%, #f7efdd 100%);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    box-shadow: -6px -6px 0 rgba(17, 17, 17, .35);
+    transition: width .16s steps(3, jump-end), height .16s steps(3, jump-end);
+  }
+  .karte:hover .karte-blatt::before, .plakat-nacht:hover::before, .plakat-schluss:hover::before { width: 42px; height: 42px; }
+  .plakat { pointer-events: auto; } /* Plakate reagieren auf die Maus (Sticker-Ecke) */
+}
+
+/* ---------- Marker-Ring um das aktive Formularfeld ---------- */
+.feld, .wahl { position: relative; }
+@media (prefers-reduced-motion: no-preference) {
+  .feld:focus-within::after {
+    content: ''; position: absolute; inset: -8px -12px -6px -10px; z-index: 2; pointer-events: none;
+    border: 3px solid var(--magenta); border-radius: 46% 54% 49% 51% / 62% 41% 59% 38%;
+    rotate: -1.2deg; animation: ring-zieht .38s steps(5, end) both;
+  }
+}
+@keyframes ring-zieht { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+
+/* ---------- Menü: Zettel fallen nacheinander vom Tape herunter und schwingen kurz nach (Stop-Motion);
+   beim Schließen fliegen sie in umgekehrter Reihenfolge wieder hoch ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .menue.auf .menue-liste li { animation: zettel-faellt .34s steps(4, end) both; animation-delay: calc(var(--i, 0) * 55ms); }
+  .menue.zu .menue-liste li { animation: zettel-hoch .16s steps(2, end) both; animation-delay: calc((5 - var(--i, 0)) * 22ms); }
+}
+@keyframes zettel-faellt {
+  0%   { opacity: 0; transform: translateY(-64px) rotate(-7deg); }
+  45%  { opacity: 1; transform: translateY(6px) rotate(3deg); }
+  75%  { transform: translateY(-2px) rotate(-1.2deg); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes zettel-hoch { to { opacity: 0; transform: translateY(-56px) rotate(5deg); } }
+@keyframes schnipsel-rein { from { opacity: 0; transform: translate(-30px, -14px) rotate(-6deg); } to { opacity: 1; transform: none; } }
+
+/* ---------- Footer-Riesenwort läuft beim Scrollen seitlich ---------- */
+@supports (view-timeline-name: --tiefe) {
+  @media (prefers-reduced-motion: no-preference) { .fuss .lw { animation-name: laufband; } }
+}
+@keyframes laufband { from { translate: 10vw 0; } to { translate: -22vw 0; } }
+
+/* ---------- Überraschungen: Stempel neu, Blatt bebt, Ticket wackelt, Schere schnippt ---------- */
+.stempel { pointer-events: auto; cursor: pointer; }
+@media (prefers-reduced-motion: no-preference) {
+  .stempel.neu-gestempelt { animation: stempeln .22s steps(3, end) both; }
+  .bebt { animation: beben .24s steps(4, end); }
+  .ticket { pointer-events: auto; }
+  .ticket:hover { animation: wackeln .5s steps(6, end); }
+  .ht-card.schnipp .ht-card__frame { animation: schnippen .18s steps(2, end); }
+}
+@keyframes stempeln { from { transform: scale(2.1) rotate(-20deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes beben { 0% { translate: 0 0; } 25% { translate: -5px 3px; } 50% { translate: 4px -2px; } 75% { translate: -2px 1px; } 100% { translate: 0 0; } }
+@keyframes wackeln { 0%, 100% { rotate: 9deg; } 20% { rotate: 13deg; } 40% { rotate: 5deg; } 60% { rotate: 12deg; } 80% { rotate: 7deg; } }
+@keyframes schnippen { 0% { translate: 0 0; } 50% { translate: 3px -4px; } 100% { translate: 0 0; } }
+
+/* ---------- Easter Egg „Stempeln“ (js/stempel.js) ---------- */
+/* Nur auf der Bühne (Plakatwand bzw. Blatt mit dem Stempel) hängt der Stempel am Zeiger; außerhalb ist der Zeiger normal (05.11.2026) */
+.stempel-buehne, .stempel-buehne * { cursor: none; }
+.stempel-buehne a, .stempel-buehne button, .stempel-buehne input, .stempel-buehne select, .stempel-buehne textarea, .stempel-buehne label, .stempel-buehne summary { cursor: pointer; }
+.stempel-zeiger { transition: opacity .12s; }
+.stempel-zeiger.draussen { opacity: 0; }
+.stempel-zeiger {
+  position: fixed; left: 0; top: 0; z-index: 90; width: 188px; height: 132px; pointer-events: none;
+  transform: translate(-400px, -400px); transform-origin: 94px 69px; will-change: transform;
+}
+.stempel-zeiger svg { display: block; overflow: visible; }
+/* Drücken von oben gesehen: der Stempel geht weg vom Auge, der Schatten zieht sich zusammen */
+.stempel-zeiger .so-koerper, .stempel-zeiger .so-schatten { transform-origin: 100px 73px; }
+@media (prefers-reduced-motion: no-preference) {
+  .stempel-zeiger.drueckt .so-koerper { animation: stempel-runter .22s steps(3, end); }
+  .stempel-zeiger.drueckt .so-schatten { animation: schatten-eng .22s steps(3, end); }
+}
+@keyframes stempel-runter { 0% { transform: none; } 45% { transform: scale(.92); } 100% { transform: none; } }
+@keyframes schatten-eng { 0% { transform: none; opacity: 1; } 45% { transform: scale(.88); opacity: .25; } 100% { transform: none; opacity: 1; } }
+/* Weglegen-Knopf als Zettel an der Ecke des Kissens (gehört sichtbar zum Kissen, nicht zur Überschrift daneben); kein Rahmen */
+.stempel-weg {
+  position: fixed; left: 14px; bottom: 14px; z-index: 91; width: 44px; height: 44px; padding: 0;
+  background: var(--papier); color: var(--schwarz); border: 0; font: 700 20px/1 var(--f-mono); cursor: pointer;
+  clip-path: var(--k-chip); rotate: 8deg;
+}
+.stempel-weg:hover { background: var(--gold); }
+.stempel-kissen { filter: drop-shadow(5px 6px 0 rgba(17, 17, 17, .55)); }
+/* Abdruck auf Bildern: normal gedruckt statt multipliziert, mit hauchdünnem Papierrand, damit der Satz auf der Collage lesbar bleibt */
+.abdruck.auf-bild { mix-blend-mode: normal; filter: drop-shadow(0 0 1px rgba(255, 244, 223, .95)) drop-shadow(0 0 3px rgba(255, 244, 223, .55)); }
+/* Trocken: Pfeil vom Stempel zum Kissen, Kissen hüpft, Stempel schüttelt sich */
+.stempel-pfeil { position: fixed; inset: 0; z-index: 88; pointer-events: none; transition: opacity .35s; }
+.stempel-pfeil svg { display: block; overflow: visible; }
+.stempel-pfeil path { fill: none; stroke: var(--magenta); stroke-width: 5; stroke-linecap: butt; stroke-linejoin: miter; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.stempel-pfeil.weg { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .stempel-pfeil path { stroke-dashoffset: 1; animation: pfeil-zeichnet .32s steps(5, end) forwards; }
+  .stempel-pfeil path.spitze { animation-delay: .3s; }
+  .stempel-kissen.ruft { animation: kissen-ruft .6s steps(6, end); }
+  .stempel-zeiger.trocken .so-koerper { animation: stempel-trocken .3s steps(4, end); }
+  .stempel.lockt { animation: stempel-lockt .9s steps(8, end); }
+}
+@keyframes pfeil-zeichnet { to { stroke-dashoffset: 0; } }
+@keyframes kissen-ruft { 0%, 100% { translate: 0 0; rotate: 0deg; } 20% { translate: 0 -16px; rotate: -3deg; } 40% { translate: 0 0; } 60% { translate: 0 -8px; rotate: 2deg; } 80% { translate: 0 0; } }
+@keyframes stempel-trocken { 0%, 100% { transform: none; } 25% { transform: rotate(-5deg); } 75% { transform: rotate(4deg); } }
+/* „2027“ lockt einmal, wenn die Plakatwand fertig ist (Grunddrehung -12deg bleibt) */
+@keyframes stempel-lockt { 0%, 100% { rotate: -12deg; translate: 0 0; } 20% { rotate: -19deg; translate: -2px -6px; } 45% { rotate: -6deg; translate: 2px -3px; } 70% { rotate: -15deg; translate: 0 -1px; } }
+.abdruck {
+  position: absolute; z-index: 70; pointer-events: none;
+  width: 150px; height: 100px;
+  color: #b5126c; /* satte Stempeltinte, etwas dunkler als unser Magenta */
+  translate: -50% -50%; rotate: var(--dreh, 0deg);
+  opacity: var(--tinte, .8); mix-blend-mode: multiply;
+  -webkit-mask: linear-gradient(var(--fw, 120deg), #000 var(--fs, 55%), rgba(0, 0, 0, .6) 100%); mask: linear-gradient(var(--fw, 120deg), #000 var(--fs, 55%), rgba(0, 0, 0, .6) 100%);
+  transition: opacity .6s;
+}
+.abdruck svg { display: block; overflow: visible; }
+@media (max-width: 767px) { .abdruck { width: 138px; height: 92px; } }
+/* Rahmen und Kleintext verblassen bei wenig Tinte zuerst, der Satz bleibt kräftig (Abnutzung macht SVG-Filter je Gruppe) */
+.abdruck .ab-rahmen { opacity: var(--rahmen, 1); }
+.ht-card__frame .abdruck { z-index: 5; mix-blend-mode: multiply; width: 110px; height: 73px; }
+.f-schwarz .abdruck, .fuss .abdruck { mix-blend-mode: screen; color: #ff5fb6; border-color: #ff5fb6; }
+.f-magenta .abdruck { color: var(--schwarz); border-color: var(--schwarz); }
+.abdruck.verblasst { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .abdruck { animation: abdruck-klatsch .18s steps(3, end) both; }
+  .abdruck.satt { animation: abdruck-satt .16s steps(2, end); }
+}
+@keyframes abdruck-klatsch { from { scale: 1.6; opacity: 0; } to { scale: 1; opacity: var(--tinte, .8); } }
+@keyframes abdruck-satt { 0% { scale: 1.12; } 100% { scale: 1; } }
+
+/* ---------- Stempel-Story: Kissen, Tintenstand, Anfang und Ende (js/stempel.js) ---------- */
+/* Flug des Stempels (aus dem Kissen, ins Kissen, zur Ablage) */
+.stempel-zeiger.fliegt { transition: transform .5s cubic-bezier(.25, 1.2, .45, 1); }
+.stempel-zeiger .so-nass { transition: opacity .35s; }
+.stempel-zeiger.weg, .stempel-kissen.weg { transition: transform .55s cubic-bezier(.55, 0, .9, .4), opacity .35s .2s; transform: translate(-70vw, 40vh) rotate(-14deg) !important; opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Drücken: der Stempel kippt einen Hauch, der Schatten hinkt einen Moment nach */
+  .stempel-zeiger.drueckt .so-koerper { animation: stempel-runter .22s steps(3, end); }
+  .stempel-zeiger.drueckt .so-schatten { animation: schatten-eng .22s steps(3, end) .03s; }
+  .stempel-zeiger.tunkt .so-koerper { animation: stempel-tunkt .34s steps(4, end); }
+  .stempel-zeiger.tunkt .so-schatten { animation: schatten-eng .34s steps(4, end); }
+  .stempel-zeiger.landet .so-koerper { animation: stempel-landet .42s steps(4, end) both; }
+}
+@keyframes stempel-runter { 0% { transform: none; } 45% { transform: scale(.92) rotate(1.4deg); } 100% { transform: none; } }
+@keyframes stempel-tunkt { 0% { transform: none; } 50% { transform: scale(.9) rotate(-.8deg); } 100% { transform: none; } }
+@keyframes stempel-landet { 0% { transform: scale(1.08); } 40% { transform: scale(.96); } 70% { transform: scale(1.015); } 100% { transform: none; } }
+/* Stempelkissen unten links über dem Knopf „Stempel weglegen“ */
+.stempel-kissen { position: fixed; left: 8px; bottom: 66px; z-index: 89; width: 164px; height: 123px; cursor: none; }
+.stempel-kissen svg { display: block; overflow: visible; width: 100%; height: 100%; }
+.stempel-kissen .sk-deckel-auf, .stempel-kissen .sk-deckel-zu { transform-box: view-box; transform-origin: 100px 56px; }
+.stempel-kissen .sk-deckel-zu { transform: scaleY(0); }
+.stempel-kissen.zu .sk-deckel-auf { transform: scaleY(0); }
+.stempel-kissen.zu .sk-deckel-zu { transform: scaleY(1); }
+.stempel-kissen .sk-filz { transform-box: fill-box; transform-origin: center; }
+@media (prefers-reduced-motion: no-preference) {
+  .stempel-kissen { animation: kissen-auf .3s ease-out both; }
+  .stempel-kissen .sk-deckel-auf { animation: deckel-auf .36s .12s cubic-bezier(.2, 1.3, .5, 1) both; }
+  .stempel-kissen.gedrueckt .sk-filz { animation: filz-delle .32s steps(3, end); }
+  .stempel-kissen.gedrueckt .sk-delle { animation: delle-blitz .32s steps(3, end); }
+  .stempel-kissen.leer { animation: kissen-leer .5s ease-in-out; }
+  .stempel-kissen.zu .sk-deckel-auf { animation: deckel-hoch .2s ease-in both; }
+  .stempel-kissen.zu .sk-deckel-zu { animation: deckel-zu .24s .2s cubic-bezier(.4, 0, .8, 1) both; }
+  .stempel-kissen.zu { animation: kissen-klappt .2s .42s steps(2, end); }
+}
+@keyframes kissen-auf { from { opacity: 0; } to { opacity: 1; } }
+@keyframes deckel-auf { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes deckel-hoch { from { transform: scaleY(1); } to { transform: scaleY(0); } }
+@keyframes deckel-zu { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes kissen-klappt { 0%, 100% { translate: 0 0; } 50% { translate: 0 2px; } }
+@keyframes filz-delle { 0%, 100% { transform: none; } 40% { transform: scale(.985, .96); } }
+@keyframes delle-blitz { 0%, 100% { opacity: 0; } 40% { opacity: 1; } }
+@keyframes kissen-leer { 0%, 100% { rotate: 0deg; } 25% { rotate: -2.5deg; } 60% { rotate: 2deg; } }
+@media (max-width: 767px) { .stempel-kissen { width: 124px; height: 93px; bottom: 64px; } }
+/* Abdruck: Tintenstand steuert Deckkraft und Löchrigkeit, frische Tinte quetscht am Rand und trocknet in Stufen */
+.abdruck {
+  -webkit-mask: linear-gradient(var(--fw, 120deg), #000 var(--fs, 55%), rgba(0, 0, 0, var(--fe, .6)) 100%);
+  mask: linear-gradient(var(--fw, 120deg), #000 var(--fs, 55%), rgba(0, 0, 0, var(--fe, .6)) 100%);
+}
+.abdruck::before { content: ''; position: absolute; inset: -8px; border-radius: 16px; background: radial-gradient(closest-side, rgba(40, 20, 30, .08), rgba(40, 20, 30, 0)); }
+.abdruck .lage2 { position: absolute; inset: 0; translate: 2.4px 1.6px; rotate: 1.4deg; opacity: var(--lage2, .55); }
+@media (prefers-reduced-motion: no-preference) {
+  .abdruck.nass { animation: abdruck-klatsch .18s steps(3, end) both, abdruck-trocknet 1.7s .18s steps(4, end) both; }
+}
+@keyframes abdruck-trocknet {
+  0% { filter: drop-shadow(0 0 .9px currentColor) contrast(1.25); opacity: min(1, calc(var(--tinte, .8) + .15)); }
+  100% { filter: none; opacity: var(--tinte, .8); }
+}
+/* Schlusspunkt der Stempel-Story: der letzte Satz kommt mit Nachdruck, das Blatt bebt stärker */
+@media (prefers-reduced-motion: no-preference) {
+  .abdruck.letzter-satz.nass { animation: abdruck-letzter-satz .3s steps(4, end) both, abdruck-trocknet 2.2s .3s steps(5, end) both; }
+  .bebt-stark { animation: beben-stark .4s steps(6, end); }
+}
+@keyframes abdruck-letzter-satz { 0% { scale: 2.3; rotate: calc(var(--dreh, 0deg) + 7deg); opacity: 0; } 60% { scale: .94; } 100% { scale: 1; rotate: var(--dreh, 0deg); opacity: var(--tinte, .8); } }
+@keyframes beben-stark { 0% { translate: 0 0; } 17% { translate: -9px 5px; } 34% { translate: 8px -4px; } 51% { translate: -6px 3px; } 68% { translate: 4px -2px; } 85% { translate: -2px 1px; } 100% { translate: 0 0; } }
+
+/* ---------- Runde C: niedrige Handys (bis 800 px hoch) ----------
+   Der Hero rückt etwas zusammen, damit der große grüne Knopf bei 360 × 740 ganz im ersten Bild steht. Collage und
+   Titel bleiben unverändert groß, nur Luft und Knopfpolster werden knapper. */
+@media (max-width: 767px) and (max-height: 800px) {
+  .hero-oben { padding-top: 4px; }
+  .hero .dachzeile { margin-top: 4px; margin-bottom: 10px; }
+  .hero-titel { margin-bottom: 14px; }
+  .hero-unten { padding-top: 12px; }
+  .hero-knopf .knopf { padding-top: 8px; padding-bottom: 8px; }
+}
+/* Mitlaufender Knopf: eine Zeile */
+.sticky-wa .knopf-text { white-space: nowrap; }
+/* Übergabe: ragt der Hero-Knopf nur ein Stück ins Bild, während der mitlaufende da ist, wartet er unsichtbar
+   (Platz bleibt), bis er weit genug drin ist. So gibt es nie zwei grüne Knöpfe übereinander. */
+.hero-knopf.uebergeben .knopf-halter { visibility: hidden; }

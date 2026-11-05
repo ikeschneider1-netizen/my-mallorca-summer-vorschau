@@ -1,0 +1,116 @@
+/* Entwurf 8 v3 – Farben, Schriften, Raster (PROMPT.md §4). Schriften: Google Fonts, OFL, selbst gehostet, Subset Latin. */
+
+@font-face { font-family: 'Anton'; src: url(../fonts/anton.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Abril Fatface'; src: url(../fonts/abril.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Alfa Slab One'; src: url(../fonts/alfa.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Bungee'; src: url(../fonts/bungee.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Ultra'; src: url(../fonts/ultra.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Staatliches'; src: url(../fonts/staatliches.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Unbounded'; src: url(../fonts/unbounded-900.woff2) format('woff2'); font-weight: 900; font-display: swap; }
+@font-face { font-family: 'Bricolage Grotesque'; src: url(../fonts/bricolage.woff2) format('woff2'); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: 'Courier Prime'; src: url(../fonts/courier-400.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Courier Prime'; src: url(../fonts/courier-700.woff2) format('woff2'); font-weight: 700; font-display: swap; }
+
+:root {
+  /* Druckschatten statt Bildschirmschatten (AD-Runde): Sticker und Plakat, auf Schwarz keiner */
+  --schatten-sticker: 6px 7px 0 rgba(17, 17, 17, .88);
+  --schatten-plakat: 10px 12px 0 rgba(17, 17, 17, .9);
+  --ultramarin: #2e2fc8;
+  --gold: #ffc20e;
+  --magenta: #c8187a;
+  --aprikose: #ff8a3d;
+  --papier: #fff4df;
+  --schwarz: #111111;
+  --weiss: #ffffff;
+  --text: #121419;
+  --wa-gruen: #25D366;
+  /* Lagune (Ikes Blaugrün aus dem Sun-Club-Entwurf, 04.11.2026 für die Bewerbungsseiten gewählt) */
+  --lagune: #1ec8d0;
+
+  --f-text: 'Bricolage Grotesque', system-ui, sans-serif;
+  --f-mono: 'Courier Prime', 'Courier New', monospace;
+  --f-knopf: 'Unbounded', 'Arial Black', sans-serif;
+
+  /* 12 Spalten, 48 px Rand und 24 px Gasse bei 1440 px; schmaler auf kleineren Breiten */
+  --rand: clamp(16px, 3.34vw, 48px);
+  --gasse: clamp(16px, 1.67vw, 24px);
+
+  /* Ransom-Größen: Handy, Tablet und Desktop (dort zusätzlich durch die Höhe begrenzt) */
+  --fs-xxl: 14.6vw;
+  --fs-xl: 15vw;
+  --fs-l: 12.4vw;
+  --fs-m: 10vw;
+  --fs-s: 22px;
+
+  --fs-mono: clamp(14px, 1.18vw, 17px);
+  --fs-lead: clamp(17px, 1.25vw, 18px);
+  --schatten: 0 10px 22px rgba(17, 17, 17, .18);
+  --stop: steps(4, jump-end);
+}
+
+@media (min-width: 768px) {
+  :root { --fs-xxl: 11vw; --fs-xl: 10.6vw; --fs-l: 8.6vw; --fs-m: 6.6vw; }
+}
+@media (min-width: 1024px) {
+  :root {
+    --fs-xxl: clamp(78px, min(7.6vw, 12.6vh), 114px);
+    --fs-xl: clamp(76px, min(8.2vw, 13.5vh), 124px);
+    --fs-l: clamp(62px, min(6.6vw, 10.8vh), 98px);
+    --fs-m: clamp(46px, min(4.9vw, 8vh), 72px);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 72px; overflow-x: clip; }
+body {
+  margin: 0;
+  background: var(--papier);
+  color: var(--text);
+  font: 400 var(--fs-lead)/1.5 var(--f-text);
+  overflow-x: clip;
+}
+img, svg, video { display: block; max-width: 100%; }
+h1, h2, h3, p, dl, dd, ol, ul, figure { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+a { color: inherit; text-underline-offset: .18em; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+::selection { background: var(--gold); color: var(--text); }
+:root { caret-color: var(--ultramarin); }
+
+/* Korn: SVG-Rauschen, Deckkraft ca. 0,1, nicht animiert */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: .1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='k'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23k)'/%3E%3C/svg%3E");
+}
+
+/* Fokus: eckiger Rahmen mit hohem Kontrast – die einzige erlaubte Linie */
+:focus-visible { outline: 3px solid var(--schwarz); outline-offset: 3px; }
+.dunkel :focus-visible, .karte-4 :focus-visible { outline-color: var(--gold); }
+main:focus { outline: none; }
+
+.sr {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden; clip-path: inset(50%);
+  white-space: nowrap; border: 0;
+}
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.skip {
+  position: fixed;
+  left: var(--rand);
+  top: 10px;
+  z-index: 200;
+  padding: 12px 16px;
+  background: var(--schwarz);
+  color: var(--papier);
+  font: 700 16px/1.2 var(--f-mono);
+  transform: translateY(-160%);
+}
+.skip:focus { transform: none; outline-color: var(--gold); }

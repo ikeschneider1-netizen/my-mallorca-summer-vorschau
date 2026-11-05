@@ -1,0 +1,326 @@
+/* Bausteine: Ransom-Buchstaben, Etiketten, Tape, Knöpfe, Warnhinweis, Platzhalter, Riss, Schere.
+   Keine Rundungen, keine Rahmen. Kanten kommen aus css/kanten.css (bauen.mjs). */
+
+/* ---------- Ransom ---------- */
+.ransom-titel { font-weight: 400; line-height: 1; letter-spacing: 0; }
+.ransom-titel .zeile { display: block; }
+.rw { display: inline-block; white-space: nowrap; font-size: var(--fs-m); line-height: 1; }
+.rw.xxl { font-size: var(--fs-xxl); }
+.rw.xl { font-size: var(--fs-xl); }
+.rw.l { font-size: var(--fs-l); }
+.rw.s { font-size: var(--fs-s); }
+.rw.ml { font-size: calc((var(--fs-l) + var(--fs-m)) / 2); }
+.rw.xs { font-size: calc(var(--fs-m) * .62); }
+.zeile .rw + .rw { margin-left: .2em; }
+.rl {
+  display: inline-block;
+  margin-right: -.06em;
+  transform: translateY(var(--y)) rotate(var(--r)) scale(var(--s));
+}
+.rp {
+  display: inline-block;
+  min-width: .6em;
+  padding: var(--pt, .1em) var(--px, .11em) var(--pb, .03em);
+  transition: translate .12s steps(2, jump-end), scale .12s steps(2, jump-end);
+  line-height: .9;
+  text-align: center;
+}
+@media (hover: hover) {
+  .rl:hover > .rp { animation: wackeln .18s both; }
+}
+.rl:active > .rp { animation: wackeln .18s both; }
+@keyframes wackeln {
+  0%   { rotate: 3deg;  animation-timing-function: steps(1, end); }
+  33%  { rotate: -3deg; animation-timing-function: steps(1, end); }
+  66%  { rotate: 2deg;  animation-timing-function: steps(1, end); }
+  100% { rotate: 0deg; }
+}
+
+.f-anton { font-family: 'Anton', sans-serif; font-size: 1.06em; }
+.f-abril { font-family: 'Abril Fatface', serif; font-size: 1.02em; }
+.f-alfa { font-family: 'Alfa Slab One', serif; font-size: .9em; }
+.f-bungee { font-family: 'Bungee', sans-serif; font-size: .8em; }
+.f-ultra { font-family: 'Ultra', serif; font-size: .84em; }
+.f-staatliches { font-family: 'Staatliches', sans-serif; font-size: 1.1em; }
+
+.p-weiss { background-color: var(--weiss); }
+.p-papier { background-color: var(--papier); }
+.p-schwarz { background-color: var(--schwarz); }
+.p-gold { background-color: var(--gold); }
+.p-aprikose { background-color: var(--aprikose); }
+.p-blau { background-color: var(--ultramarin); }
+.p-magenta { background-color: var(--magenta); }
+.p-lagune { background-color: var(--lagune); }
+.c-schwarz { color: var(--schwarz); }
+.c-weiss { color: var(--weiss); }
+.c-papier { color: var(--papier); }
+.c-gold { color: var(--gold); }
+.c-blau { color: var(--ultramarin); }
+.c-lagune { color: var(--lagune); }
+
+/* Halftone per CSS: Punktraster, auf der Schnipselfarbe verrechnet */
+.ht { background-image: radial-gradient(circle, rgba(17, 17, 17, .2) 30%, transparent 34%); background-size: 6px 6px; background-blend-mode: multiply; }
+.htw { background-image: radial-gradient(circle, rgba(255, 255, 255, .17) 30%, transparent 34%); background-size: 6px 6px; background-blend-mode: screen; }
+
+/* ---------- Etiketten (Courier auf Papierstreifen) ---------- */
+.label {
+  display: inline-block;
+  padding: .42em .8em .38em;
+  background: var(--weiss);
+  color: var(--text);
+  font: 700 clamp(15px, 1.38vw, 21px)/1.2 var(--f-mono);
+  white-space: nowrap;
+  clip-path: var(--k-label-1);
+  rotate: -1.6deg;
+}
+.label-2 { background: var(--papier); clip-path: var(--k-label-2); rotate: 1.2deg; }
+.label-3 { clip-path: var(--k-label-3); }
+.label-frei { background: none; clip-path: none; rotate: -2deg; }
+
+.kapitelnr {
+  font: 900 clamp(42px, 5vw, 72px)/1 var(--f-knopf);
+  color: var(--ultramarin);
+  letter-spacing: .02em;
+  rotate: -3deg;
+  transform-origin: left bottom;
+}
+
+/* ---------- Warnhinweis und Platzhalter ---------- */
+.warn {
+  display: flex;
+  align-items: flex-start;
+  gap: .55em;
+  font: 700 var(--fs-mono)/1.4 var(--f-mono);
+}
+.warn svg { flex: none; width: 1.2em; height: 1.1em; margin-top: .08em; }
+.dachzeile {
+  font: 700 var(--fs-mono)/1.4 var(--f-mono);
+  letter-spacing: .01em;
+}
+.dachzeile .warn { display: inline-flex; margin-left: .8em; font: inherit; vertical-align: top; }
+mark.platzhalter {
+  background: var(--gold);
+  color: var(--text);
+  font: 700 .86em/1.3 var(--f-mono);
+  padding: .12em .35em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* ---------- Knöpfe ---------- */
+.knopf {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 44px;
+  text-decoration: none;
+  font: 900 18px/1.05 var(--f-knopf);
+  letter-spacing: -.01em;
+  transition: transform .16s cubic-bezier(.2, .8, .2, 1);
+}
+.knopf::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--knopf-bg);
+  clip-path: var(--knopf-kante);
+}
+@media (hover: hover) {
+  .knopf:hover { transform: translateY(-2px); }
+}
+.knopf:active { transform: translateY(0) scale(.98); }
+.knopf.gestempelt { animation: stempel .3s both; }
+@keyframes stempel {
+  0%   { scale: .94; rotate: -1deg; animation-timing-function: steps(1, end); }
+  40%  { scale: 1.03; rotate: .6deg; animation-timing-function: steps(1, end); }
+  75%  { scale: .99; rotate: 0deg; animation-timing-function: steps(1, end); }
+  100% { scale: 1; }
+}
+.knopf-text { display: inline-block; }
+.pfeil { display: inline-block; width: .9em; height: .6em; margin-left: .32em; vertical-align: .06em; }
+
+.knopf-gruen {
+  --knopf-bg: var(--wa-gruen);
+  --knopf-kante: var(--k-knopf-gruen);
+  color: var(--text);
+  padding: 12px 34px 12px 12px;
+  font-size: clamp(19px, 1.8vw, 26px);
+}
+.knopf-gruen .knopf-text { max-width: 9.6em; }
+.knopf-ico-feld {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.5em;
+  height: 2.5em;
+  background: var(--schwarz);
+  color: var(--wa-gruen);
+  clip-path: var(--k-knopf-icon);
+}
+.knopf-ico-feld .knopf-ico { width: 1.4em; height: 1.4em; }
+
+.knopf-blau {
+  --knopf-bg: var(--ultramarin);
+  --knopf-kante: var(--k-knopf-blau);
+  color: var(--papier);
+  gap: 10px;
+  padding: 9px 20px 9px 12px;
+  font-size: 15px;
+}
+.knopf-blau .knopf-ico { width: 24px; height: 24px; flex: none; }
+.knopf-blau .knopf-text { max-width: 10.4em; }
+
+.knopf-halter { position: relative; display: inline-block; }
+
+/* ---------- Tape ---------- */
+.tape {
+  position: absolute;
+  display: block;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 40%, rgba(17, 17, 17, .06)),
+    var(--tape, var(--gold));
+  clip-path: var(--k-tape-1);
+  pointer-events: none;
+  z-index: 2;
+}
+.tape-knopf { width: 118px; height: 32px; right: -58px; bottom: -10px; rotate: -33deg; clip-path: var(--k-tape-2); }
+
+/* ---------- Link „Lieber per Formular“ ---------- */
+.link-formular {
+  display: inline-flex;
+  align-items: center;
+  gap: .55em;
+  min-height: 44px;
+  padding: 0 4px;
+  font: 700 clamp(16px, 1.3vw, 19px)/1.2 var(--f-mono);
+  text-decoration: none;
+}
+.link-formular .pfeil { margin: 0; width: 1em; }
+@media (hover: hover) {
+  .link-formular:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+}
+
+/* ---------- Riss: Papierkante mit weißer Faser und Schatten ---------- */
+.riss-rand, .riss-statisch {
+  display: block;
+  height: 32px;
+  filter: drop-shadow(0 6px 0 rgba(17, 17, 17, .82));
+  pointer-events: none;
+}
+.riss-rand::before, .riss-rand::after, .riss-statisch::before, .riss-statisch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.riss-rand::before, .riss-statisch::before { background: var(--weiss); clip-path: var(--k-riss-faser-d); }
+.riss-rand::after, .riss-statisch::after { background: var(--papier); clip-path: var(--k-riss-papier-d); }
+@media (max-width: 767px) {
+  .riss-rand::before, .riss-statisch::before { clip-path: var(--k-riss-faser-m); }
+  .riss-rand::after, .riss-statisch::after { clip-path: var(--k-riss-papier-m); }
+}
+
+/* ---------- Schere (nur im Ladeablauf sichtbar) ---------- */
+.schere { position: absolute; width: 112px; height: 68px; opacity: 0; pointer-events: none; }
+
+/* ---------- Gimmicks (nur mit JS und ohne reduzierte Bewegung aktiv) ---------- */
+.riss-aktiv .riss-statisch { display: none; }
+.fetzen {
+  position: absolute;
+  top: 10px;
+  width: 38px;
+  height: 24px;
+  background: var(--weiss);
+  clip-path: var(--k-label-1);
+}
+.fetzen-1 { left: 23%; }
+.fetzen-2 { left: 49%; width: 26px; height: 18px; background: var(--papier); clip-path: var(--k-label-2); }
+.fetzen-3 { left: 72%; width: 44px; height: 20px; clip-path: var(--k-label-3); }
+
+/* Kapitelnummer stempelt sich ein (Idee 1) */
+.nr-bereit { opacity: 0; }
+.nr-stempel { animation: nr-stempel .26s both; }
+@keyframes nr-stempel {
+  0%   { opacity: .35; scale: 1.28; filter: blur(1.5px); animation-timing-function: steps(1, end); }
+  33%  { opacity: .7; scale: 1.1; filter: blur(.6px); animation-timing-function: steps(1, end); }
+  66%  { opacity: 1; scale: .97; filter: none; animation-timing-function: steps(1, end); }
+  100% { opacity: 1; scale: 1; }
+}
+
+/* Klatsch (Idee 5) */
+.klatsch .karten { animation: beben .17s both; }
+@keyframes beben {
+  0%   { translate: 2px -1px; animation-timing-function: steps(1, end); }
+  50%  { translate: -2px 1px; animation-timing-function: steps(1, end); }
+  100% { translate: 0 0; }
+}
+
+/* ---------- Bild-Schnipsel, Gesichtsteile und lose Buchstaben (Deko, sparsam) ---------- */
+.schnipsel { position: relative; display: block; pointer-events: none; filter: drop-shadow(var(--schatten-sticker)); }
+.schnipsel picture, .schnipsel img { display: block; width: 100%; height: auto; }
+.schnipsel img { clip-path: var(--k-karte-2); background: var(--weiss); }
+.tape-schnipsel { width: 88px; height: 26px; top: -11px; left: 32%; rotate: -6deg; clip-path: var(--k-tape-3); }
+.rw.lose { position: absolute; font-size: clamp(30px, 3vw, 46px); }
+
+/* Kapitel 01: Palmen-Schnipsel unter der Einleitung, mit zwei losen Buchstaben */
+.schnipsel-palmen { width: min(62%, 280px); margin: 34px 0 0 auto; rotate: -4deg; }
+.schnipsel-palmen .lose-1 { left: -38px; top: 18%; }
+.schnipsel-palmen .lose-2 { right: 2px; bottom: -26px; }
+/* Auge nur ab Tablet; am Handy gibt es nur ein Gesichtsteil (Mund im Ablauf) */
+.schnipsel-auge { display: none; }
+/* Himmel hinter den Karten nur am Desktop */
+.schnipsel-himmel { display: none; }
+/* Ablauf: Mund unter dem grünen Knopf */
+.schnipsel-mund { width: min(48%, 200px); margin: 30px 0 0 auto; rotate: 5deg; }
+.schnipsel-mund img { clip-path: var(--k-karte-3); }
+.schnipsel-mund .lose-3 { left: -34px; top: -18px; }
+.schnipsel-mund .lose-4 { right: 2px; bottom: -22px; }
+
+@media (min-width: 768px) {
+  .seite-links { position: relative; }
+  .schnipsel-auge { display: block; position: absolute; top: 46px; right: clamp(16px, 4vw, 56px); width: clamp(150px, 14vw, 210px); rotate: 6deg; z-index: 1; }
+  .schnipsel-auge img { clip-path: var(--k-karte-4); }
+}
+@media (min-width: 1024px) {
+  .schnipsel-palmen { width: min(52%, 300px); margin: 40px 6% 0 auto; }
+  .ablauf { position: relative; }
+  .karten { position: relative; z-index: 1; }
+  .schnipsel-himmel { display: block; position: absolute; bottom: 4vh; right: 1%; width: min(28%, 400px); rotate: 3deg; z-index: 0; }
+  .schnipsel-himmel img { clip-path: var(--k-karte-1); }
+  .schnipsel-mund { width: min(70%, 230px); margin: 44px 0 0 18%; rotate: -6deg; }
+}
+
+/* ---------- Carson-Typo auf den großen Flächen: riesige, durchscheinende Wörter hinter dem Inhalt ---------- */
+.lagen { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.lw {
+  position: absolute;
+  left: var(--x); top: var(--y);
+  font-family: var(--f);
+  font-weight: var(--fw, 400);
+  font-size: var(--g);
+  line-height: .8;
+  letter-spacing: -.02em;
+  white-space: nowrap;
+  color: var(--lw-farbe, var(--text));
+  opacity: var(--o, .06);
+  rotate: var(--r, 0deg);
+}
+.lw::before { content: attr(data-text); }
+
+/* Zerrissene Bild-Fetzen im Hintergrund (Ikes Teamfotos, sehr blass, hinter dem Inhalt) */
+.lb {
+  position: absolute;
+  left: var(--x); top: var(--y);
+  width: var(--b);
+  height: auto;
+  aspect-ratio: var(--ar, 3 / 4);
+  object-fit: cover;
+  object-position: var(--pos, 50% 50%);
+  opacity: var(--o, .15);
+  rotate: var(--r, 0deg);
+  clip-path: var(--kante);
+  filter: var(--fi, none);
+}
+@media (max-width: 767px) { .lb.nur-gross { display: none; } }

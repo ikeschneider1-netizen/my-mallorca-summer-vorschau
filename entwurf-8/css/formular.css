@@ -1,0 +1,218 @@
+/* Bewerbungsformular, Danke-Seite, Halftone-Schimmer, verrückter Formular-Link. */
+
+/* ---------- Halftone-Schimmer ---------- */
+.schimmer-band {
+  position: relative;
+  height: clamp(150px, 19vw, 250px);
+  margin: 0 calc(-1 * var(--rand));
+  clip-path: var(--k-zacken-unten-m);
+  /* Ohne JS: stilles Punktraster */
+  background: radial-gradient(circle, rgba(46, 47, 200, .55) 30%, transparent 33%) 0 0 / 14px 14px;
+}
+.schimmer { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.js .schimmer-band { background-image: none; }
+.schimmer-flaeche { z-index: 0; }
+@media (min-width: 768px) { .schimmer-band { clip-path: var(--k-zacken-unten-d); } }
+
+/* Clip-Bereich: Schimmer hinter dem Clip, Bildunterschrift auf eigenem Papierstreifen */
+.zwischenspiel { overflow: hidden; }
+.zwischenspiel .clip { position: relative; z-index: 1; }
+@media (min-width: 1024px) { .zwischenspiel .clip { max-width: min(1080px, calc((100vh - 140px) * 1.778)); } }
+/* Ruhiges Punktefeld hinter dem Clip, oben und unten weich auslaufend (kein Zusammenstoß mit Kapitel 01 und Ablauf) */
+.schimmer-flaeche { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent); opacity: .75; }
+.clip figcaption .dachzeile {
+  display: inline-block;
+  padding: .55em .9em .5em;
+  background: var(--papier);
+  clip-path: var(--k-feld);
+}
+
+/* ---------- „Lieber per Formular“: beim Drüberfahren wird es zum Erpresserbrief ---------- */
+.lf { display: inline-flex; flex-wrap: wrap; }
+.lf > span { display: inline-block; white-space: pre; padding: .08em .02em; }
+@media (hover: hover) {
+  .link-formular:hover { text-decoration: none; }
+  .link-formular:hover .lf > span { animation: lf-kleben .25s both; animation-delay: calc(var(--i) * 14ms); }
+  .link-formular:hover .pfeil { animation: lf-pfeil .25s both; }
+}
+.link-formular:focus-visible .lf > span, .link-formular:active .lf > span { animation: lf-kleben .25s both; animation-delay: calc(var(--i) * 14ms); }
+.link-formular:focus-visible .pfeil, .link-formular:active .pfeil { animation: lf-pfeil .25s both; }
+@keyframes lf-kleben {
+  0%   { rotate: calc(var(--r) * -2); translate: 0 -6px; animation-timing-function: steps(1, end); }
+  40%  { rotate: calc(var(--r) * 1.5); translate: 0 2px; background: var(--bg); color: var(--fg); font-family: var(--ff); animation-timing-function: steps(1, end); }
+  100% { rotate: var(--r); translate: 0 0; background: var(--bg); color: var(--fg); font-family: var(--ff); }
+}
+@keyframes lf-pfeil {
+  0%   { translate: 0 0; animation-timing-function: steps(1, end); }
+  40%  { translate: 6px -2px; animation-timing-function: steps(1, end); }
+  100% { translate: 4px 0; }
+}
+/* Einmal nach dem Ladeablauf zuckt der Pfeil, damit man den zweiten Weg sieht. */
+.intro .hero .link-formular .pfeil { animation: lf-zucken .3s 1.56s 2 both; }
+@keyframes lf-zucken {
+  0%   { translate: 0 0; animation-timing-function: steps(1, end); }
+  33%  { translate: 7px 0; animation-timing-function: steps(1, end); }
+  66%  { translate: 2px 0; animation-timing-function: steps(1, end); }
+  100% { translate: 0 0; }
+}
+
+/* ---------- Formular-Seite ---------- */
+.seite-unter { position: relative; padding: 0 var(--rand) 88px; }
+.unter-kopf { position: relative; }
+.unter-titel { position: relative; z-index: 1; margin-top: -.62em; font-size: var(--fs-xl); }
+.unter-titel .label-1 { margin: 10px 0 0 4px; }
+.unter-titel .zeile + .zeile { margin-top: -.06em; }
+.unterzeile { margin-top: 18px; max-width: 34ch; font-size: clamp(19px, 1.7vw, 24px); line-height: 1.4; }
+.form-wa { margin-top: 30px; display: grid; gap: 12px; justify-items: start; max-width: 46ch; }
+.form-wa p:first-child { font: 700 var(--fs-mono)/1.4 var(--f-mono); }
+.klein { font-size: 15px; line-height: 1.5; }
+
+.form-blatt {
+  position: relative;
+  margin: 44px calc(-1 * var(--rand)) 0;
+  padding: 52px var(--rand) 56px;
+  background: var(--weiss);
+  clip-path: var(--k-zacken-oben-m);
+}
+.bewerbung { display: grid; gap: 26px; max-width: 760px; }
+.pflicht-hinweis { font: 700 var(--fs-mono)/1.4 var(--f-mono); }
+.feld { display: grid; gap: 8px; }
+.feld > label, .feld > .feld-titel, .wahl legend {
+  font: 900 clamp(17px, 1.4vw, 19px)/1.25 var(--f-knopf);
+  letter-spacing: -.015em;
+}
+.stern { color: var(--magenta); margin-left: .15em; }
+.hinweis { font: 400 15px/1.45 var(--f-mono); }
+.feld-paar { display: grid; gap: 26px; }
+@media (min-width: 640px) { .feld-paar { grid-template-columns: 1fr 1fr; gap: 24px; } }
+
+/* Eingabefelder: weißes, ausgeschnittenes Etikett auf schwarzem Untergrund (von Ike freigegeben, 04.11.2026) */
+.eingabe { position: relative; isolation: isolate; display: block; }
+.eingabe::before, .eingabe::after { content: ''; position: absolute; pointer-events: none; }
+.eingabe::before { inset: -3px; z-index: -2; background: var(--schwarz); clip-path: var(--k-feld); }
+.eingabe::after { inset: 0; z-index: -1; background: var(--weiss); clip-path: var(--k-feld); }
+.eingabe input, .eingabe select, .eingabe textarea {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  padding: 13px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: 400 18px/1.4 var(--f-text);
+  appearance: none;
+  border-radius: 0;
+}
+.eingabe textarea { min-height: 128px; resize: vertical; }
+.eingabe select { padding-right: 48px; cursor: pointer; }
+.eingabe-wahl::after { background: var(--weiss) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16'%3E%3Cpath fill='%23111' d='M0 4h24L12 16z'/%3E%3C/svg%3E") no-repeat right 16px center / 16px 11px; }
+.eingabe input::placeholder, .eingabe textarea::placeholder { color: #5f6170; opacity: 1; }
+.eingabe:focus-within { outline: 3px solid var(--ultramarin); outline-offset: 5px; }
+.eingabe input:focus-visible, .eingabe select:focus-visible, .eingabe textarea:focus-visible { outline: none; }
+.eingabe input[type="file"] { padding: 10px 12px; font-size: 16px; cursor: pointer; }
+.eingabe input[type="file"]::file-selector-button {
+  margin-right: 14px;
+  padding: 9px 14px;
+  border: 0;
+  background: var(--schwarz);
+  color: var(--papier);
+  font: 700 15px/1 var(--f-mono);
+  cursor: pointer;
+}
+.ist-fehler .eingabe::before { background: var(--magenta); inset: -4px; }
+
+/* Auswahl (Radio, Checkbox): eckig */
+.wahl { border: 0; margin: 0; padding: 0; display: grid; gap: 10px; }
+.wahl legend { padding: 0; margin-bottom: 4px; }
+.option { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 8px 0; cursor: pointer; font-size: 17px; line-height: 1.45; }
+.option input {
+  flex: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  background: var(--weiss);
+  box-shadow: 0 0 0 3px var(--schwarz);
+  cursor: pointer;
+}
+.option input:checked { background: var(--ultramarin); box-shadow: 0 0 0 3px var(--schwarz), inset 0 0 0 5px var(--weiss); }
+.option input:focus-visible { outline: 3px solid var(--ultramarin); outline-offset: 5px; }
+.ist-fehler .option input { box-shadow: 0 0 0 3px var(--magenta); }
+.option .warn { display: inline-flex; margin-left: .4em; font-size: 15px; }
+
+/* Freiwillige Felder: eingeklappt */
+.mehr { display: grid; }
+.mehr > summary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  min-height: 48px;
+  padding: 8px 18px 8px 14px;
+  list-style: none;
+  cursor: pointer;
+  isolation: isolate;
+  font: 900 18px/1.2 var(--f-knopf);
+}
+.mehr > summary::-webkit-details-marker { display: none; }
+.mehr > summary::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--gold); clip-path: var(--k-chip); rotate: -1deg; }
+.mehr > summary .plus { display: grid; place-items: center; width: 26px; height: 26px; background: var(--schwarz); color: var(--gold); font: 700 20px/1 var(--f-mono); }
+.mehr[open] > summary .plus { rotate: 45deg; }
+.mehr-inhalt { display: grid; gap: 26px; padding-top: 26px; }
+.mehr[open] .mehr-inhalt { animation: mehr-auf .2s steps(3, jump-end) both; }
+@keyframes mehr-auf { from { opacity: 0; translate: 0 -10px; } to { opacity: 1; translate: 0 0; } }
+
+.fehler { display: flex; gap: .5em; align-items: flex-start; color: var(--magenta); font: 700 15px/1.45 var(--f-mono); }
+.fehler[hidden] { display: none; }
+.fehler::before { content: ''; flex: none; width: 1.15em; height: 1.05em; margin-top: .1em; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath fill='%23ff8a3d' d='M12 1.2 23.2 20.8H.8z'/%3E%3Cpath fill='%23111' d='M10.9 7.4h2.2l-.4 7.4h-1.4zM12 16.2a1.35 1.35 0 1 1 0 2.7 1.35 1.35 0 0 1 0-2.7z'/%3E%3C/svg%3E") no-repeat center / contain; }
+.fehler-sammel { padding: 14px 16px; background: var(--papier); }
+.datenschutz-feld .option { font-size: 16px; }
+.datenschutz-feld a { font-weight: 700; }
+.absenden { display: grid; gap: 14px; justify-items: start; margin-top: 6px; }
+.knopf-gross { font-size: clamp(19px, 1.7vw, 23px); padding: 16px 26px 16px 22px; }
+.test-hinweis { font-size: 15px; }
+.zurueck { margin-top: 34px; display: inline-flex; }
+
+@media (min-width: 1024px) {
+  .unter-kopf { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gasse); align-items: start; }
+  .unter-kopf .danke-text { grid-column: 1 / 9; }
+  .unter-kopf .schimmer-band { grid-column: 1 / -1; }
+  .unter-titel { grid-column: 1 / 9; }
+  .unterzeile { grid-column: 1 / 7; }
+  .form-wa { grid-column: 8 / 13; grid-row: 3 / span 2; align-self: start; margin-top: 18px; }
+  .form-blatt { margin: 56px 0 0 calc(-1 * var(--rand)); max-width: calc(860px + var(--rand)); padding: 64px 64px 64px var(--rand); clip-path: var(--k-blatt-d); }
+}
+
+/* ---------- Danke-Seite ---------- */
+.danke-text { margin-top: 22px; max-width: 52ch; font-size: clamp(18px, 1.5vw, 21px); line-height: 1.5; }
+.danke-blatt h2 { font: 900 clamp(24px, 2.3vw, 32px)/1.15 var(--f-knopf); letter-spacing: -.02em; margin-bottom: 22px; }
+.schritte { display: grid; gap: 14px; counter-reset: schritt; max-width: 62ch; }
+.schritte li { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; font-size: 18px; line-height: 1.5; counter-increment: schritt; }
+.schritte li::before {
+  content: counter(schritt);
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  height: 40px;
+  font: 400 24px/1 'Bungee', sans-serif;
+  background: var(--gold);
+  clip-path: var(--k-chip);
+  rotate: -3deg;
+}
+.danke-aktion .knopf-text { max-width: 13em; }
+.danke-aktion { margin-top: 30px; display: flex; flex-wrap: wrap; align-items: center; gap: 22px 40px; }
+.danke-blatt .klein { margin-top: 52px; }
+
+.zurueck .pfeil { animation: none !important; translate: none !important; }
+@media (hover: hover) { .zurueck:hover { text-decoration: underline; text-decoration-thickness: 2px; } }
+
+/* Reflex wie auf einer Fensterscheibe (js/reflex.js) */
+.reflex { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; mix-blend-mode: multiply; opacity: 0; }
+/* Lokaler Reflex auf farbigen Flächen (z. B. schwarzer Ablauf): hinter dem Inhalt, helle Punkte */
+.reflex.reflex-lokal { position: absolute; inset: 0 0 auto 0; z-index: 0; mix-blend-mode: screen; will-change: transform; }
+[data-reflex-mix="multiply"] > .reflex.reflex-lokal { mix-blend-mode: multiply; }
+
+/* Bewerbungs- und Danke-Seite in Lagune */
+.seite-lagune { background: var(--lagune); }
+.seite-lagune .schimmer-band { background-color: transparent; }
