@@ -216,3 +216,29 @@
 /* Bewerbungs- und Danke-Seite in Lagune */
 .seite-lagune { background: var(--lagune); }
 .seite-lagune .schimmer-band { background-color: transparent; }
+
+/* ---------- Foto-Upload (Ike, 06.11.2026): Pflichtfeld, Fenster aus Papier wie die anderen Felder, nach der Auswahl ein Polaroid ----------
+   Das echte Datei-Feld liegt unsichtbar über dem ganzen Fenster: Tippen öffnet Galerie/Kamera, am Rechner kann man ein Bild hineinziehen.
+   Ohne JS bleibt das normale Datei-Feld sichtbar. */
+.foto-fenster { display: grid; place-items: center; min-height: 176px; margin-top: 6px; text-align: center; }
+.js .foto-fenster input[type="file"] { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; padding: 0; opacity: 0; cursor: pointer; }
+html:not(.js) .foto-leer, html:not(.js) .foto-bild { display: none; }
+.foto-leer { display: grid; justify-items: center; gap: 10px; padding: 24px 16px; }
+.foto-ico { width: 54px; height: 46px; fill: none; stroke: var(--schwarz); stroke-width: 3.2; stroke-linejoin: miter; }
+.foto-ruf { display: inline-block; padding: 7px 12px 5px; background: var(--gold); color: var(--schwarz); font: 700 16px/1.2 var(--f-mono); clip-path: var(--k-chip); rotate: -1.5deg; }
+@media (hover: hover) { .foto-fenster:hover .foto-ruf { background: var(--lagune); } }
+.foto-fenster.zieht::after { background: #fff1b0; } /* ein Bild wird gerade hineingezogen */
+.foto-bild { position: relative; display: grid; justify-items: center; gap: 12px; padding: 20px 16px 14px; }
+.foto-bild[hidden] { display: none; }
+.foto-bild img { width: 148px; height: 178px; object-fit: cover; padding: 8px 8px 28px; background: var(--weiss); rotate: -3deg; filter: drop-shadow(4px 5px 0 rgba(17, 17, 17, .85)); }
+.foto-bild::before { content: ''; position: absolute; top: 12px; left: 50%; z-index: 1; width: 66px; height: 20px; translate: -50% 0; rotate: 4deg; background: var(--gold); opacity: .9; clip-path: var(--k-tape-1); }
+.foto-bild.ohne-vorschau img, .foto-bild.ohne-vorschau::before { display: none; } /* z. B. HEIC: der Browser kann es nicht zeigen, der Name reicht */
+.foto-name { max-width: 100%; font: 400 14px/1.35 var(--f-mono); overflow-wrap: anywhere; }
+.foto-anders { justify-self: start; min-height: 44px; margin-top: 4px; padding: 0 2px; background: none; border: 0; color: inherit; font: 700 15px/1.2 var(--f-mono); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; cursor: pointer; }
+.foto-anders[hidden] { display: none; }
+.foto-anders:focus-visible { outline: 3px solid var(--ultramarin); outline-offset: 4px; }
+@media (prefers-reduced-motion: no-preference) {
+  .foto-bild:not([hidden]) img { animation: foto-klebt .3s steps(3, end) both; }
+}
+@keyframes foto-klebt { from { scale: 1.25; rotate: -9deg; opacity: 0; } to { scale: 1; rotate: -3deg; opacity: 1; } }
+.foto-leer[hidden] { display: none; }

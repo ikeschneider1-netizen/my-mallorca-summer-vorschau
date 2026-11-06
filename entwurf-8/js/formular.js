@@ -12,8 +12,9 @@
     mail: 'Diese E-Mail-Adresse sieht nicht ganz richtig aus.',
     tel: 'Bitte gib deine Nummer mit Ländervorwahl an, z. B. +49 170 1234567.',
     alter: 'Schade, du musst mindestens 18 sein. Melde dich gern, sobald es so weit ist!',
-    gross: 'Die Datei ist zu groß. Maximal [X] MB, ein Handyfoto passt meistens.',
+    gross: 'Die Datei ist zu groß. Maximal 10 MB, ein Handyfoto passt meistens.',
     typ: 'Dieses Format können wir nicht öffnen. Bitte JPG, PNG oder PDF.',
+    typFoto: 'Dieses Format können wir nicht öffnen. Bitte ein Foto als JPG, PNG oder HEIC.',
     datenschutz: 'Bitte bestätige noch kurz den Datenschutz-Hinweis.'
   };
   var sammel = form.querySelector('.fehler-sammel');
@@ -35,13 +36,13 @@
     }
     if (feld.type === 'file') {
       var datei = feld.files && feld.files[0];
-      if (!datei) return '';
+      if (!datei) return feld.required ? TEXT.leer : '';
       var max = Number(feld.dataset.maxMb || 10) * 1024 * 1024;
       if (datei.size > max) return TEXT.gross;
       var erlaubt = (feld.getAttribute('accept') || '').split(',').map(function (a) { return a.trim().toLowerCase(); });
       var endung = '.' + datei.name.split('.').pop().toLowerCase();
       var ok = erlaubt.some(function (a) { return a === datei.type.toLowerCase() || a === endung || (a === '.heic' && endung === '.heif'); });
-      return ok ? '' : TEXT.typ;
+      return ok ? '' : (feld.id === 'foto' ? TEXT.typFoto : TEXT.typ);
     }
     if (feld.required && !wert) return TEXT.leer;
     if (!wert) return '';
@@ -94,7 +95,30 @@
   form.addEventListener('change', function (e) {
     var f = e.target;
     if (f.type === 'file' || f.type === 'checkbox' || f.type === 'radio') zeige(f, pruefe(f));
+    if (f.id === 'foto') fotoZeigen();
   });
+
+  // Foto-Upload (Ike, 06.11.2026): Polaroid-Vorschau, „Anderes Foto“, Hineinziehen am Rechner.
+  // Nur im Browser: Das Foto verlässt das Gerät nicht, solange es keinen Versand gibt.
+  var foto = form.querySelector('#foto');
+  if (foto) {
+    var fenster = foto.closest('.foto-fenster'), leer = fenster.querySelector('.foto-leer'), bild = fenster.querySelector('.foto-bild');
+    var img = bild.querySelector('img'), name = bild.querySelector('.foto-name'), anders = form.querySelector('.foto-anders'), url = '';
+    var fotoZeigen = function () {
+      var datei = foto.files && foto.files[0];
+      if (url) { URL.revokeObjectURL(url); url = ''; }
+      if (!datei || pruefe(foto)) { bild.hidden = true; leer.hidden = false; anders.hidden = true; return; }
+      url = URL.createObjectURL(datei);
+      bild.classList.remove('ohne-vorschau');
+      img.onerror = function () { bild.classList.add('ohne-vorschau'); }; // z. B. HEIC: nicht darstellbar, der Name reicht
+      img.src = url;
+      name.textContent = datei.name;
+      leer.hidden = true; bild.hidden = false; anders.hidden = false;
+    };
+    anders.addEventListener('click', function () { foto.click(); });
+    ['dragenter', 'dragover'].forEach(function (t) { fenster.addEventListener(t, function () { fenster.classList.add('zieht'); }); });
+    ['dragleave', 'drop'].forEach(function (t) { fenster.addEventListener(t, function () { fenster.classList.remove('zieht'); }); });
+  }
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();

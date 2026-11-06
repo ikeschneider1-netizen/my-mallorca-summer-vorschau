@@ -51,7 +51,7 @@
   1% { opacity: 1; }
   100% {
     opacity: 1;
-    transform: translateY(var(--y)) rotate(var(--r)) scale(var(--s));
+    transform: translateY(calc(var(--y) * .35)) rotate(calc(var(--r) * .4)); /* ruhige Endlage wie seite.css (lesbare Überschriften, 06.11.2026) */
     filter: none;
   }
 }
@@ -64,8 +64,8 @@
 @keyframes aufschlag {
   0% { opacity: 0; transform: translateY(calc(var(--y) - .3em)) rotate(var(--r)) scale(1.7); filter: drop-shadow(14px 20px 8px rgba(17, 17, 17, .3)); }
   1% { opacity: 1; }
-  55% { opacity: 1; transform: translateY(calc(var(--y) + .04em)) rotate(var(--r)) scale(calc(var(--s) * .9)); filter: none; }
-  100% { opacity: 1; transform: translateY(var(--y)) rotate(var(--r)) scale(var(--s)); filter: none; }
+  55% { opacity: 1; transform: translateY(calc(var(--y) * .35 + .04em)) rotate(calc(var(--r) * .4)) scale(.9); filter: none; }
+  100% { opacity: 1; transform: translateY(calc(var(--y) * .35)) rotate(calc(var(--r) * .4)); filter: none; }
 }
 .intro .tape-foto { animation: stauchen .34s steps(4, jump-end) 1.02s both; transform-origin: 50% 100%; }
 @media (min-width: 1024px) {

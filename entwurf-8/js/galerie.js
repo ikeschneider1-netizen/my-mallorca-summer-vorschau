@@ -57,7 +57,13 @@
     var manual = false, manualT = 0, raf = 0, io = null;
     function now() { return manual ? manualT : performance.now() / 1000; }
 
-    var DIRS = { ltr: 1, rtl: 1, ttb: 1, btt: 1 };
+    // Richtung = Winkel der Schnittlinie durch die Mitte (Grad, im Uhrzeigersinn, 0 = von links nach rechts).
+    // Ike, 06.11.2026: auch schräg durch einige Fotos (diag, diag-auf, diag-zurueck) oder eine Zahl in Grad.
+    var DIRS = { ltr: 0, rtl: 180, ttb: 90, btt: 270, diag: 32, 'diag-auf': -32, 'diag-zurueck': 212 };
+    function winkelVon(dir) {
+      if (dir && Object.prototype.hasOwnProperty.call(DIRS, dir)) return DIRS[dir];
+      var z = parseFloat(dir); return isFinite(z) ? z : null;
+    }
     var cards = Array.prototype.map.call(root.querySelectorAll('.ht-card'), function (el, idx) {
       var frame = el.querySelector('.ht-card__frame');
       var ht = el.querySelector('.ht-card__ht');
@@ -79,13 +85,13 @@
       el.appendChild(sc);
       if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
       var dir = el.dataset.htDirection;
-      if (!DIRS[dir]) dir = DIRS[o.direction] ? o.direction : o.sequence[idx % o.sequence.length];
-      if (!DIRS[dir]) dir = 'ltr';
+      if (winkelVon(dir) === null) dir = winkelVon(o.direction) !== null ? o.direction : o.sequence[idx % o.sequence.length];
+      if (winkelVon(dir) === null) dir = 'ltr';
       el.dataset.htDir = dir; // aufgelöste Richtung (Hook für CSS/Tests)
-      var vert = dir === 'ttb' || dir === 'btt';
-      wa.style.transformOrigin = vert ? '25% 50%' : '50% 25%';
-      wb.style.transformOrigin = vert ? '75% 50%' : '50% 75%';
-      return { dir: dir, el: el, frame: frame, ht: ht, hb: hb, wa: wa, wb: wb, sc: sc, bl1: sc.querySelector('.ht-bl1'), bl2: sc.querySelector('.ht-bl2'),
+      var grad = winkelVon(dir), rad = grad * Math.PI / 180, dx = Math.cos(rad), dy = Math.sin(rad);
+      // Der Schatten der Hälften fällt quer zur Schnittlinie in den Spalt
+      el.style.setProperty('--ht-sx', (-dy * 4).toFixed(1) + 'px'); el.style.setProperty('--ht-sy', (dx * 4).toFixed(1) + 'px');
+      return { dir: dir, grad: grad, dx: dx, dy: dy, nx: -dy, ny: dx, L: 0, C: 0, uIn: 0, uOut: 0, el: el, frame: frame, ht: ht, hb: hb, wa: wa, wb: wb, sc: sc, bl1: sc.querySelector('.ht-bl1'), bl2: sc.querySelector('.ht-bl2'),
                kipp: idx % 2 ? 1 : -1, cutL: 0, tCut: 0,
                phase: 'idle', t0: 0, tc: 0, hover: false, focus: false, pinned: false, done: false, w: 0, h: 0 };
     });
@@ -99,18 +105,22 @@
       var s = clamp(Math.min(c.w, c.h) * 0.5, 110, 260);
       c.sc.style.width = s + 'px'; c.sc.style.height = (s * 0.6) + 'px';
       c.scW = s; c.scH = s * 0.6;
+      // Ausdehnung des Rahmens längs (L) und quer (C) zur Schnittlinie; Ein- und Austritt der Linie durch die Mitte
+      var adx = Math.abs(c.dx), ady = Math.abs(c.dy);
+      c.L = adx * c.w + ady * c.h; c.C = ady * c.w + adx * c.h;
+      var halb = Math.min(adx > 1e-6 ? c.w / 2 / adx : Infinity, ady > 1e-6 ? c.h / 2 / ady : Infinity);
+      c.uIn = c.L / 2 - halb; c.uOut = c.L / 2 + halb; c.cutL = 0;
+      // jede Hälfte kippt um ihre eigene Mitte
+      var oa = map(c, c.L / 2, c.C / 4), ob = map(c, c.L / 2, c.C * 3 / 4);
+      c.wa.style.transformOrigin = oa[0].toFixed(1) + 'px ' + oa[1].toFixed(1) + 'px';
+      c.wb.style.transformOrigin = ob[0].toFixed(1) + 'px ' + ob[1].toFixed(1) + 'px';
     }
 
     // Koordinaten: u = Laufrichtung der Schere, v = quer dazu
     function map(c, u, v) {
-      switch (c.dir) {
-        case 'rtl': return [c.w - u, v];
-        case 'ttb': return [v, u];
-        case 'btt': return [v, c.h - u];
-        default: return [u, v];
-      }
+      var a = u - c.L / 2, b = v - c.C / 2;
+      return [c.w / 2 + a * c.dx + b * c.nx, c.h / 2 + a * c.dy + b * c.ny];
     }
-    var ANGLE = { ltr: 0, rtl: 180, ttb: 90, btt: -90 };
 
     // Ike, 05.11.2026: Die Schere schneidet den Halbton in der Mitte auf, fließend und etwas langsamer,
     // danach klappen die Hälften auseinander und das echte Foto bleibt.
@@ -145,19 +155,18 @@
         return r < 1;
       }
       if (o.fps > 0) e = Math.floor(e * o.fps + 1e-6) / o.fps; // nur falls Stop-Motion gewünscht
-      var vert = c.dir === 'ttb' || c.dir === 'btt';
-      var L = vert ? c.h : c.w, C = vert ? c.w : c.h, D = o.duration;
-      var U0 = -0.06 * L, U1 = 1.14 * L;               // Schere kommt von außen und läuft aus dem Bild
+      var L = c.L, C = c.C, D = o.duration, span = c.uOut - c.uIn;
+      var U0 = c.uIn - 0.06 * span, U1 = c.uOut + 0.14 * span; // Schere kommt von außen und läuft aus dem Bild
       var lin = Math.min(1, e / D);
       var pos = U0 + easeCut(lin) * (U1 - U0);
-      if (c.cutL !== L) { c.cutL = L; c.tCut = D * invert(easeCut, (L + 2 - U0) / (U1 - U0)); }
+      if (c.cutL !== L) { c.cutL = L; c.tCut = D * invert(easeCut, (c.uOut + 2 - U0) / (U1 - U0)); }
       var q = clamp((e - c.tCut) / o.part, 0, 1);      // Auseinanderklappen, sobald der Schnitt durch ist
 
-      if (pos <= 0) {
+      if (pos <= c.uIn) {
         ganz(c);
       } else {
         // Schnittkante der Zackenschere in der Mitte; dahinter öffnet sich ein keilförmiger Spalt
-        var mid = C / 2, tooth = clamp(L / 26, 9, 18), half = tooth / 2, amp = tooth * 0.3;
+        var mid = C / 2, tooth = clamp(span / 26, 9, 18), half = tooth / 2, amp = tooth * 0.3;
         var maxW = clamp(C * 0.06, 8, 24), slope = 0.2;
         var uEnd = Math.min(pos, L + 2), schneidet = pos < L + 2, k;
         var kante = [[-2, -amp]];
@@ -178,9 +187,10 @@
         c.hb.style.clipPath = poly(c, B);
         c.wb.style.visibility = '';
         // Auseinanderklappen: beide Hälften gleiten aus dem Rahmen, leicht gekippt, zum Schluss ausgeblendet
-        var g = easeInOut(q), d = (g * (mid + maxW + 30)).toFixed(1), w = (g * 5 * c.kipp).toFixed(2);
-        c.wa.style.transform = q > 0 ? (vert ? 'translate(-' + d + 'px,0)' : 'translate(0,-' + d + 'px)') + ' rotate(' + (-w) + 'deg)' : '';
-        c.wb.style.transform = q > 0 ? (vert ? 'translate(' + d + 'px,0)' : 'translate(0,' + d + 'px)') + ' rotate(' + w + 'deg)' : '';
+        var g = easeInOut(q), d = g * (mid + maxW + 30), w = (g * 5 * c.kipp).toFixed(2);
+        var tx = c.nx * d, ty = c.ny * d; // quer zur Schnittlinie auseinander
+        c.wa.style.transform = q > 0 ? 'translate(' + (-tx).toFixed(1) + 'px,' + (-ty).toFixed(1) + 'px) rotate(' + (-w) + 'deg)' : '';
+        c.wb.style.transform = q > 0 ? 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) rotate(' + w + 'deg)' : '';
         var op = q > 0.65 ? String(1 - (q - 0.65) / 0.35) : '';
         c.wa.style.opacity = op; c.wb.style.opacity = op;
       }
@@ -188,12 +198,12 @@
       var show = e < D;
       sc.style.visibility = show ? 'visible' : 'hidden';
       if (show) {
-        var snips = clamp(Math.round(L / 70), 4, 9), ph = 2 * Math.PI * snips * lin;
+        var snips = clamp(Math.round(span / 70), 4, 9), ph = 2 * Math.PI * snips * lin;
         var pt = map(c, pos, C / 2 + Math.sin(ph) * Math.max(1, C * 0.004));
         var px = c.scW * PIVOT[0], py = c.scH * PIVOT[1];
         sc.style.transformOrigin = px + 'px ' + py + 'px';
         sc.style.transform = 'translate(' + (pt[0] - px).toFixed(1) + 'px,' + (pt[1] - py).toFixed(1) + 'px) rotate(' +
-          ((ANGLE[c.dir] || 0) + Math.sin(ph * 0.5) * 2).toFixed(2) + 'deg)';
+          (c.grad + Math.sin(ph * 0.5) * 2).toFixed(2) + 'deg)';
         var a = (13 * (0.5 + 0.5 * Math.cos(ph))).toFixed(2);
         c.bl1.setAttribute('transform', 'rotate(' + (-a) + ' 52 30)');
         c.bl2.setAttribute('transform', 'rotate(' + a + ' 52 30)');

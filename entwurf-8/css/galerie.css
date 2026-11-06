@@ -22,9 +22,8 @@
 /* Zwei Halbton-Hälften (von galerie.js angelegt): Die Schere trennt sie in der Mitte, dann klappen sie weg.
    Harter Druckschatten nur während des Schnitts, damit der Halbton wie Papier über dem Foto liegt. */
 .ht-card__half{ position:absolute; inset:0; display:block; pointer-events:none; will-change:transform; }
-.ht-card.is-open .ht-card__half{ filter:drop-shadow(0 4px 0 rgba(17,17,17,.5)); }
-.ht-card.is-open[data-ht-dir="ttb"] .ht-card__half,
-.ht-card.is-open[data-ht-dir="btt"] .ht-card__half{ filter:drop-shadow(4px 0 0 rgba(17,17,17,.5)); }
+/* Schatten quer zur Schnittlinie (--ht-sx/--ht-sy setzt galerie.js je nach Winkel, auch schräg) */
+.ht-card.is-open .ht-card__half{ filter:drop-shadow(var(--ht-sx,0) var(--ht-sy,4px) 0 rgba(17,17,17,.5)); }
 .ht-card__scissor{
   position:absolute; left:0; top:0; z-index:3; pointer-events:none; visibility:hidden;
   filter:drop-shadow(3px 4px 0 rgba(0,0,0,.28));

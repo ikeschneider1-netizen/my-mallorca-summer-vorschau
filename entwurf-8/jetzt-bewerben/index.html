@@ -122,7 +122,7 @@
 
       <fieldset class="wahl" aria-describedby="dauer-fehler">
         <legend>Wie lange kannst du?<span class="stern" aria-hidden="true">*</span></legend>
-        <label class="option"><input type="radio" name="dauer" value="ganze-saison" required><span>Die ganze Saison (März bis Oktober)<span class="warn"><svg aria-hidden="true"><use href="#i-warn"/></svg>Mit Kunde bestätigen</span></span></label>
+        <label class="option"><input type="radio" name="dauer" value="ganze-saison" required><span>Die ganze Saison (April bis Oktober)</span></label>
         <label class="option"><input type="radio" name="dauer" value="teil"><span>Einen Teil der Saison</span></label>
         <p class="fehler" id="dauer-fehler" hidden></p>
       </fieldset>
@@ -134,18 +134,25 @@
         <p class="fehler" id="zeitraum-fehler" hidden></p>
       </div>
 
+      <!-- Foto-Upload (Ike, 06.11.2026): Pflichtfeld, genau ein Foto. Fenster aus Papier, nach der Auswahl ein Polaroid. -->
+      <div class="feld feld-foto">
+        <label for="foto">Foto von dir<span class="stern" aria-hidden="true">*</span></label>
+        <p class="hinweis" id="foto-hinweis">Ein aktuelles Handy-Selfie reicht völlig.</p>
+        <span class="eingabe foto-fenster">
+          <input id="foto" name="foto" type="file" required accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" data-max-mb="10" aria-describedby="foto-hinweis foto-fehler">
+          <span class="foto-leer" aria-hidden="true"><svg class="foto-ico" viewBox="0 0 48 40" aria-hidden="true" focusable="false"><path d="M3 11h11l4-7h12l4 7h11v26H3z"/><circle cx="24" cy="23" r="8"/></svg><span class="foto-ruf">Foto auswählen</span></span>
+          <span class="foto-bild" hidden><img alt="" width="148" height="178"><span class="foto-name" aria-live="polite"></span></span>
+        </span>
+        <button type="button" class="foto-anders" hidden>Anderes Foto</button>
+        <p class="fehler" id="foto-fehler" hidden></p>
+      </div>
+
       <details class="mehr">
         <summary><span class="plus" aria-hidden="true">+</span>Noch mehr über dich (freiwillig)</summary>
         <div class="mehr-inhalt">
           <div class="feld">
             <label for="ueber">Kurz zu dir</label>
             <span class="eingabe"><textarea id="ueber" name="ueber" rows="4" placeholder="Was machst du gerade? Warum hast du Bock auf den Job? Zwei, drei Sätze reichen."></textarea></span>
-          </div>
-          <div class="feld">
-            <label for="foto">Foto von dir</label>
-            <p class="hinweis" id="foto-hinweis">Ein aktuelles Handy-Selfie reicht völlig.</p>
-            <span class="eingabe"><input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp,image/heic,.heic" data-max-mb="10" aria-describedby="foto-hinweis foto-fehler"></span>
-            <p class="fehler" id="foto-fehler" hidden></p>
           </div>
           <div class="feld">
             <label for="lebenslauf">Lebenslauf oder Sonstiges</label>
@@ -193,8 +200,7 @@
   <div class="fuss-raster">
     <div class="fuss-marke">
       <a class="logo fuss-logo" href="../">MyMallorcaSummer</a>
-      <p class="fuss-kurz">MyMallorcaSummer vermittelt Promoter-Jobs an der Playa de Palma auf Mallorca. Saison 2027: März bis Oktober.</p>
-      <p class="warn"><svg aria-hidden="true"><use href="#i-warn"/></svg>Mit Kunde bestätigen</p>
+      <p class="fuss-kurz">MyMallorcaSummer vermittelt Promoter-Jobs an der Playa de Palma auf Mallorca. Saison 2027: April bis Oktober.</p>
     </div>
     <nav class="fuss-nav" aria-label="Fußzeile">
       <ul>
